@@ -70,8 +70,8 @@ for i = 1%:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);
-    aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh, ...
-        plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
+    aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,...
+        plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig);
 end
 
 toc;

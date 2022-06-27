@@ -16,41 +16,62 @@ function aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,plotRow,p
 %   saveMat    : Saves TOF as .mat file
 %   saveFig    : Saves plotted figures
 %
-
-% Calculate # of A-scans and # of data points per A-scan
-[numAScans, dataPointsPerAScan] = size(cScan);
-
+tic;
 % Calculate number of scans along x (row) and y (col) scan directions
 % Add 1 for x and 2 for y because the last line begins with (row,col)
 col = cScan(end,2) + 1;
 row = cScan(end,1) + 1;
 
-% Take absolute value of signal
-cScan = abs(cScan);
+% Take absolute value and trim row and column info
+cScan = abs(cScan(:,3:end));
+
+% Calculate # of A-scans and # of data points per A-scan
+[numAScans, dataPointsPerAScan] = size(cScan);
 
 % Use basic gating procedure similar to UTWin
 firstPeak = zeros(numAScans,1);
 secondPeak = firstPeak;
 
-tEnd = (dataPointsPerAScan-3)*dt;
+tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
 % Step through each A-scan to calculate time of flight (TOF)
-for i = 1%:numAScans
+for i = 1:numAScans
+
     % Check if mean signal value is above noise threshold
-    if mean(cScan(i,3:end)) > noiseThresh
+    if mean(cScan(i,:)) > noiseThresh
+        % Find neighboring values that are within 0.01 magnitude and set equal
+        for j = 1:length(cScan(i,:))-1
+            if abs(cScan(i,j+1)-cScan(i,j))<0.01
+                cScan(i,j+1) = cScan(i,j);
+            end
+        end
+
         % Find and save peaks/locations in signal
-        [p, l] = findpeaks(cScan(i,3:end),t);
+        [p, l] = findpeaks(cScan(i,:),t);
         % Manually add 0 point to peaks list in case signal is cut off on
         % left side
         p = [0 p];
+        
+        % Find neighboring peaks that are within 0.05 magnitude and set equal
+        for j = 1:length(p)-1
+            if abs(p(j+1)-p(j))<0.05
+                p(j+1) = p(j);
+            end
+        end
+
         % Find and save locations of peaks in previously found peaks in
         % descending order
-        [~, loc] = findpeaks(p,'SortStr','descend','MinPeakProminence',0.1);
+        [peak, loc] = findpeaks(p,'SortStr','descend');
         if length(loc) >= 2
-            % Find locations of peaks
-            firstPeak(i) = l(loc(1));
-            secondPeak(i) = l(loc(2));
+            if peak(2) > 0.3*peak(1) % Check if peak is 30% of 1st peak
+                % Find locations of peaks
+                firstPeak(i) = l(loc(1)+1);
+                secondPeak(i) = l(loc(2)+1);
+            else
+                firstPeak(i) = 1;
+                secondPeak(i) = 1;
+            end
         else
             firstPeak(i) = 1;
             secondPeak(i) = 1;
@@ -67,6 +88,7 @@ rawTOF = secondPeak - firstPeak;
 
 % Reshape and normalize raw TOF by max TOF
 TOF = abs((1/max(rawTOF)) .* reshape(rawTOF',col,row)');
+toc;
 
 % Save TOF to .mat file
 if saveMat == true
@@ -100,8 +122,6 @@ if plotAScan == true
     ylabel("Amplitude");
     xlim([0,tEnd]);
 end
-
-disp(strcat("Finished processing A-scans for ",sampleName));
 
 end
 
