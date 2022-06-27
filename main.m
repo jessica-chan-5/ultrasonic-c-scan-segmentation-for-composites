@@ -51,6 +51,8 @@ fileNames = [miscFileNames; fileNames];
 
 %% Testing cScanRead function call
 
+% Uncomment when need to convert additional .csv files
+%{
 disp("Saved C-scans as .mat files for:");
 
 for i = 1:length(fileNames)
@@ -61,6 +63,7 @@ end
 
 toc;
 disp("Done! Finished processing all C-scan .csv files.")
+%}
 
 %% Testing aScanProcessing function call
 

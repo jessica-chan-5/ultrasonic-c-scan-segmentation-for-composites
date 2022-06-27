@@ -86,6 +86,10 @@ end
 % Calculate raw TOF
 rawTOF = secondPeak - firstPeak;
 
+% Find baseline TOF for undamaged plate
+baseTOF = mode(rawTOF,'all');
+rawTOF(abs(rawTOF-baseTOF)<2*dt) = baseTOF;
+
 % Reshape and normalize raw TOF by max TOF
 TOF = abs((1/max(rawTOF)) .* reshape(rawTOF',col,row)');
 toc;
