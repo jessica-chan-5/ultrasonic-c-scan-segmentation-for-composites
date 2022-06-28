@@ -52,7 +52,8 @@ for i = 1:numAScans
         % Manually add 0 point to peaks list in case signal is cut off on
         % left side
         p = [0 p];
-        
+        l = [0 l];
+
         % Find neighboring peaks that are within 0.05 magnitude and set equal
         for j = 1:length(p)-1
             if abs(p(j+1)-p(j))<0.05
@@ -60,14 +61,17 @@ for i = 1:numAScans
             end
         end
 
+        % Test mag % relative to 2nd peak
+%         nom2ndPeak = mode(round(secondPeak,1),'all');
+
         % Find and save locations of peaks in previously found peaks in
         % descending order
-        [peak, loc] = findpeaks(p,'SortStr','descend');
+        [peak, loc] = findpeaks(p,l,'SortStr','descend');
         if length(loc) >= 2
-            if peak(2) > 0.3*peak(1) % Check if peak is 30% of 1st peak
-                % Find locations of peaks
-                firstPeak(i) = l(loc(1)+1);
-                secondPeak(i) = l(loc(2)+1);
+%             if peak(2) > 0.5*nom2ndPeak % Check if peak is 50% of 1st peak
+            if peak(2) > 0.3*peak(1) % Check if peak is 50% of 1st peak
+                firstPeak(i) = loc(1);
+                secondPeak(i) = loc(2);
             else
                 firstPeak(i) = 1;
                 secondPeak(i) = 1;
@@ -88,7 +92,7 @@ rawTOF = secondPeak - firstPeak;
 
 % Find baseline TOF for undamaged plate
 baseTOF = mode(rawTOF,'all');
-rawTOF(abs(rawTOF-baseTOF)<2*dt) = baseTOF;
+rawTOF(abs(rawTOF-baseTOF)<7*dt) = baseTOF;
 
 % Reshape and normalize raw TOF by max TOF
 TOF = abs((1/max(rawTOF)) .* reshape(rawTOF',col,row)');

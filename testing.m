@@ -1,13 +1,10 @@
 
-plotRow = 221;
-% plotRow = 1;
+plotRow = 201;
 numCol = 1190;
-plotCol = numCol/2;
+plotCol = 770;
 
-% spacing = 5;
 spacing = 1;
-% numPoints = 9;
-numPoints = 16;
+numPoints = 1;
 
 figure;
 
@@ -44,8 +41,9 @@ for i = 1:numPoints
 
     % Find and save locations of peaks in previously found peaks in
     % descending order
-    [~, loc] = findpeaks(p,'SortStr','descend');
+    % [~, loc] = findpeaks(p,'SortStr','descend');
     hold on;
+    [peak loc] = findpeaks(p,l,'Annotate','extents')
     findpeaks(p,l,'Annotate','extents');
 
     title(titleStr);
@@ -56,3 +54,14 @@ for i = 1:numPoints
     hl=findobj(gcf,'type','legend');
     delete(hl);
 end
+
+%% Show image slice
+
+numCol = 1190+350;
+height = 32/2;
+plotRow = 384/2;
+width = 40/2;
+
+figure('visible','on');
+imshow(TOF(plotRow:plotRow+height,numCol/2-width:numCol/2+width),'XData',[vertScale*((width*2+1)/numCol) 0]);
+title(strcat("TOF ",sampleName));
