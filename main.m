@@ -52,10 +52,10 @@ fileNames = [miscFileNames; fileNames];
 %% Testing cScanRead function call
 
 % Uncomment when need to convert additional .csv files
-%{
+%%{
 disp("Saved C-scans as .mat files for:");
 
-for i = 1:length(fileNames)
+for i = 1%:length(fileNames)
     inFile = strcat("Input\",fileNames(i),".csv");
     outFile = strcat("Output\",fileNames(i));
     cScanRead(inFile,outFile); % Convert .csv to .mat file
@@ -69,7 +69,7 @@ disp("Done! Finished processing all C-scan .csv files.")
 
 tic;
 disp("Processed C-scans and converted to TOF for:")
-for i = 1%:length(fileNames)
+for i = 16%:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);

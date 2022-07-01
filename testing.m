@@ -1,10 +1,11 @@
-
+%% Plot A-Scans
 plotRow = 201;
 numCol = 1190;
 plotCol = 770;
 
 spacing = 1;
-numPoints = 1;
+numPoints = 16;
+plotIndex = zeros(1,numPoints);
 
 figure;
 
@@ -43,7 +44,7 @@ for i = 1:numPoints
     % descending order
     % [~, loc] = findpeaks(p,'SortStr','descend');
     hold on;
-    [peak loc] = findpeaks(p,l,'Annotate','extents')
+    [peak loc] = findpeaks(p,l,'Annotate','extents');
     findpeaks(p,l,'Annotate','extents');
 
     title(titleStr);
@@ -57,11 +58,47 @@ end
 
 %% Show image slice
 
-numCol = 1190+350;
+numCol = 1190+100;
 height = 32/2;
 plotRow = 384/2;
-width = 40/2;
+width = 2/2;
 
 figure('visible','on');
-imshow(TOF(plotRow:plotRow+height,numCol/2-width:numCol/2+width),'XData',[vertScale*((width*2+1)/numCol) 0]);
+% plotRow:plotRow+height
+imshow(TOF(:,numCol/2-width:numCol/2+width),'XData',[vertScale*((width*2+1)/numCol) 0]);
 title(strcat("TOF ",sampleName));
+
+%% Bins
+testTOF = round(abs(rawTOF),4);
+[C,~,ic] = unique(testTOF);
+a_counts = accumarray(ic,1);
+[~,loc] = findpeaks(a_counts(2:end-2),C(2:end-2));
+
+for i=1:numAScans
+    for j=1:length(loc)-1
+        if testTOF(i)>loc(j) && testTOF(i)<=loc(j+1)
+            testTOF(i) = loc(j+1);
+        end
+    end
+end
+
+% Reshape and normalize raw TOF by max TOF
+TOFtest = abs((1/max(testTOF)) .* reshape(testTOF',col,row)');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

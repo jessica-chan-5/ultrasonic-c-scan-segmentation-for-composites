@@ -15,18 +15,6 @@ function aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,plotRow,p
 %   plotAScan  : Plots A-scan for specified row, column location on plate
 %   saveMat    : Saves TOF as .mat file
 %   saveFig    : Saves plotted figures
-%
-tic;
-% Calculate number of scans along x (row) and y (col) scan directions
-% Add 1 for x and 2 for y because the last line begins with (row,col)
-col = cScan(end,2) + 1;
-row = cScan(end,1) + 1;
-
-% Take absolute value and trim row and column info
-cScan = abs(cScan(:,3:end));
-
-% Calculate # of A-scans and # of data points per A-scan
-[numAScans, dataPointsPerAScan] = size(cScan);
 
 % Use basic gating procedure similar to UTWin
 firstPeak = zeros(numAScans,1);
@@ -61,21 +49,12 @@ for i = 1:numAScans
             end
         end
 
-        % Test mag % relative to 2nd peak
-%         nom2ndPeak = mode(round(secondPeak,1),'all');
-
         % Find and save locations of peaks in previously found peaks in
         % descending order
-        [peak, loc] = findpeaks(p,l,'SortStr','descend');
+        [~, loc] = findpeaks(p,l,'SortStr','descend');
         if length(loc) >= 2
-%             if peak(2) > 0.5*nom2ndPeak % Check if peak is 50% of 1st peak
-            if peak(2) > 0.3*peak(1) % Check if peak is 50% of 1st peak
-                firstPeak(i) = loc(1);
-                secondPeak(i) = loc(2);
-            else
-                firstPeak(i) = 1;
-                secondPeak(i) = 1;
-            end
+            firstPeak(i) = loc(1);
+            secondPeak(i) = loc(2);
         else
             firstPeak(i) = 1;
             secondPeak(i) = 1;
@@ -96,7 +75,15 @@ rawTOF(abs(rawTOF-baseTOF)<7*dt) = baseTOF;
 
 % Reshape and normalize raw TOF by max TOF
 TOF = abs((1/max(rawTOF)) .* reshape(rawTOF',col,row)');
-toc;
+
+% Merge adjacent transition sections
+for i = 1:row
+    for j = 1:col-1
+        if abs(TOF(i,j+1)-TOF(i,j))<0.1 
+            TOF(i,j+1) = TOF(i,j);
+        end
+    end
+end
 
 % Save TOF to .mat file
 if saveMat == true
