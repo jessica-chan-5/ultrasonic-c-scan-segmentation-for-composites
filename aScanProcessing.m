@@ -16,53 +16,58 @@ function aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,plotRow,p
 %   saveMat    : Saves TOF as .mat file
 %   saveFig    : Saves plotted figures
 
+% Find row, column, and data points info from C-scan
+[row, col, dataPointsPerAScan] = size(cScan);
+
 % Use basic gating procedure similar to UTWin
-firstPeak = zeros(numAScans,1);
+firstPeak = zeros(row,col);
 secondPeak = firstPeak;
 
 tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
 % Step through each A-scan to calculate time of flight (TOF)
-for i = 1:numAScans
+for i = 1:row
+    for j = 1:col
+        aScan = squeeze(cScan(i,j,:))';
 
-    % Check if mean signal value is above noise threshold
-    if mean(cScan(i,:)) > noiseThresh
-        % Find neighboring values that are within 0.01 magnitude and set equal
-        for j = 1:length(cScan(i,:))-1
-            if abs(cScan(i,j+1)-cScan(i,j))<0.01
-                cScan(i,j+1) = cScan(i,j);
+        % Check if mean signal value is above noise threshold
+        if mean(aScan) > noiseThresh        
+            % Find neighboring values that are within 0.01 magnitude and set equal
+            for k = 1:length(aScan)-1
+                if abs(aScan(1,k+1)-aScan(1,k))<0.01
+                    aScan(1,k+1) = aScan(1,k);
+                end
             end
-        end
-
-        % Find and save peaks/locations in signal
-        [p, l] = findpeaks(cScan(i,:),t);
-        % Manually add 0 point to peaks list in case signal is cut off on
-        % left side
-        p = [0 p];
-        l = [0 l];
-
-        % Find neighboring peaks that are within 0.05 magnitude and set equal
-        for j = 1:length(p)-1
-            if abs(p(j+1)-p(j))<0.05
-                p(j+1) = p(j);
+    
+            % Find and save peaks/locations in signal
+            [p, l] = findpeaks(aScan,t);
+            % Manually add 0 point to peaks list in case signal is cut off on
+            % left side
+            p = [0 p];
+            l = [0 l];
+    
+            % Find neighboring peaks that are within 0.05 magnitude and set equal
+            for k = 1:length(p)-1
+                if abs(p(k+1)-p(k))< (5*(2^8)^-1)
+                    p(k+1) = p(k);
+                end
             end
-        end
+    
+            % Find and save locations of peaks in previously found peaks
+            [~, loc] = findpeaks(p,l,'SortStr','descend');
+            if length(loc) >= 2
+                firstPeak(i,j) = loc(1);
+                secondPeak(i,j) = loc(2);
+            else
 
-        % Find and save locations of peaks in previously found peaks in
-        % descending order
-        [~, loc] = findpeaks(p,l,'SortStr','descend');
-        if length(loc) >= 2
-            firstPeak(i) = loc(1);
-            secondPeak(i) = loc(2);
+                firstPeak(i,j) = 1;
+                secondPeak(i,j) = 1;
+            end
         else
-            firstPeak(i) = 1;
-            secondPeak(i) = 1;
+            firstPeak(i,j) = 1;
+            secondPeak(i,j) = 1;
         end
-    % Set TOF = 0 if mean signal value is below noise threshold
-    else
-        firstPeak(i) = 1;
-        secondPeak(i) = 1;
     end
 end
 
@@ -74,16 +79,7 @@ baseTOF = mode(rawTOF,'all');
 rawTOF(abs(rawTOF-baseTOF)<7*dt) = baseTOF;
 
 % Reshape and normalize raw TOF by max TOF
-TOF = abs((1/max(rawTOF)) .* reshape(rawTOF',col,row)');
-
-% Merge adjacent transition sections
-for i = 1:row
-    for j = 1:col-1
-        if abs(TOF(i,j+1)-TOF(i,j))<0.1 
-            TOF(i,j+1) = TOF(i,j);
-        end
-    end
-end
+TOF = abs((1/max(rawTOF,[],'all')) .* rawTOF);
 
 % Save TOF to .mat file
 if saveMat == true
@@ -110,7 +106,7 @@ if plotAScan == true
     titleStr = strcat("A-scan at row ",num2str(plotRow)," column ",num2str(plotCol));
 
     figure("Name",titleStr);
-    plot(t,abs(cScan(plotRow*plotCol,3:end)));
+    plot(t,abs(cScan(plotRow,plotCol,:)));
 
     title(titleStr);
     xlabel("Time [us]");

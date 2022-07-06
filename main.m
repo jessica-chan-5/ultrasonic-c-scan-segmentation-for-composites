@@ -1,5 +1,4 @@
 %% Header
-
 close all; clear; format compact;
 
 %% Function inputs
@@ -10,7 +9,7 @@ vertScale    = 238;   % equal to "Scanning Length" in header
 noiseThresh  = 0.01;
 plotRow      = 1190/2; % Center of plate
 plotCol      = 384/2;  % Center of plate
-plotTOF      = false;
+plotTOF      = true;
 plotAScan    = false;
 saveMat      = false;
 saveFig      = false;
@@ -52,10 +51,10 @@ fileNames = [miscFileNames; fileNames];
 %% Testing cScanRead function call
 
 % Uncomment when need to convert additional .csv files
-%%{
+%{
 disp("Saved C-scans as .mat files for:");
 
-for i = 1%:length(fileNames)
+for i = 1:length(fileNames)
     inFile = strcat("Input\",fileNames(i),".csv");
     outFile = strcat("Output\",fileNames(i));
     cScanRead(inFile,outFile); % Convert .csv to .mat file
@@ -69,7 +68,7 @@ disp("Done! Finished processing all C-scan .csv files.")
 
 tic;
 disp("Processed C-scans and converted to TOF for:")
-for i = 16%:length(fileNames)
+for i = 1%:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);

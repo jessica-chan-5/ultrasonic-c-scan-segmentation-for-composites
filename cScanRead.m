@@ -1,5 +1,5 @@
 function cScanRead(inFile,outFile)
-% Reads .csv file format C-scan and saves C-scan as .mat file
+% Reads .csv file format C-scan and saves 3D matrix C-scan as .mat file
 % 
 % Inputs:
 %   inFile : Name of .csv C-scan input file
