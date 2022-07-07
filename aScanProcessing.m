@@ -1,4 +1,4 @@
-function aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
+function TOF = aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
 % 
@@ -39,7 +39,7 @@ for i = 1:row
                     aScan(1,k+1) = aScan(1,k);
                 end
             end
-    
+            
             % Find and save peaks/locations in signal
             [p, l] = findpeaks(aScan,t);
             % Manually add 0 point to peaks list in case signal is cut off on
@@ -49,16 +49,23 @@ for i = 1:row
     
             % Find neighboring peaks that are within 0.05 magnitude and set equal
             for k = 1:length(p)-1
-                if abs(p(k+1)-p(k))< (5*(2^8)^-1)
+%                 if abs(p(k+1)-p(k))< (5*(2^8)^-1)
+                if abs(p(k+1)-p(k))< 0.05
                     p(k+1) = p(k);
                 end
             end
     
             % Find and save locations of peaks in previously found peaks
-            [~, loc] = findpeaks(p,l,'SortStr','descend');
+            [~, loc,width] = findpeaks(p,l,'SortStr','descend','WidthReference','halfheight');
             if length(loc) >= 2
-                firstPeak(i,j) = loc(1);
-                secondPeak(i,j) = loc(2);
+                k = find(l==loc(1));
+                if width(1) > 0.7 && mean(p(k):p(k)+4) <= 0.9
+                    firstPeak(i,j) = 1;
+                    secondPeak(i,j) = 1;
+                else
+                    firstPeak(i,j) = loc(1);
+                    secondPeak(i,j) = loc(2);
+                end
             else
 
                 firstPeak(i,j) = 1;
