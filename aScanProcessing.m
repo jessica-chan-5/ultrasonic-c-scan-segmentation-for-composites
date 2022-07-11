@@ -1,4 +1,5 @@
-function TOF = aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,startRow,startCol,endRow,endCol,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
+function TOF = aScanProcessing(cScan,inFile,outFile,dt,vertScale, ...
+    noiseThresh,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
 % 
@@ -38,17 +39,9 @@ horCentTOF = zeros(1,vertCent);
 % From center of left edge
 for i = 1:vertCent
     rowSlice = squeeze(cScan(horCent,i,:))';
-    % Find and save peaks/locations in signal
-    [p, l] = findpeaks(rowSlice,t);
-    % Manually add 0 point to peaks list in case signal is cut off on
-    % left side
-    p = [0 p];
-    l = [0 l];
+    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+    horCentTOF(i) = tempSecondPeak - tempFirstPeak;
 
-    % Find and save locations of peaks in previously found peaks
-    [~, loc,~] = findpeaks(p,l,'MinPeakProminence',0.09,...
-        'WidthReference','halfheight');
-    horCentTOF(i) = loc(2) - loc(1);
     if (mode(horCentTOF(1:i)) - horCentTOF(i)) >= 0.3
         startCol = i-10;
         break
@@ -60,60 +53,40 @@ horCentTOF = zeros(1,vertCent);
 
 for i = col:-1:vertCent+1
     rowSlice = squeeze(cScan(horCent,i,:))';
+    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+    horCentTOF(i) = tempSecondPeak - tempFirstPeak;
 
-    % Check if mean signal value is above noise threshold
-        if mean(rowSlice) > noiseThresh        
-            % Find neighboring values that are within 0.01 magnitude and set equal
-            for k = 1:length(rowSlice)-1
-                if abs(rowSlice(1,k+1)-rowSlice(1,k))<0.01
-                    rowSlice(1,k+1) = rowSlice(1,k);
-                end
-            end
-            
-            % Find and save peaks/locations in signal
-            [p, l] = findpeaks(rowSlice,t);
-            % Manually add 0 point to peaks list in case signal is cut off on
-            % left side
-            p = [0 p];
-            l = [0 l];
-    
-            % Find neighboring peaks that are within 0.02 magnitude and set equal
-            for k = 1:length(p)-1
-                if abs(p(k+1)-p(k))< 0.02
-                    p(k+1) = p(k);
-                end
-            end
-            
-            % Square off zero TOF plateaus
-            k = find(p>=0.94,1);
-            if mean(p(k:k+2)) >= 0.97
-                p(k:k+4) = 1;
-            end
-
-            % Find and save locations of peaks in previously found peaks
-            [peak, loc,width] = findpeaks(p,l,'MinPeakProminence',0.09,...
-                'WidthReference','halfheight');
-            if length(loc) >= 2
-                k = find(l==loc(1));
-                if width(1) > 0.7 && mean(p(k:k+4)) >= 0.97 && peak(2) < 0.98
-                    tempFirstPeak = 1;
-                    tempsecondPeak = 1;
-                else
-                    tempFirstPeak = loc(1);
-                    tempsecondPeak = loc(2);
-                end
-            else
-                tempFirstPeak = 1;
-                tempsecondPeak = 1;
-            end
-        else
-            tempFirstPeak = 1;
-            tempsecondPeak = 1;
-        end
-
-    horCentTOF(i) = tempsecondPeak - tempFirstPeak;
     if (mode(horCentTOF(col:-1:i)) - horCentTOF(i)) >= 0.3
         endCol = i+10;
+        break
+    end
+end
+
+% Search through vertical centerline
+vertCentTOF = zeros(1,horCent);
+
+% From center of top edge
+for i = 1:horCent
+    rowSlice = squeeze(cScan(i,vertCent,:))';
+    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+    vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
+
+    if (mode(vertCentTOF(1:i)) - vertCentTOF(i)) >= 0.3
+        startRow = i-10;
+        break
+    end
+end
+
+% From center of bottom edge
+vertCentTOF = zeros(1,horCent);
+
+for i = row:-1:horCent+1
+    rowSlice = squeeze(cScan(i,vertCent,:))';
+    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+    vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
+
+    if (mode(vertCentTOF(row:-1:i)) - vertCentTOF(i)) >= 0.3
+        endRow = i+10;
         break
     end
 end
@@ -122,57 +95,7 @@ end
 for i = startRow:endRow
     for j = startCol:endCol
         aScan = squeeze(cScan(i,j,:))';
-
-        % Check if mean signal value is above noise threshold
-        if mean(aScan) > noiseThresh        
-            % Find neighboring values that are within 0.01 magnitude and set equal
-            for k = 1:length(aScan)-1
-                if abs(aScan(1,k+1)-aScan(1,k))<0.01
-                    aScan(1,k+1) = aScan(1,k);
-                end
-            end
-            
-            % Find and save peaks/locations in signal
-            [p, l] = findpeaks(aScan,t);
-            % Manually add 0 point to peaks list in case signal is cut off on
-            % left side
-            p = [0 p];
-            l = [0 l];
-    
-            % Find neighboring peaks that are within 0.02 magnitude and set equal
-            for k = 1:length(p)-1
-                if abs(p(k+1)-p(k))< 0.02
-                    p(k+1) = p(k);
-                end
-            end
-            
-            % Square off zero TOF plateaus
-            k = find(p>=0.94,1);
-            if mean(p(k:k+2)) >= 0.97
-                p(k:k+4) = 1;
-            end
-
-            % Find and save locations of peaks in previously found peaks
-            [peak, loc,width] = findpeaks(p,l,'MinPeakProminence',0.09,...
-                'WidthReference','halfheight');
-            if length(loc) >= 2
-                k = find(l==loc(1));
-                if width(1) > 0.7 && mean(p(k:k+4)) >= 0.97 && peak(2) < 0.98
-                    firstPeak(i,j) = 1;
-                    secondPeak(i,j) = 1;
-                else
-                    firstPeak(i,j) = loc(1);
-                    secondPeak(i,j) = loc(2);
-                end
-            else
-
-                firstPeak(i,j) = 1;
-                secondPeak(i,j) = 1;
-            end
-        else
-            firstPeak(i,j) = 1;
-            secondPeak(i,j) = 1;
-        end
+        [firstPeak(i,j), secondPeak(i,j)] = calcTOF(aScan,noiseThresh,t);
     end
 end
 

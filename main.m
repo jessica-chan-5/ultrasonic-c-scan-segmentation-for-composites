@@ -65,23 +65,12 @@ disp("Done! Finished processing all C-scan .csv files.")
 
 %% Testing aScanProcessing function call
 
-startRow = 123;
-startCol = 369;
-endRow = 245;
-endCol = 833;
-
-% startRow = 1;
-% startCol = 1;
-% endRow = 385;
-% endCol = 1190;
-
 disp("Processed C-scans and converted to TOF for:")
-for i = 1%:length(fileNames)
+for i = 1:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);
     aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,...
-        startRow,startCol,endRow,endCol,...
         plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig);
 end
 
