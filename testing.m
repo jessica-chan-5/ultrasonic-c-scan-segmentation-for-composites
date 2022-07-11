@@ -1,10 +1,11 @@
 %% Countor plot
 figure;
-contourf(TOF);
+testTOF = abs(rawTOF);
+contourf(testTOF);
 
 %% Plot A-Scans
-plotRow = 165;
-plotCol = 680;
+plotRow = 131;
+plotCol = 618;
 
 spacing = 1;
 numPoints = 16;
@@ -30,27 +31,34 @@ for i = 1:numPoints
 
     % Find and save peaks/locations in signal
     [p, l] = findpeaks(aScan,t);
-%     findpeaks(aScan,t);
+
     % Manually add 0 point to peaks list in case signal is cut off on
     % left side
     p = [0 p];
     l = [0 l];
 
-    % Find neighboring peaks that are within 0.05 magnitude and set equal
+    % Find neighboring peaks that are within 0.02 magnitude and set equal
     for k = 1:length(p)-1
-%         if abs(p(k+1)-p(k))< (5*(2^8)^-1)
-        if abs(p(k+1)-p(k))< 0.05
+        if abs(p(k+1)-p(k))< 0.02
             p(k+1) = p(k);
         end
+    end
+    
+    % Square off zero TOF plateaus
+    k = find(p>=0.94,1);
+    hold on; plot(l(k),p(k),'x','MarkerSize',8);
+    if mean(p(k:k+2)) >= 0.97
+        p(k:k+2) = 1;
     end
 
     % Find and save locations of peaks in previously found peaks in
     % descending order
     hold on;
-    [peak, loc, width] = findpeaks(p,l,'SortStr','descend','WidthReference','halfheight');
+    [peak, loc, width, prom] = findpeaks(p,l,'MinPeakProminence',0.09,...
+        'WidthReference','halfheight');
     if length(loc) >= 2
         k = find(l==loc(1));
-        if width(1) > 0.7 && mean(p(k):p(k)+4) <= 0.9
+        if width(1) > 0.7 && mean(p(k:k+4)) >= 0.97 && peak(2) < 0.98
             firstPeakTest(i) = 1;
             secondPeakTest(i) = 1;
         else
@@ -61,7 +69,7 @@ for i = 1:numPoints
         firstPeakTest(i) = 1;
         secondPeakTest(i) = 1;
     end
-    findpeaks(p,l,'MinPeakProminence',0.1,'Annotate','extents');
+    findpeaks(p,l,'Annotate','extents','WidthReference','halfheight');
 
     title(titleStr);
     xlabel("Time [us]");
