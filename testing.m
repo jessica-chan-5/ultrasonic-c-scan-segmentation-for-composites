@@ -4,11 +4,11 @@ testTOF = abs(rawTOF);
 contourf(testTOF);
 
 %% Plot A-Scans
-plotRow = 131;
-plotCol = 618;
+plotRow = 160;
+plotCol = 673;
 
 spacing = 1;
-numPoints = 16;
+numPoints = 1;
 firstPeakTest = zeros(1,numPoints);
 secondPeakTest = firstPeakTest;
 
@@ -69,8 +69,7 @@ for i = 1:numPoints
         firstPeakTest(i) = 1;
         secondPeakTest(i) = 1;
     end
-    findpeaks(p,l,'Annotate','extents','WidthReference','halfheight');
-
+    findpeaks(p,l,'Annotate','extents','MinPeakProminence',0.09,'WidthReference','halfheight')
     title(titleStr);
     xlabel("Time [us]");
     ylabel("Amplitude");

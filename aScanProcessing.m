@@ -1,5 +1,5 @@
 function TOF = aScanProcessing(cScan,inFile,outFile,dt,vertScale, ...
-    noiseThresh,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
+    noiseThresh, cropDam, plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
 % 
@@ -29,66 +29,73 @@ secondPeak = firstPeak;
 tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
-% Search for rectangular bounding box of damage
-
-% Search through horizontal centerline
-horCent = floor(row/2);
-vertCent = floor(col/2);
-horCentTOF = zeros(1,vertCent);
-
-% From center of left edge
-for i = 1:vertCent
-    rowSlice = squeeze(cScan(horCent,i,:))';
-    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-    horCentTOF(i) = tempSecondPeak - tempFirstPeak;
-
-    if (mode(horCentTOF(1:i)) - horCentTOF(i)) >= 0.3
-        startCol = i-10;
-        break
+if cropDam == true
+    % Search for rectangular bounding box of damage
+    
+    % Search through horizontal centerline
+    horCent = floor(row/2);
+    vertCent = floor(col/2);
+    horCentTOF = zeros(1,vertCent);
+    
+    % From center of left edge
+    for i = 1:vertCent
+        rowSlice = squeeze(cScan(horCent,i,:))';
+        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+        horCentTOF(i) = tempSecondPeak - tempFirstPeak;
+    
+        if (mode(horCentTOF(1:i)) - horCentTOF(i)) >= 0.3
+            startCol = i-20;
+            break
+        end
     end
-end
-
-% From center of right edge
-horCentTOF = zeros(1,vertCent);
-
-for i = col:-1:vertCent+1
-    rowSlice = squeeze(cScan(horCent,i,:))';
-    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-    horCentTOF(i) = tempSecondPeak - tempFirstPeak;
-
-    if (mode(horCentTOF(col:-1:i)) - horCentTOF(i)) >= 0.3
-        endCol = i+10;
-        break
+    
+    % From center of right edge
+    horCentTOF = zeros(1,vertCent);
+    
+    for i = col:-1:vertCent+1
+        rowSlice = squeeze(cScan(horCent,i,:))';
+        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+        horCentTOF(i) = tempSecondPeak - tempFirstPeak;
+    
+        if (mode(horCentTOF(col:-1:i)) - horCentTOF(i)) >= 0.3
+            endCol = i+20;
+            break
+        end
     end
-end
-
-% Search through vertical centerline
-vertCentTOF = zeros(1,horCent);
-
-% From center of top edge
-for i = 1:horCent
-    rowSlice = squeeze(cScan(i,vertCent,:))';
-    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-    vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
-
-    if (mode(vertCentTOF(1:i)) - vertCentTOF(i)) >= 0.3
-        startRow = i-10;
-        break
+    
+    % Search through vertical centerline
+    vertCentTOF = zeros(1,horCent);
+    
+    % From center of top edge
+    for i = 1:horCent
+        rowSlice = squeeze(cScan(i,vertCent,:))';
+        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+        vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
+    
+        if (mode(vertCentTOF(1:i)) - vertCentTOF(i)) >= 0.3
+            startRow = i-5;
+            break
+        end
     end
-end
-
-% From center of bottom edge
-vertCentTOF = zeros(1,horCent);
-
-for i = row:-1:horCent+1
-    rowSlice = squeeze(cScan(i,vertCent,:))';
-    [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-    vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
-
-    if (mode(vertCentTOF(row:-1:i)) - vertCentTOF(i)) >= 0.3
-        endRow = i+10;
-        break
+    
+    % From center of bottom edge
+    vertCentTOF = zeros(1,horCent);
+    
+    for i = row:-1:horCent+1
+        rowSlice = squeeze(cScan(i,vertCent,:))';
+        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+        vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
+    
+        if (mode(vertCentTOF(row:-1:i)) - vertCentTOF(i)) >= 0.3
+            endRow = i+5;
+            break
+        end
     end
+else
+    startCol = 1;
+    endCol   = col;
+    startRow = 1;
+    endRow   = row;
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
@@ -108,6 +115,20 @@ rawTOF(abs(rawTOF-baseTOF)<2*dt) = baseTOF;
 
 % Reshape and normalize raw TOF by max TOF
 TOF = (1/max(rawTOF,[],'all')) .* rawTOF;
+
+% Fill in area outside of crop with TOF = 1 (white)
+if cropDam == true
+    for i = [1:col, 1:startCol-1, endCol+1:col, 1:col]
+        for j = [1:startRow-1,endRow+1:row]
+            TOF(j,i) = 1;
+        end
+    end
+    for i = [1:startCol-1, endCol+1:col]
+        for j = startRow-1:endRow+1
+            TOF(j,i) = 1;
+        end
+    end
+end
 
 % Save TOF to .mat file
 if saveMat == true

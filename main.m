@@ -6,6 +6,7 @@ close all; clear; format compact;
 dt           = 0.02;  % us
 vertScale    = 238;   % equal to "Scanning Length" in header
 noiseThresh  = 0.01;
+cropDam      = true;
 plotRow      = 1190/2; % Center of plate
 plotCol      = 384/2;  % Center of plate
 plotTOF      = true;
@@ -66,12 +67,12 @@ disp("Done! Finished processing all C-scan .csv files.")
 %% Testing aScanProcessing function call
 
 disp("Processed C-scans and converted to TOF for:")
-for i = 1:length(fileNames)
+for i = 1%:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);
     aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,...
-        plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig);
+        cropDam,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig);
 end
 
 disp("Done! Finished processing all C-scan .mat files.")
