@@ -128,6 +128,19 @@ if cropDam == true
             TOF(j,i) = 1;
         end
     end
+    % Vertical lines
+    scaleRatio = col/vertScale;
+    for i = [1:scaleRatio, col-scaleRatio+1:col]
+        for j = 1:row
+            TOF(j,i) = 0;
+        end
+    end
+    % Horizontal lines
+    for i = 1:col
+        for j = [1, row]
+            TOF(j,i) = 0;
+        end
+    end
 end
 
 % Save TOF to .mat file
