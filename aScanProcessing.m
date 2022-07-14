@@ -29,68 +29,127 @@ secondPeak = firstPeak;
 tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
+scaleRatio = col/vertScale;
+
 if cropDam == true
     % Search for rectangular bounding box of damage
+    cropThresh = 0.05;
+    padExtra = 1.25;
     
-    % Search through horizontal centerline
-    horCent = floor(row/2);
-    vertCent = floor(col/2);
-    horCentTOF = zeros(1,vertCent);
-    
-    % From center of left edge
-    for i = 1:vertCent
-        rowSlice = squeeze(cScan(horCent,i,:))';
-        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-        horCentTOF(i) = tempSecondPeak - tempFirstPeak;
-    
-        if (mode(horCentTOF(1:i)) - horCentTOF(i)) >= 0.3
-            startCol = i-20;
-            break
+    % Calculate spacing
+    numPts = 10;
+    vertSpace = floor(min(row,vertScale)/numPts);
+    horSpace = vertSpace*scaleRatio;
+
+    % Calculate horizontal and vertical indices
+    top2bot = 1:vertSpace:row-vertSpace;
+    halfVert = floor(length(top2bot)/2);
+    top2cent = top2bot(1:halfVert);
+    bot2cent = top2bot(end:-1:halfVert+1);
+
+    left2right = 1:horSpace:col-horSpace;
+    halfHor = floor(length(left2right)/2);
+    left2cent = left2right(1:halfHor);
+    right2cent = left2right(end:-1:halfHor+1);
+
+    % From top to center
+    vertTop = NaN(1,length(left2right));
+
+    for j = 1:length(left2right)
+        tempTOF = zeros(1,length(top2cent));
+        for i = 1:length(top2cent)
+            rowSlice = squeeze(cScan(top2cent(i),left2right(j),:))';
+            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+            tempTOF(i) = tempSecondPeak - tempFirstPeak;
+
+            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
+                vertTop(j) = i;
+                break
+            end
         end
     end
-    
-    % From center of right edge
-    horCentTOF = zeros(1,vertCent);
-    
-    for i = col:-1:vertCent+1
-        rowSlice = squeeze(cScan(horCent,i,:))';
-        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-        horCentTOF(i) = tempSecondPeak - tempFirstPeak;
-    
-        if (mode(horCentTOF(col:-1:i)) - horCentTOF(i)) >= 0.3
-            endCol = i+20;
-            break
+    startRow = top2cent(min(vertTop));
+
+    % From bottom to center
+    vertBot = NaN(1,length(left2right));
+    for j = 1:length(left2right)
+        tempTOF = zeros(1,length(bot2cent));
+        for i = 1:length(bot2cent)
+            rowSlice = squeeze(cScan(bot2cent(i),left2right(j),:))';
+            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+            tempTOF(i) = tempSecondPeak - tempFirstPeak;
+        
+            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
+                vertBot(j) = i;
+                break
+            end
         end
     end
+    endRow = bot2cent(min(vertBot));
     
-    % Search through vertical centerline
-    vertCentTOF = zeros(1,horCent);
+    % Set rows to search
+    startRowI = find(top2bot==startRow);
+    endRowI = find(top2bot==endRow);
+    searchRows = top2bot(startRowI:endRowI);
     
-    % From center of top edge
-    for i = 1:horCent
-        rowSlice = squeeze(cScan(i,vertCent,:))';
-        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-        vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
-    
-        if (mode(vertCentTOF(1:i)) - vertCentTOF(i)) >= 0.3
-            startRow = i-5;
-            break
+    % Add padding
+    vertPad = floor(vertSpace*padExtra);
+    startRow = startRow - vertPad;
+    endRow = endRow + vertPad;
+
+    if startRow <= 0
+        startRow = 1;
+    end
+    if endRow > row
+        endRow = row;
+    end
+
+    % From left to center
+    horLeft = NaN(1,length(searchRows));
+    for j = 1:length(searchRows)
+        tempTOF = zeros(1,length(left2cent));
+        for i = 1:length(left2cent)
+            rowSlice = squeeze(cScan(searchRows(j),left2cent(i),:))';
+            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+            tempTOF(i) = tempSecondPeak - tempFirstPeak;
+        
+            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
+                horLeft(j) = i;
+                break
+            end
         end
     end
+    startCol = left2cent(min(horLeft));
     
-    % From center of bottom edge
-    vertCentTOF = zeros(1,horCent);
-    
-    for i = row:-1:horCent+1
-        rowSlice = squeeze(cScan(i,vertCent,:))';
-        [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-        vertCentTOF(i) = tempSecondPeak - tempFirstPeak;
-    
-        if (mode(vertCentTOF(row:-1:i)) - vertCentTOF(i)) >= 0.3
-            endRow = i+5;
-            break
+    % From right to center
+    horRight = NaN(1,length(searchRows));
+    for j = 1:length(searchRows)
+        tempTOF = zeros(1,length(right2cent));
+        for i = 1:length(right2cent)
+            rowSlice = squeeze(cScan(searchRows(j),right2cent(i),:))';
+            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
+            tempTOF(i) = tempSecondPeak - tempFirstPeak;
+        
+            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
+                horRight(j) = i;
+                break
+            end
         end
     end
+    endCol = right2cent(min(horRight));
+
+    % Add padding
+    horPad = floor(horSpace*padExtra);
+    startCol = startCol - horPad;
+    endCol = endCol + horPad;
+
+    if startCol <= 0
+        startCol = 1;
+    end
+    if endCol > col
+        endCol = col;
+    end
+
 else
     startCol = 1;
     endCol   = col;
@@ -129,7 +188,6 @@ if cropDam == true
         end
     end
     % Vertical lines
-    scaleRatio = col/vertScale;
     for i = [1:scaleRatio, col-scaleRatio+1:col]
         for j = 1:row
             TOF(j,i) = 0;
