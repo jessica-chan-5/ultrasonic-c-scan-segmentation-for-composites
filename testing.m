@@ -3,6 +3,10 @@ figure;
 testTOF = abs(rawTOF);
 contourf(testTOF);
 
+%% Save figure
+ax = gca;
+exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
+
 %% Plot A-Scans
 plotRow = 160;
 plotCol = 673;

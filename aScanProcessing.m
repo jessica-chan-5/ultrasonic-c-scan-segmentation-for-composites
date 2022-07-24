@@ -33,7 +33,7 @@ scaleRatio = col/vertScale;
 
 if cropDam == true
     % Search for rectangular bounding box of damage
-    cropThresh = 0.05;
+    cropThresh = 0.2;
     padExtra = 1.25;
     
     % Calculate spacing
@@ -53,39 +53,9 @@ if cropDam == true
     right2cent = left2right(end:-1:halfHor+1);
 
     % From top to center
-    vertTop = NaN(1,length(left2right));
-
-    for j = 1:length(left2right)
-        tempTOF = zeros(1,length(top2cent));
-        for i = 1:length(top2cent)
-            rowSlice = squeeze(cScan(top2cent(i),left2right(j),:))';
-            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-            tempTOF(i) = tempSecondPeak - tempFirstPeak;
-
-            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
-                vertTop(j) = i;
-                break
-            end
-        end
-    end
-    startRow = top2cent(min(vertTop));
-
+    startRow = cropEdgeDetect(top2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
     % From bottom to center
-    vertBot = NaN(1,length(left2right));
-    for j = 1:length(left2right)
-        tempTOF = zeros(1,length(bot2cent));
-        for i = 1:length(bot2cent)
-            rowSlice = squeeze(cScan(bot2cent(i),left2right(j),:))';
-            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-            tempTOF(i) = tempSecondPeak - tempFirstPeak;
-        
-            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
-                vertBot(j) = i;
-                break
-            end
-        end
-    end
-    endRow = bot2cent(min(vertBot));
+    endRow = cropEdgeDetect(bot2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
     
     % Set rows to search
     startRowI = find(top2bot==startRow);
@@ -98,45 +68,16 @@ if cropDam == true
     endRow = endRow + vertPad;
 
     if startRow <= 0
-        startRow = 1;
+        startRow = 2;
     end
     if endRow > row
-        endRow = row;
+        endRow = row-1;
     end
 
     % From left to center
-    horLeft = NaN(1,length(searchRows));
-    for j = 1:length(searchRows)
-        tempTOF = zeros(1,length(left2cent));
-        for i = 1:length(left2cent)
-            rowSlice = squeeze(cScan(searchRows(j),left2cent(i),:))';
-            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-            tempTOF(i) = tempSecondPeak - tempFirstPeak;
-        
-            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
-                horLeft(j) = i;
-                break
-            end
-        end
-    end
-    startCol = left2cent(min(horLeft));
-    
+    startCol = cropEdgeDetect(left2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
     % From right to center
-    horRight = NaN(1,length(searchRows));
-    for j = 1:length(searchRows)
-        tempTOF = zeros(1,length(right2cent));
-        for i = 1:length(right2cent)
-            rowSlice = squeeze(cScan(searchRows(j),right2cent(i),:))';
-            [tempFirstPeak, tempSecondPeak] = calcTOF(rowSlice,noiseThresh,t);
-            tempTOF(i) = tempSecondPeak - tempFirstPeak;
-        
-            if (mean(tempTOF(1:i)) - tempTOF(i)) >= cropThresh
-                horRight(j) = i;
-                break
-            end
-        end
-    end
-    endCol = right2cent(min(horRight));
+    endCol = cropEdgeDetect(right2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
 
     % Add padding
     horPad = floor(horSpace*padExtra);
@@ -144,17 +85,17 @@ if cropDam == true
     endCol = endCol + horPad;
 
     if startCol <= 0
-        startCol = 1;
+        startCol = 2;
     end
     if endCol > col
-        endCol = col;
+        endCol = col-1;
     end
 
 else
-    startCol = 1;
-    endCol   = col;
-    startRow = 1;
-    endRow   = row;
+    startCol = 2;
+    endCol   = col-1;
+    startRow = 2;
+    endRow   = row-1;
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
@@ -175,30 +116,15 @@ rawTOF(abs(rawTOF-baseTOF)<2*dt) = baseTOF;
 % Reshape and normalize raw TOF by max TOF
 TOF = (1/max(rawTOF,[],'all')) .* rawTOF;
 
-% Fill in area outside of crop with TOF = 1 (white)
 if cropDam == true
-    for i = [1:col, 1:startCol-1, endCol+1:col, 1:col]
-        for j = [1:startRow-1,endRow+1:row]
-            TOF(j,i) = 1;
-        end
-    end
-    for i = [1:startCol-1, endCol+1:col]
-        for j = startRow-1:endRow+1
-            TOF(j,i) = 1;
-        end
-    end
-    % Vertical lines
-    for i = [1:scaleRatio, col-scaleRatio+1:col]
-        for j = 1:row
-            TOF(j,i) = 0;
-        end
-    end
-    % Horizontal lines
-    for i = 1:col
-        for j = [1, row]
-            TOF(j,i) = 0;
-        end
-    end
+    % Fill in area outside of crop with TOF = 1 (white)
+    TOF = fillArea([1:col, 1:startCol-1, endCol+1:col, 1:col],...
+        [1:startRow-1,endRow+1:row],1,TOF);
+    TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,1,TOF);
+    
+    % Black vertical and horizontal outlines
+    TOF = fillArea([1:scaleRatio, col-scaleRatio+1:col],1:row,0,TOF);
+    TOF = fillArea(1:col,[1, row],0,TOF);
 end
 
 % Save TOF to .mat file
@@ -234,6 +160,10 @@ if plotAScan == true
     xlabel("Time [us]");
     ylabel("Amplitude");
     xlim([0,tEnd]);
+
+    figure('visible','on');
+    imshow(TOF,'XData',[vertScale 0]);
+    title(strcat("TOF ",sampleName));
 end
 
 end

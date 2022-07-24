@@ -38,7 +38,7 @@ end
 % %{
 miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
                  "CSAI-CONT-H-10J-2-waveform-CH1";
-                 "CSAI-CONT-H-10J-3-waveform-CH1";
+%                  "CSAI-CONT-H-10J-3-waveform-CH1";
                  "CSAI-CONT-H-20J-1-waveform-CH1";
                  "CSAI-CONT-H-20J-2-waveform-CH1";
                  "CSAI-CONT-H-20J-3-waveform-CH1";
@@ -67,7 +67,7 @@ disp("Done! Finished processing all C-scan .csv files.")
 %% Testing aScanProcessing function call
 
 disp("Processed C-scans and converted to TOF for:")
-for i = 1%:length(fileNames)
+for i = 4%1:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);
