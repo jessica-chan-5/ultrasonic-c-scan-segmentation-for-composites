@@ -67,7 +67,7 @@ disp("Done! Finished processing all C-scan .csv files.")
 %% Testing aScanProcessing function call
 
 disp("Processed C-scans and converted to TOF for:")
-for i = 2:length(fileNames)
+for i = 14%:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);

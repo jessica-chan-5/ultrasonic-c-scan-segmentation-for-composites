@@ -40,23 +40,39 @@ if cropDam == true
     numPts = 10;
     vertSpace = floor(min(row,vertScale)/numPts);
     horSpace = vertSpace*scaleRatio;
-    noiseSpace = 5;
+    yNoiseSpace = 50;
+    xNoiseSpace = 15;
 
     % Calculate horizontal and vertical indices
-    top2bot = noiseSpace:vertSpace:row-vertSpace;
+    top2bot = yNoiseSpace:vertSpace:row-vertSpace;
     halfVert = floor(length(top2bot)/2);
     top2cent = top2bot(1:halfVert);
     bot2cent = top2bot(end:-1:halfVert+1);
 
-    left2right = noiseSpace:horSpace:col-horSpace;
+    left2right = xNoiseSpace:horSpace:col-horSpace;
     halfHor = floor(length(left2right)/2);
     left2cent = left2right(1:halfHor);
     right2cent = left2right(end:-1:halfHor+1);
+    
+    % Calculate baseline TOF
+    baseRows = 50:5:60;
+    baseCols = 10:2:14;
+    tempTOF = zeros(length(baseRows),length(baseCols));
+
+    for i = 1:length(baseRows)
+        for j = 1:length(baseCols)
+            point = squeeze(cScan(baseRows(i),baseCols(j),:))';
+            [firstPeak, secondPeak] = calcTOF(point,noiseThresh,t);
+            tempTOF(i,j) = secondPeak-firstPeak;
+        end
+    end
+
+    baseTOF = mode(tempTOF,'all');
 
     % From top to center
-    startRow = cropEdgeDetect(top2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
+    startRow = cropEdgeDetect(baseTOF,top2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
     % From bottom to center
-    endRow = cropEdgeDetect(bot2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
+    endRow = cropEdgeDetect(baseTOF,bot2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
     
     % Set rows to search
     startRowI = find(top2bot==startRow);
@@ -76,9 +92,9 @@ if cropDam == true
     end
 
     % From left to center
-    startCol = cropEdgeDetect(left2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
+    startCol = cropEdgeDetect(baseTOF,left2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
     % From right to center
-    endCol = cropEdgeDetect(right2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
+    endCol = cropEdgeDetect(baseTOF,right2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
 
     % Add padding
     horPad = floor(horSpace*padExtra);
