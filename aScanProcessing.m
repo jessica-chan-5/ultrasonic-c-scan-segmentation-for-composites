@@ -40,14 +40,15 @@ if cropDam == true
     numPts = 10;
     vertSpace = floor(min(row,vertScale)/numPts);
     horSpace = vertSpace*scaleRatio;
+    noiseSpace = 5;
 
     % Calculate horizontal and vertical indices
-    top2bot = 1:vertSpace:row-vertSpace;
+    top2bot = noiseSpace:vertSpace:row-vertSpace;
     halfVert = floor(length(top2bot)/2);
     top2cent = top2bot(1:halfVert);
     bot2cent = top2bot(end:-1:halfVert+1);
 
-    left2right = 1:horSpace:col-horSpace;
+    left2right = noiseSpace:horSpace:col-horSpace;
     halfHor = floor(length(left2right)/2);
     left2cent = left2right(1:halfHor);
     right2cent = left2right(end:-1:halfHor+1);

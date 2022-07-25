@@ -12,7 +12,7 @@ plotCol      = 384/2;  % Center of plate
 plotTOF      = true;
 plotAScan    = false;
 saveMat      = false;
-saveFig      = false;
+saveFig      = true;
 
 %% Input/output file names
 
@@ -67,7 +67,7 @@ disp("Done! Finished processing all C-scan .csv files.")
 %% Testing aScanProcessing function call
 
 disp("Processed C-scans and converted to TOF for:")
-for i = 4%1:length(fileNames)
+for i = 2:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);
