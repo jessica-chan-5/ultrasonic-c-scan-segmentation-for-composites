@@ -1,4 +1,4 @@
-function TOF = aScanProcessing(cScan,inFile,outFile,dt,vertScale, ...
+function [TOF, baseTOF] = aScanProcessing(cScan,inFile,outFile,dt,vertScale, ...
     noiseThresh, cropDam, plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
@@ -23,8 +23,7 @@ tic;
 [row, col, dataPointsPerAScan] = size(cScan);
 
 % Use basic gating procedure similar to UTWin
-firstPeak = zeros(row,col);
-secondPeak = firstPeak;
+TOF = zeros(row,col);
 
 tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
@@ -62,12 +61,11 @@ if cropDam == true
     for i = 1:length(baseRows)
         for j = 1:length(baseCols)
             point = squeeze(cScan(baseRows(i),baseCols(j),:))';
-            [firstPeak, secondPeak] = calcTOF(point,noiseThresh,t);
-            tempTOF(i,j) = secondPeak-firstPeak;
+            tempTOF(i,j) = calcTOF(point,noiseThresh,t);
         end
     end
 
-    baseTOF = mode(tempTOF,'all');
+    baseTOF = mode(tempTOF(tempTOF~=0),'all');
 
     % From top to center
     startRow = cropEdgeDetect(baseTOF,top2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
@@ -119,29 +117,19 @@ end
 for i = startRow:endRow
     for j = startCol:endCol
         aScan = squeeze(cScan(i,j,:))';
-        [firstPeak(i,j), secondPeak(i,j)] = calcTOF(aScan,noiseThresh,t);
+        TOF(i,j) = calcTOF(aScan,noiseThresh,t);
     end
 end
-
-% Calculate raw TOF
-rawTOF = secondPeak - firstPeak;
-
-% Find baseline TOF for undamaged plate
-baseTOF = mode(rawTOF,'all');
-rawTOF(abs(rawTOF-baseTOF)<2*dt) = baseTOF;
-
-% Reshape and normalize raw TOF by max TOF
-TOF = (1/max(rawTOF,[],'all')) .* rawTOF;
 
 if cropDam == true
     % Fill in area outside of crop with TOF = 1 (white)
     TOF = fillArea([1:col, 1:startCol-1, endCol+1:col, 1:col],...
-        [1:startRow-1,endRow+1:row],1,TOF);
-    TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,1,TOF);
+        [1:startRow-1,endRow+1:row],0,TOF);
+    TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,0,TOF);
     
-    % Black vertical and horizontal outlines
-    TOF = fillArea([1:scaleRatio, col-scaleRatio+1:col],1:row,0,TOF);
-    TOF = fillArea(1:col,[1, row],0,TOF);
+%     % Black vertical and horizontal outlines
+%     TOF = fillArea([1:scaleRatio, col-scaleRatio+1:col],1:row,0,TOF);
+%     TOF = fillArea(1:col,[1, row],0,TOF);
 end
 
 % Save TOF to .mat file
@@ -152,19 +140,19 @@ end
 sampleName = inFile{1}(8:end-10);
 
 % Plot TOF
+TOFplot = (1/max(TOF,[],'all')) .* TOF;
+
 if plotTOF == true && saveFig == false
     figure('visible','on');
-    imshow(TOF,'XData',[vertScale 0]);
+    imshow(TOFplot,'XData',[vertScale 0]);
     title(strcat("TOF ",sampleName));
 elseif plotTOF == true && saveFig == true
     figure('visible','off');
-    imshow(TOF,'XData',[vertScale 0]);
+    imshow(TOFplot,'XData',[vertScale 0]);
     title(strcat("TOF ",sampleName));
     ax = gca;
     exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
 end
-
-toc;
 
 % Plot A-scan for max value of signal
 if plotAScan == true
@@ -182,6 +170,10 @@ if plotAScan == true
     imshow(TOF,'XData',[vertScale 0]);
     title(strcat("TOF ",sampleName));
 end
+
+toc;
+disp(sampleName);
+disp('test');
 
 end
 

@@ -14,6 +14,9 @@ plotAScan    = false;
 saveMat      = false;
 saveFig      = true;
 
+numLayers = 25;
+plateThick = 3.3; % mm
+
 %% Input/output file names
 
 panelType = ["BL","CONT","RPR"];
@@ -66,16 +69,29 @@ disp("Done! Finished processing all C-scan .csv files.")
 
 %% Testing aScanProcessing function call
 
+TOF = cell(length(fileNames),1);
+baseTOF = nan(length(fileNames),1);
+
 disp("Processed C-scans and converted to TOF for:")
-for i = 14%:length(fileNames)
+for i = 1%:length(fileNames)
     inFile = strcat("Output\",fileNames(i),'-cScan.mat');
     outFile = strcat("Output\",fileNames(i),'-TOF.mat');
     load(inFile);
-    aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,...
+    [TOF{i}, baseTOF(i)] = aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,...
         cropDam,plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig);
 end
 
 disp("Done! Finished processing all C-scan .mat files.")
+
+%% Testing aScanSegmentation function call
+
+disp("Processed TOF and segmented TOF for:")
+for i = 1%:length(fileNames)
+    aScanSegmentation(TOF{i});
+end
+
+disp("Done! Finished processing all TOF.")
+
 
 
 
