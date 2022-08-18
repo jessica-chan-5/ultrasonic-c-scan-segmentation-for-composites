@@ -20,7 +20,7 @@ function aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale)
     
     % Plot
     figure;
-    imshow(binTOF,customColorMap,'XData',[vertScale 0]);
+    imshow(binTOF,customColorMap,'XData',[0 vertScale],'YData',[385 0]);
     
     testBins = [1:2:numLayers+1,26,27];
     figure;
