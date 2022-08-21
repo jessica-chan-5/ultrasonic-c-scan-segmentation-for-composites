@@ -9,7 +9,7 @@ for j = 1:length(searchj)
         else
             point = squeeze(cScan(searchj(j),searchi(i),:))';
         end
-        tof(i) = calcTOF(point,noiseThresh,t);
+        tof(i) = calcTOFpoint(point,noiseThresh,t);
         if abs(baseTOF - tof(i)) >= cropThresh
             edgeCandidates(j) = i;
             break

@@ -7,28 +7,45 @@ title(strcat("TOF ",sampleName));
 figure;
 contourf(TOF);
 
+%% Plot color
+
+dt           = 0.02;  % us
+vertScale    = 238;   % equal to "Scanning Length" in header
+noiseThresh  = 0.01;
+cropDam      = true;
+plotTOF      = true;
+plotAScan    = false;
+saveMat      = false;
+saveFig      = true;
+
+numLayers = 25;
+plateThick = 3.3; % mm
+
+aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale)
+
 %% Save figure
 ax = gca;
 exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
 
 %% Plot A-Scans
-plotRow = 208;
-plotCol = 631;
+plotRow = 185;
+plotCol = 392;
 
-spacing = 2;
-numPoints = 9;
-firstPeakTest = zeros(1,numPoints);
-secondPeakTest = firstPeakTest;
+spacing = 7;
+numPoints = 16;
+TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
 
 figure;
+
+startI = 1;
 
 for i = 1:length(points)
     
     widePeak = false;
     widePeakI = t(end);
 
-    titleStr = strcat("Row ", num2str(plotRow), " Col ", num2str(plotCol+(points(i)-1)));
+    titleStr = strcat("Row ", num2str(plotRow), " Col ", num2str(plotCol+(points(i)-1))," i=",num2str(i));
     aScan = squeeze(cScan(plotRow,plotCol+(points(i)-1),:))';
     aScan(aScan>1) = 1;
 
@@ -55,11 +72,14 @@ for i = 1:length(points)
     % Find neighboring peaks that are within 10 x 0.0039
     % Set peak location to be at center of the neighboring peaks
     % Set peak value as max of neighboring peaks
-    thresh = 10*0.0039;
-    [p, l] = findCenter(p,l,4,thresh);
-    [p, l] = findCenter(p,l,3,thresh);
-    [p, l] = findCenter(p,l,2,thresh);
-    [p, l] = findCenter(p,l,1,thresh);
+    thresh = 0.04;
+%     [p, l] = findCenter(p,l,4,thresh,false);
+%     [p, l] = findCenter(p,l,3,thresh,false);
+%     [p, l] = findCenter(p,l,2,thresh,false);
+    [p, l] = findCenter(p,l,1,thresh,false);
+
+    p = rmmissing(p);
+    l = rmmissing(l);
 
     % Find and save locations of peaks in previously found peaks in
     % descending order
@@ -67,25 +87,49 @@ for i = 1:length(points)
     hold on;
     [peak, loc, width, prom] = findpeaks(p,l,'Annotate','extents',...
         'MinPeakProminence',minpeakprom,'MinPeakHeight',0.16,...
-        'SortStr','descend','WidthReference','halfheight');
+        'WidthReference','halfheight');
 
     if length(loc) >= 2
-        loc1 = min([loc(1),loc(2)]);
-        loc2 = max([loc(1),loc(2)]);
-        
-        if widePeak == false
-            firstPeakTest(i) = loc1;
-            secondPeakTest(i) = loc2;
-        elseif widePeak == true && widePeakI > loc1
-            firstPeakTest(i) = loc1;
-            secondPeakTest(i) = loc2;
+
+        for k = 1:length(loc)-1
+            if (loc(k+1)-loc(k)) <= 0.28
+                disp(strcat("Removed loc(k+1=",num2str(k+1),"), j=",num2str(i)));
+                peak(k+1) = NaN;
+                loc(k+1) = NaN;
+            end
+        end
+
+        peak = rmmissing(peak);
+        loc = rmmissing(loc);
+
+        loc1 = loc(1);
+        [~, loc2i] = max(peak(2:end));
+        tof = loc(loc2i+1)-loc(1);
+
+        if i == 1
+            pastTOF = tof+0.16;
+        end
+        currentTOF = tof;
+
+        if widePeak == false || (widePeak == true && widePeakI > loc(1))
+            if abs(pastTOF-currentTOF) > 0.16
+                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
+                disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
+                TOFtest(startI:i) = pastTOF;
+                startI = i;
+                pastTOF = currentTOF;
+            else
+                TOFtest(i) = tof;
+            end
         else
-            firstPeakTest(i) = 1;
-            secondPeakTest(i) = 1;
+            TOFtest(i) = 0;
+            startI = i;
+            pastTOF = 0;
         end
     else
-        firstPeakTest(i) = 1;
-        secondPeakTest(i) = 1;
+        TOFtest(i) = 0;
+        startI = i;
+        pastTOF = 0;
     end
 
     findpeaks(p,l,'Annotate','extents','MinPeakProminence',minpeakprom,...
@@ -99,47 +143,34 @@ for i = 1:length(points)
     delete(hl);
 end
 
-TOFtest = (secondPeakTest-firstPeakTest)'
+TOFtest = [(1:length(TOFtest))', TOFtest']
 
-%% Remove outliers
+%% Try to draw outlines
 
-testingTOF = TOF;
+testingTOF = TOFtest;
 
-for i = 2:size(testingTOF,1)-1
-    for j = 2:size(testingTOF,2)-1
-        L = j-1;
-        R = j+1;
-        T = i+1;
-        B = i-1;
-        Mi = i;
-        Mj = j;
-        
-        TL = TOF(T,L);
-        TMj = TOF(T,Mj);
-        TR = TOF(T,R);
-        
-        MiL = TOF(Mi,L);
-        MiR = TOF(Mi,R);
-
-        BL = TOF(B,L);
-        BMj = TOF(B,Mj);
-        BR = TOF(B,R);
-
-        if range([TL,TMj,TR,MiL,MiR,BL,BMj,BR]) == 0
-            testingTOF(i,j) = TL;
+% Left to right
+for i = 1:size(TOFtest,1)
+    for j = 2:size(TOFtest,2)
+        if abs(TOFtest(i,j-1) - TOFtest(i,j)) >= 0.1
+            testingTOF(i,j) = 0;
         end
     end
 end
 
-%% Plot testingTOF
+% Top to bottom
+for j = 1:size(TOFtest,2)
+    for i = 2:size(TOFtest,1)
+        if abs(TOFtest(i-1,j) - TOFtest(i,j)) >= 0.1
+            testingTOF(i,j) = 0;
+        end
+    end
+end
+
+%% Plot outlines
 figure('visible','on');
-imshow((1/max(testingTOF,[],'all')) .*testingTOF,'XData',[0 vertScale],'YData',[385 0]);
+imshow((1/max(testingTOF,[],'all')) .* testingTOF,'XData',[0 vertScale],'YData',[385 0]);
 title(strcat("TOF ",sampleName));
-
-
-
-
-
 
 
 

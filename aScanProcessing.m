@@ -23,8 +23,6 @@ tic;
 [row, col, dataPointsPerAScan] = size(cScan);
 
 % Use basic gating procedure similar to UTWin
-TOF = zeros(row,col);
-
 tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
@@ -56,15 +54,8 @@ if cropDam == true
     % Calculate baseline TOF
     baseRows = 50:5:60;
     baseCols = 10:2:14;
-    tempTOF = zeros(length(baseRows),length(baseCols));
-
-    for i = 1:length(baseRows)
-        for j = 1:length(baseCols)
-            point = squeeze(cScan(baseRows(i),baseCols(j),:))';
-            tempTOF(i,j) = calcTOF(point,noiseThresh,t);
-        end
-    end
-
+    
+    tempTOF = calcTOF(cScan,noiseThresh,t,baseRows,baseCols);
     baseTOF = mode(tempTOF(tempTOF~=0),'all');
 
     % From top to center
@@ -114,12 +105,10 @@ else
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
-for i = startRow:endRow
-    for j = startCol:endCol
-        aScan = squeeze(cScan(i,j,:))';
-        TOF(i,j) = calcTOF(aScan,noiseThresh,t);
-    end
-end
+cropTOF = calcTOF(cScan,noiseThresh,t,startRow:endRow,startCol:endCol);
+
+TOF = zeros(row,col);
+TOF(startRow:endRow,startCol:endCol) = cropTOF;
 
 if cropDam == true
     % Fill in area outside of crop with TOF = 1 (white)
@@ -138,6 +127,35 @@ if saveMat == true
 end
 
 sampleName = inFile{1}(8:end-10);
+
+% Remove outliers
+for i = 2:size(TOF,1)-1
+    for j = 2:size(TOF,2)-1
+        L = j-1;
+        R = j+1;
+        T = i+1;
+        B = i-1;
+        Mi = i;
+        Mj = j;
+        
+        TL = TOF(T,L);
+        TMj = TOF(T,Mj);
+        TR = TOF(T,R);
+        
+        MiL = TOF(Mi,L);
+        MiR = TOF(Mi,R);
+
+        BL = TOF(B,L);
+        BMj = TOF(B,Mj);
+        BR = TOF(B,R);
+        
+        freqTab = tabulate([TL,TMj,TR,MiL,MiR,BL,BMj,BR]);
+
+        if freqTab(1,2) >= 5
+            TOF(i,j) = freqTab(1,1);
+        end
+    end
+end
 
 % Plot TOF
 TOFplot = (1/max(TOF,[],'all')) .* TOF;
