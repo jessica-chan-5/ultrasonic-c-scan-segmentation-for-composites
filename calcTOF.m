@@ -69,7 +69,7 @@ for i = 1:length(row)
                 currentTOF = tof;
         
                 if widePeak == false || (widePeak == true && widePeakI > loc(1))
-                    if abs(pastTOF-currentTOF) >= 0.16
+                    if abs(pastTOF-currentTOF) > 0.16
                         TOF(i,startI:j) = pastTOF;
                         startI = j;
                         pastTOF = currentTOF;
@@ -77,16 +77,28 @@ for i = 1:length(row)
                         TOF(i,j) = tof;
                     end
                 else
+                    currentTOF = 0;
+                    if abs(pastTOF-currentTOF) > 0.16
+                        TOF(i,startI:j) = pastTOF;
+                    end
                     startI = j;
                     pastTOF = 0;
                     TOF(i,j) = 0;
                 end
             else
+                currentTOF = 0;
+                if abs(pastTOF-currentTOF) > 0.16
+                    TOF(i,startI:j) = pastTOF;
+                end
                 startI = j;
                 pastTOF = 0;
                 TOF(i,j) = 0;
             end
         else
+            currentTOF = 0;
+            if abs(pastTOF-currentTOF) > 0.16
+                TOF(i,startI:j) = pastTOF;
+            end
             startI = j;
             pastTOF = 0;
             TOF(i,j) = 0;

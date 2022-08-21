@@ -28,10 +28,10 @@ ax = gca;
 exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
 
 %% Plot A-Scans
-plotRow = 185;
-plotCol = 392;
+plotRow = 184;
+plotCol = 388;
 
-spacing = 7;
+spacing = 6;
 numPoints = 16;
 TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
@@ -113,6 +113,7 @@ for i = 1:length(points)
 
         if widePeak == false || (widePeak == true && widePeakI > loc(1))
             if abs(pastTOF-currentTOF) > 0.16
+                disp("1")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
                 TOFtest(startI:i) = pastTOF;
@@ -122,11 +123,25 @@ for i = 1:length(points)
                 TOFtest(i) = tof;
             end
         else
+            currentTOF = 0;
+            if abs(pastTOF-currentTOF) > 0.16
+                disp("2")
+                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
+                disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
+                TOFtest(startI:i) = pastTOF;
+            end
             TOFtest(i) = 0;
             startI = i;
             pastTOF = 0;
         end
     else
+        currentTOF = 0;
+        if abs(pastTOF-currentTOF) > 0.16
+            disp("3")
+            disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
+            disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
+            TOFtest(startI:i) = pastTOF;
+        end
         TOFtest(i) = 0;
         startI = i;
         pastTOF = 0;
