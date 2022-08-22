@@ -29,9 +29,9 @@ exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
 
 %% Plot A-Scans
 plotRow = 184;
-plotCol = 388;
+plotCol = 465;
 
-spacing = 6;
+spacing = 1;
 numPoints = 16;
 TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
@@ -83,10 +83,10 @@ for i = 1:length(points)
 
     % Find and save locations of peaks in previously found peaks in
     % descending order
-    minpeakprom = 0.09;
+    minpeakprom = 0.07;
     hold on;
     [peak, loc, width, prom] = findpeaks(p,l,'Annotate','extents',...
-        'MinPeakProminence',minpeakprom,'MinPeakHeight',0.16,...
+        'MinPeakProminence',minpeakprom,'MinPeakHeight',0.25,...
         'WidthReference','halfheight');
 
     if length(loc) >= 2
@@ -148,7 +148,7 @@ for i = 1:length(points)
     end
 
     findpeaks(p,l,'Annotate','extents','MinPeakProminence',minpeakprom,...
-        'MinPeakHeight',0.16,'SortStr','descend','WidthReference','halfheight')
+        'MinPeakHeight',0.25,'SortStr','descend','WidthReference','halfheight')
     title(titleStr);
     xlabel("Time [us]");
     ylabel("Amplitude");
