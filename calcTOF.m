@@ -2,9 +2,18 @@ function TOF = calcTOF(cScan,noiseThresh,t,row,col)
 
 TOF = zeros(length(row),length(col));
 
+% Sensitivity parameters
+neighThresh = 0.04; % 10 x 0.0039 (1/2^8)
+minpeakprom = 0.09;
+minpeakheight = 0.16;
+resolutionThresh = 0.12*2;
+
 for i = 1:length(row)
 
+    % Intialize check values
     startI = 1;
+    l2i = zeros(1,length(col));
+    pastTOF = 0;
 
     for j = 1:length(col)
         
@@ -26,51 +35,43 @@ for i = 1:length(row)
             p = [0 p];
             l = [0 l];
         
+            % Flag wide peaks if mean is close to 1 and max diff from 1 is less
+            % than neighoring threshold value
             for k = 1:length(p)-2
-                if mean(p(k:k+2)) >= 0.98 && max(1 - p(k:k+2)) <= (10*0.0039)
+                if mean(p(k:k+2)) >= 0.98 && max(1 - p(k:k+2)) <= neighThresh
                     widePeak = true;
                     widePeakI = l(k);
                     break;
                 end
             end
             
-            % Find neighboring peaks that are within 10 x 0.0039
-            % Set peak location to be at center of the two neighboring peaks
-            % Set peak value as max of two neighboring peaks
+            % Find neighboring peaks that are within ~10 x 0.0039
+            % Set peak location and value to be at leftmost of the neighboring peaks
             thresh = 0.04;
-        %     [p, l] = findCenter(p,l,4,thresh,false);
-        %     [p, l] = findCenter(p,l,3,thresh,false);
-        %     [p, l] = findCenter(p,l,2,thresh,false);
             [p, l] = findCenter(p,l,1,thresh,false);
-        
-            p = rmmissing(p);
-            l = rmmissing(l);
+%             p = rmmissing(p);
+%             l = rmmissing(l);
         
             % Find and save locations of peaks in previously found peaks
-            [peak, loc,~] = findpeaks(p,l,'MinPeakProminence',0.09,...
-                'MinPeakHeight',0.16,'WidthReference','halfheight');
+            [peak, loc] = findpeaks(p,l,...
+                'MinPeakProminence',minpeakprom,...
+                'MinPeakHeight',minpeakheight,...
+                'WidthReference','halfheight');
+
             if length(loc) >= 2
-                for k = 1:length(loc)-1
-                    if (loc(k+1)-loc(k)) <= 0.28
-                        peak(k+1) = NaN;
-                        loc(k+1) = NaN;
-                    end
-                end
-
-                peak = rmmissing(peak);
-                loc = rmmissing(loc);
                 
+                loc1 = loc(1);
                 [~, loc2i] = max(peak(2:end));
-                tof = loc(loc2i+1)-loc(1);
+                loc2i = loc2i + 1;
+                l2i(j) = find(l==loc(loc2i));
+                tof = loc(loc2i)-loc1;
 
-                if j == 1
-                    pastTOF = tof+0.16;
-                end
                 currentTOF = tof;
         
-                if widePeak == false || (widePeak == true && widePeakI > loc(1))
-                    if abs(pastTOF-currentTOF) > 0.16
-                        TOF(i,startI:j) = pastTOF;
+                if widePeak == false || (widePeak == true && widePeakI > loc1)
+                    if range(l2i(startI:j)) > 2 || j == 1 || (pastTOF == 0 && currentTOF ~= 0)
+                        TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                        TOF(i,j) = currentTOF;
                         startI = j;
                         pastTOF = currentTOF;
                     else
@@ -78,8 +79,9 @@ for i = 1:length(row)
                     end
                 else
                     currentTOF = 0;
-                    if abs(pastTOF-currentTOF) > 0.16
-                        TOF(i,startI:j) = pastTOF;
+                    if pastTOF ~= 0
+                        TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                        TOF(i,j) = currentTOF;
                     end
                     startI = j;
                     pastTOF = 0;
@@ -87,8 +89,9 @@ for i = 1:length(row)
                 end
             else
                 currentTOF = 0;
-                if abs(pastTOF-currentTOF) > 0.16
-                    TOF(i,startI:j) = pastTOF;
+                if pastTOF ~= 0
+                    TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                    TOF(i,j) = currentTOF;
                 end
                 startI = j;
                 pastTOF = 0;
@@ -96,8 +99,9 @@ for i = 1:length(row)
             end
         else
             currentTOF = 0;
-            if abs(pastTOF-currentTOF) > 0.16
-                TOF(i,startI:j) = pastTOF;
+            if pastTOF ~= 0
+                TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                TOF(i,j) = currentTOF;
             end
             startI = j;
             pastTOF = 0;
@@ -107,6 +111,6 @@ for i = 1:length(row)
 end
 
 % If TOF is too small to resolve, set to zero
-TOF(TOF < 0.12*2) = 0;
+TOF(TOF < resolutionThresh) = 0;
 
 end

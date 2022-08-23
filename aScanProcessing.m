@@ -151,7 +151,7 @@ for i = 2:size(TOF,1)-1
         
         freqTab = tabulate([TL,TMj,TR,MiL,MiR,BL,BMj,BR]);
 
-        if freqTab(1,2) >= 5
+        if freqTab(1,2) >= 8
             TOF(i,j) = freqTab(1,1);
         end
     end

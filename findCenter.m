@@ -7,8 +7,8 @@ for k = 1:length(p)-m
         if center == true
             l(k) = (l(k)+l(k+m))/2;
         end
-        p(k+1:k+m) = NaN;
-        l(k+1:k+m) = NaN;
+        p(k+1:k+m) = p(k);
+%         l(k+1:k+m) = NaN;
     end
 end
 
