@@ -8,19 +8,21 @@ contourf(TOF);
 vertScale = 238;
 numLayers = 25;
 plateThick = 3.3;
+baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
-plotRow = 171;
-plotCol = 400;
+plotRow = 223;
+plotCol = 688;
 
-spacing = 16;
+spacing = 7;
 numPoints = 25;
 TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
 
 % Sensitivity parameters
 neighThresh = 0.04; % 10 x 0.0039 (1/2^8)
+layerThresh = 0.16; % 0.10 + 0.02*3
 minpeakprom = 0.09;
 minpeakheight = 0.16;
 
@@ -84,11 +86,15 @@ for i = 1:length(points)
         currentTOF = tof;
 
         if widePeak == false || (widePeak == true && widePeakI > loc(1))
-            if range(l2i(startI:i)) > 2 || i == 1 || (pastTOF == 0 && currentTOF ~= 0)
+            if (range(l2i(startI:i)) > 2 && abs(pastTOF-currentTOF) > layerThresh) ...
+                    || i == 1 || i == length(points) ...
+                    || (pastTOF == 0 && currentTOF ~= 0)
                 disp("1")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = pastTOF;
+                round(TOFtest(startI:i-1),2)
+                mode(round(TOFtest(startI:i-1),2))
+                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
                 TOFtest(i) = currentTOF;
                 startI = i;
                 pastTOF = currentTOF;
@@ -101,7 +107,7 @@ for i = 1:length(points)
                 disp("2")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = pastTOF;
+                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
                 TOFtest(i) = currentTOF;
             end
             TOFtest(i) = 0;
@@ -114,7 +120,7 @@ for i = 1:length(points)
             disp("3")
             disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
             disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-            TOFtest(startI:i-1) = pastTOF;
+            TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
             TOFtest(i) = currentTOF;
         end
         TOFtest(i) = 0;

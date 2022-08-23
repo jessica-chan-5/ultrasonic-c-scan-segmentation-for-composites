@@ -4,6 +4,7 @@ TOF = zeros(length(row),length(col));
 
 % Sensitivity parameters
 neighThresh = 0.04; % 10 x 0.0039 (1/2^8)
+layerThresh = 0.16; % 0.10 + 0.02*3
 minpeakprom = 0.09;
 minpeakheight = 0.16;
 resolutionThresh = 0.12*2;
@@ -69,8 +70,10 @@ for i = 1:length(row)
                 currentTOF = tof;
         
                 if widePeak == false || (widePeak == true && widePeakI > loc1)
-                    if range(l2i(startI:j)) > 2 || j == 1 || (pastTOF == 0 && currentTOF ~= 0)
-                        TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                    if (range(l2i(startI:j)) > 2 && abs(pastTOF-currentTOF) > layerThresh) ...
+                            || j == 1 || j == length(col) ...
+                            || (pastTOF == 0 && currentTOF ~= 0)
+                        TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
                         TOF(i,j) = currentTOF;
                         startI = j;
                         pastTOF = currentTOF;
@@ -80,7 +83,7 @@ for i = 1:length(row)
                 else
                     currentTOF = 0;
                     if pastTOF ~= 0
-                        TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                        TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
                         TOF(i,j) = currentTOF;
                     end
                     startI = j;
@@ -90,7 +93,7 @@ for i = 1:length(row)
             else
                 currentTOF = 0;
                 if pastTOF ~= 0
-                    TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                    TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
                     TOF(i,j) = currentTOF;
                 end
                 startI = j;
@@ -100,7 +103,7 @@ for i = 1:length(row)
         else
             currentTOF = 0;
             if pastTOF ~= 0
-                TOF(i,startI:j-1) = median(unique(TOF(i,startI:j-1)));
+                TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
                 TOF(i,j) = currentTOF;
             end
             startI = j;
