@@ -77,9 +77,8 @@ for i = 1:length(row)
                 
                 if j > 1
                     if(l2i(j-1)) <= 0
-                        break;
-                    end
-                    if p(l2i(j-1)) < peak2(j)
+                        inflection = true;
+                    elseif p(l2i(j-1)) < peak2(j)
                         inflection = true;
                     end
                 end
