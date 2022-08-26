@@ -12,18 +12,17 @@ baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
-plotRow = 223;
-plotCol = 688;
+plotRow = 219;
+plotCol = 703;
 
-spacing = 7;
+spacing = 1;
 numPoints = 25;
 TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
 
 % Sensitivity parameters
 neighThresh = 0.04; % 10 x 0.0039 (1/2^8)
-layerThresh = 0.16; % 0.10 + 0.02*3
-minpeakprom = 0.09;
+layerThresh = 0.26; % 0.10 + 0.02*3
 minpeakheight = 0.16;
 
 figure;
@@ -32,10 +31,13 @@ axislabels = false;
 
 startI = 1;
 l2i = zeros(1,length(points));
+loc2i = l2i;
+peak2 = 12i;
 pastTOF = 0;
 
 for i = 1:length(points)
     
+    inflection = false;
     widePeak = false;
     widePeakI = t(end);
 
@@ -55,8 +57,8 @@ for i = 1:length(points)
     
     % Flag wide peaks if mean is close to 1 and max diff from 1 is less
     % than neighoring threshold value
-    for k = 1:length(p)-2
-        if mean(p(k:k+2)) >= 0.98 && max(1 - p(k:k+2)) <= neighThresh
+    for k = 1:length(p)-2 
+        if max(1 - p(k:k+2)) <= neighThresh % && mean(p(k:k+2)) >= 0.98
             widePeak = true;
             widePeakI = l(k);
             break;
@@ -70,30 +72,45 @@ for i = 1:length(points)
 %     l = rmmissing(l);
 
     % Find and save locations of peaks in previously found peaks
-    [peak, loc] = findpeaks(p,l,...
-        'MinPeakProminence',minpeakprom,...
+    [peak,loc,width,prom] = findpeaks(p,l,...
         'MinPeakHeight',minpeakheight,...
         'WidthReference','halfheight');
+%         'MinPeakProminence',minpeakprom,...
+
+    for k = 1:length(width)
+        if width(k) >= 0.80
+            widePeak = true;
+            widePeakI = loc(k);
+            break;
+        end
+    end
 
     if length(loc) >= 2
 
         loc1 = loc(1);
-        [~, loc2i] = max(peak(2:end));
-        loc2i = loc2i + 1;
-        l2i(i) = find(l==loc(loc2i));
-        tof = loc(loc2i)-loc(1);
+        [peak2(i), loc2i(i)] = max(peak(2:end));
+        sortedPeak = sort(peak,'descend');
+        loc2i(i) = loc2i(i) + 1;
+        l2i(i) = find(l==loc(loc2i(i)));
+        tof = loc(loc2i(i))-loc(1);
+        
+        if i > 1
+            if p(l2i(i-1)) < peak2(i)
+                 inflection = true;
+            end
+        end
 
         currentTOF = tof;
 
         if widePeak == false || (widePeak == true && widePeakI > loc(1))
-            if (range(l2i(startI:i)) > 2 && abs(pastTOF-currentTOF) > layerThresh) ...
-                    || i == 1 || i == length(points) ...
-                    || (pastTOF == 0 && currentTOF ~= 0)
+
+            if inflection == true ...
+                || i == 1 || i == length(points) ...
+                || (pastTOF == 0 && currentTOF ~= 0)
+
                 disp("1")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-                round(TOFtest(startI:i-1),2)
-                mode(round(TOFtest(startI:i-1),2))
                 TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
                 TOFtest(i) = currentTOF;
                 startI = i;
@@ -131,9 +148,9 @@ for i = 1:length(points)
     % Plot peaks
     findpeaks(p,l,...
         'Annotate','extents',...
-        'MinPeakProminence',minpeakprom,...
         'MinPeakHeight',minpeakheight,...
         'WidthReference','halfheight')
+%         'MinPeakProminence',minpeakprom,...
 
     % Format plot
     title(titleStr);
@@ -150,4 +167,5 @@ end
 sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
 
 l2i
+peak2
 TOFtest = [(1:length(TOFtest))', TOFtest']

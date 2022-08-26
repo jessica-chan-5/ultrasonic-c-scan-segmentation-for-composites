@@ -105,11 +105,11 @@ else
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
-cropTOF = calcTOF(cScan,noiseThresh,t,startRow:endRow,startCol:endCol);
+cropTOF = calcTOF(cScan,noiseThresh,t,startRow:endRow,startCol:endCol+1);
 baseTOF = mode(cropTOF,"all");
 
 TOF = zeros(row,col);
-TOF(startRow:endRow,startCol:endCol) = cropTOF;
+TOF(startRow:endRow,startCol:endCol) = cropTOF(1:end,1:end-1);
 
 if cropDam == true
     % Fill in area outside of crop with TOF = 0 (black)
