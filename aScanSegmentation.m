@@ -11,7 +11,6 @@ function aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale)
 
     % Calculate bins centered at TOF for each layer
     layersTOF = baseTOF-numLayers*dtTOF-dtTOF/2:dtTOF:baseTOF+dtTOF/2;
-%     layersTOF = [layersTOF(1:end-2),2,3];
     binTOF = discretize(TOF,layersTOF);
     
     % Create custom colormap that shows baseline TOF as white = [1, 1, 1]

@@ -13,7 +13,7 @@ aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
 plotRow = 219;
-plotCol = 703;
+plotCol = 596;
 
 spacing = 1;
 numPoints = 25;
@@ -21,18 +21,18 @@ TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
 
 % Sensitivity parameters
-neighThresh = 0.04; % 10 x 0.0039 (1/2^8)
+neighThresh = 0.08; % 8%
 layerThresh = 0.26; % 0.10 + 0.02*3
 minpeakheight = 0.16;
 
 figure;
-fontsizes = 12;
+fontsizes = 18;
 axislabels = false;
 
 startI = 1;
 l2i = zeros(1,length(points));
 loc2i = l2i;
-peak2 = 12i;
+peak2 = l2i;
 pastTOF = 0;
 
 for i = 1:length(points)
@@ -58,7 +58,7 @@ for i = 1:length(points)
     % Flag wide peaks if mean is close to 1 and max diff from 1 is less
     % than neighoring threshold value
     for k = 1:length(p)-2 
-        if max(1 - p(k:k+2)) <= neighThresh % && mean(p(k:k+2)) >= 0.98
+        if max(1 - p(k:k+2)) <= neighThresh
             widePeak = true;
             widePeakI = l(k);
             break;
@@ -68,14 +68,11 @@ for i = 1:length(points)
     % Find neighboring peaks that are within ~10 x 0.0039
     % Set peak location and value to be at leftmost of the neighboring peaks
     [p, l] = findCenter(p,l,1,neighThresh,false);
-%     p = rmmissing(p);
-%     l = rmmissing(l);
 
     % Find and save locations of peaks in previously found peaks
-    [peak,loc,width,prom] = findpeaks(p,l,...
+    [peak,loc,width] = findpeaks(p,l,...
         'MinPeakHeight',minpeakheight,...
         'WidthReference','halfheight');
-%         'MinPeakProminence',minpeakprom,...
 
     for k = 1:length(width)
         if width(k) >= 0.80
@@ -93,9 +90,11 @@ for i = 1:length(points)
         loc2i(i) = loc2i(i) + 1;
         l2i(i) = find(l==loc(loc2i(i)));
         tof = loc(loc2i(i))-loc(1);
-        
+
         if i > 1
-            if p(l2i(i-1)) < peak2(i)
+            if(l2i(i-1)) <= 0
+                inflection = true;
+            elseif p(l2i(i-1)) < peak2(i)
                  inflection = true;
             end
         end
@@ -166,6 +165,4 @@ end
 
 sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
 
-l2i
-peak2
 TOFtest = [(1:length(TOFtest))', TOFtest']
