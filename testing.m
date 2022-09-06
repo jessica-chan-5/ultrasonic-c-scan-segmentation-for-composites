@@ -12,8 +12,8 @@ baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
-plotRow = 219;
-plotCol = 596;
+plotRow = 142;
+plotCol = 589;
 
 spacing = 1;
 numPoints = 25;
@@ -22,7 +22,6 @@ points = 1:spacing:numPoints*spacing;
 
 % Sensitivity parameters
 neighThresh = 0.08; % 8%
-layerThresh = 0.26; % 0.10 + 0.02*3
 minpeakheight = 0.16;
 
 figure;
@@ -34,6 +33,7 @@ l2i = zeros(1,length(points));
 loc2i = l2i;
 peak2 = l2i;
 pastTOF = 0;
+pastNumPeaks = 0;
 
 for i = 1:length(points)
     
@@ -55,7 +55,7 @@ for i = 1:length(points)
     p = [0 p]; %#ok<AGROW> 
     l = [0 l]; %#ok<AGROW> 
     
-    % Flag wide peaks if mean is close to 1 and max diff from 1 is less
+    % Flag wide peaks if max diff from 1 is less
     % than neighoring threshold value
     for k = 1:length(p)-2 
         if max(1 - p(k:k+2)) <= neighThresh
@@ -65,7 +65,7 @@ for i = 1:length(points)
         end
     end
 
-    % Find neighboring peaks that are within ~10 x 0.0039
+    % Find neighboring peaks that are within 8%
     % Set peak location and value to be at leftmost of the neighboring peaks
     [p, l] = findCenter(p,l,1,neighThresh,false);
 
@@ -82,25 +82,37 @@ for i = 1:length(points)
         end
     end
 
+    % Count number of peaks, if more than 1 peak
+    currentNumPeaks = length(peak)-1;
+
     if length(loc) >= 2
 
         loc1 = loc(1);
         [peak2(i), loc2i(i)] = max(peak(2:end));
-        sortedPeak = sort(peak,'descend');
         loc2i(i) = loc2i(i) + 1;
         l2i(i) = find(l==loc(loc2i(i)));
-        tof = loc(loc2i(i))-loc(1);
+        currentTOF = loc(loc2i(i))-loc(1);
 
-        if i > 1
-            if(l2i(i-1)) <= 0
-                inflection = true;
-            elseif p(l2i(i-1)) < peak2(i)
-                 inflection = true;
+%         if i > 1
+%             if(l2i(i-1)) <= 0
+%                 inflection = true;
+%             elseif p(l2i(i-1)) < peak2(i)
+%                 inflection = true;
+%             end
+%         end
+
+        if i > 3
+            if currentNumPeaks > 0
+                if currentNumPeaks == pastNumPeaks && loc2i(i) ~= loc2i(i-1)
+                    inflection = true;
+                else
+                    if peak2(i-3) > peak2(i-2) && peak2(i-1) > peak2(i-2)
+                        inflection = true;
+                    end
+                end
             end
         end
-
-        currentTOF = tof;
-
+        
         if widePeak == false || (widePeak == true && widePeakI > loc(1))
 
             if inflection == true ...
@@ -115,33 +127,29 @@ for i = 1:length(points)
                 startI = i;
                 pastTOF = currentTOF;
             else
-                TOFtest(i) = tof;
+                TOFtest(i) = currentTOF;
             end
         else
-            currentTOF = 0;
             if pastTOF ~= 0
                 disp("2")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
                 TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
-                TOFtest(i) = currentTOF;
             end
-            TOFtest(i) = 0;
             startI = i;
             pastTOF = 0;
+            TOFtest(i) = 0;
         end
     else
-        currentTOF = 0;
         if pastTOF ~= 0
             disp("3")
             disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
             disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
             TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
-            TOFtest(i) = currentTOF;
         end
-        TOFtest(i) = 0;
         startI = i;
         pastTOF = 0;
+        TOFtest(i) = 0;
     end
 
     % Plot peaks
@@ -149,7 +157,6 @@ for i = 1:length(points)
         'Annotate','extents',...
         'MinPeakHeight',minpeakheight,...
         'WidthReference','halfheight')
-%         'MinPeakProminence',minpeakprom,...
 
     % Format plot
     title(titleStr);

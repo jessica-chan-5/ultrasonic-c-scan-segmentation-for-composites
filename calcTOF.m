@@ -5,7 +5,6 @@ TOF = zeros(length(row),length(col));
 % Sensitivity parameters
 neighThresh = 0.08; % 8%
 minpeakheight = 0.16;
-resolutionThresh = 0.12*2;
 
 for i = 1:length(row)
 
@@ -15,6 +14,7 @@ for i = 1:length(row)
     loc2i = l2i;
     peak2 = 12i;
     pastTOF = 0;
+    pastNumPeaks = 0;
 
     for j = 1:length(col)
         
@@ -63,22 +63,30 @@ for i = 1:length(row)
                 end
             end
 
+            % Count number of peaks
+            currentNumPeaks = length(peak)-1;
+
             if length(loc) >= 2
                 
                 loc1 = loc(1);
                 [peak2(j), loc2i(j)] = max(peak(2:end)); %#ok<AGROW> 
                 loc2i(j) = loc2i(j) + 1;
                 l2i(j) = find(l==loc(loc2i(j)));
-                tof = loc(loc2i(j))-loc1;
-                
-                if j > 1
-                    if(l2i(j-1)) <= 0
-                        inflection = true;
-                    elseif p(l2i(j-1)) < peak2(j)
-                        inflection = true;
+                currentTOF = loc(loc2i(j))-loc1;
+
+                if j > 3
+                    if currentNumPeaks > 0
+                        if currentNumPeaks == pastNumPeaks && loc2i(j) ~= loc2i(j-1)
+                            inflection = true;
+                        else
+                            if peak2(j-3) > peak2(j-2) && peak2(j-1) > peak2(j-2)
+                                inflection = true;
+                            end
+                        end
                     end
                 end
-                currentTOF = tof;
+
+                pastNumPeaks = currentNumPeaks;
         
                 if widePeak == false || (widePeak == true && widePeakI > loc1)
                     if inflection == true ...
@@ -90,39 +98,33 @@ for i = 1:length(row)
                         startI = j;
                         pastTOF = currentTOF;
                     else
-                        TOF(i,j) = tof;
+                        TOF(i,j) = currentTOF;
                     end
                 else
-                    currentTOF = 0;
                     if pastTOF ~= 0
                         TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
                     end
                     startI = j;
                     pastTOF = 0;
-                    TOF(i,j) = currentTOF;
+                    TOF(i,j) = 0;
                 end
             else
-                currentTOF = 0;
                 if pastTOF ~= 0
                     TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
                 end
                 startI = j;
                 pastTOF = 0;
-                TOF(i,j) = currentTOF;
+                TOF(i,j) = 0;
             end
         else
-            currentTOF = 0;
             if pastTOF ~= 0
                 TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
             end
             startI = j;
             pastTOF = 0;
-            TOF(i,j) = currentTOF;
+            TOF(i,j) = 0;
         end
     end
 end
-
-% If TOF is too small to resolve, set to zero
-TOF(TOF < resolutionThresh) = 0;
 
 end
