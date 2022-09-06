@@ -21,8 +21,8 @@ function aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale)
     figure;
     imshow(binTOF,customColorMap,'XData',[0 vertScale],'YData',[385 0]);
     
-    testBins = [1:2:numLayers+1,26,27];
-    figure;
-    contourf(size(TOF,2):-1:1,size(TOF,1):-1:1,binTOF,testBins);
-    colormap(customColorMap);
+%     testBins = [1:2:numLayers+1,26,27];
+%     figure;
+%     contourf(size(TOF,2):-1:1,size(TOF,1):-1:1,binTOF,testBins);
+%     colormap(customColorMap);
 end

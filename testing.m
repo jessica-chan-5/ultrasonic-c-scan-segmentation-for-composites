@@ -1,6 +1,6 @@
 %% Plot TOF
-figure;
-imshow(TOFplot,'XData',[0 vertScale],'YData',[385 0]);
+% figure;
+% imshow(TOFplot,'XData',[0 vertScale],'YData',[385 0]);
 
 figure;
 contourf(TOF);
@@ -12,16 +12,16 @@ baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
-plotRow = 142;
-plotCol = 589;
+plotRow = 165;
+plotCol = 381;
 
 spacing = 1;
-numPoints = 25;
+numPoints = 36;
 TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
 
 % Sensitivity parameters
-neighThresh = 0.08; % 8%
+neighThresh = 0.08; % 8 percent
 minpeakheight = 0.16;
 
 figure;
@@ -39,7 +39,7 @@ for i = 1:length(points)
     
     inflection = false;
     widePeak = false;
-    widePeakI = t(end);
+    widePeakLoc = t(end);
 
     titleStr = strcat("Col ", num2str(plotCol+(points(i)-1))," i=",num2str(i));
     aScan = squeeze(cScan(plotRow,plotCol+(points(i)-1),:))';
@@ -55,18 +55,17 @@ for i = 1:length(points)
     p = [0 p]; %#ok<AGROW> 
     l = [0 l]; %#ok<AGROW> 
     
-    % Flag wide peaks if max diff from 1 is less
-    % than neighoring threshold value
+    % Flag wide peaks if max diff from 1 is less than neighoring threshold value
     for k = 1:length(p)-2 
         if max(1 - p(k:k+2)) <= neighThresh
             widePeak = true;
-            widePeakI = l(k);
+            widePeakLoc = l(k);
             break;
         end
     end
 
     % Find neighboring peaks that are within 8%
-    % Set peak location and value to be at leftmost of the neighboring peaks
+    % Set peak location and value to be at max of the neighboring peaks
     [p, l] = findCenter(p,l,1,neighThresh,false);
 
     % Find and save locations of peaks in previously found peaks
@@ -77,44 +76,35 @@ for i = 1:length(points)
     for k = 1:length(width)
         if width(k) >= 0.80
             widePeak = true;
-            widePeakI = loc(k);
+            widePeakLoc = loc(k);
             break;
         end
     end
 
-    % Count number of peaks, if more than 1 peak
+    % Count number of peaks
     currentNumPeaks = length(peak)-1;
 
     if length(loc) >= 2
 
-        loc1 = loc(1);
         [peak2(i), loc2i(i)] = max(peak(2:end));
         loc2i(i) = loc2i(i) + 1;
-        l2i(i) = find(l==loc(loc2i(i)));
         currentTOF = loc(loc2i(i))-loc(1);
-
-%         if i > 1
-%             if(l2i(i-1)) <= 0
-%                 inflection = true;
-%             elseif p(l2i(i-1)) < peak2(i)
-%                 inflection = true;
-%             end
-%         end
 
         if i > 3
             if currentNumPeaks > 0
                 if currentNumPeaks == pastNumPeaks && loc2i(i) ~= loc2i(i-1)
                     inflection = true;
-                else
-                    if peak2(i-3) > peak2(i-2) && peak2(i-1) > peak2(i-2)
-                        inflection = true;
-                    end
+                elseif peak2(i-2) > peak2(i-1) && peak2(i) > peak2(i-1)
+                    inflection = true;
+                elseif (peak2(i-3)-peak2(i)) == 0 && (peak2(i-2)-peak2(i-1)) == 0
+                    inflection = true;
                 end
             end
         end
         
-        if widePeak == false || (widePeak == true && widePeakI > loc(1))
+        pastNumPeaks = currentNumPeaks;
 
+        if widePeak == false || (widePeak == true && widePeakLoc > loc(1))
             if inflection == true ...
                 || i == 1 || i == length(points) ...
                 || (pastTOF == 0 && currentTOF ~= 0)
