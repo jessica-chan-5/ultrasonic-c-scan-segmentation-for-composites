@@ -12,11 +12,11 @@ baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
-plotRow = 165;
-plotCol = 381;
+plotRow = 142;
+plotCol = 599;
 
 spacing = 1;
-numPoints = 36;
+numPoints = 25;
 TOFtest = zeros(1,numPoints);
 points = 1:spacing:numPoints*spacing;
 
@@ -28,19 +28,16 @@ figure;
 fontsizes = 18;
 axislabels = false;
 
-startI = 1;
-l2i = zeros(1,length(points));
-loc2i = l2i;
-peak2 = l2i;
-pastTOF = 0;
-pastNumPeaks = 0;
+l2i = TOFtest;
+loc2i = TOFtest;
+peak2 = TOFtest;
+widePeak = false(1,length(points));
+widePeakLoc = TOFtest;
+numPeaks = TOFtest;
+loc1 = TOFtest;
 
 for i = 1:length(points)
     
-    inflection = false;
-    widePeak = false;
-    widePeakLoc = t(end);
-
     titleStr = strcat("Col ", num2str(plotCol+(points(i)-1))," i=",num2str(i));
     aScan = squeeze(cScan(plotRow,plotCol+(points(i)-1),:))';
     aScan(aScan>1) = 1;
@@ -58,8 +55,8 @@ for i = 1:length(points)
     % Flag wide peaks if max diff from 1 is less than neighoring threshold value
     for k = 1:length(p)-2 
         if max(1 - p(k:k+2)) <= neighThresh
-            widePeak = true;
-            widePeakLoc = l(k);
+            widePeak(i) = true;
+            widePeakLoc(i) = l(k);
             break;
         end
     end
@@ -73,73 +70,14 @@ for i = 1:length(points)
         'MinPeakHeight',minpeakheight,...
         'WidthReference','halfheight');
 
-    for k = 1:length(width)
-        if width(k) >= 0.80
-            widePeak = true;
-            widePeakLoc = loc(k);
-            break;
-        end
-    end
-
     % Count number of peaks
-    currentNumPeaks = length(peak)-1;
-
-    if length(loc) >= 2
-
+    numPeaks(i) = length(peak)-1;
+    
+    if numPeaks(i)+1 >= 2
+        loc1(i) = loc(1);
         [peak2(i), loc2i(i)] = max(peak(2:end));
         loc2i(i) = loc2i(i) + 1;
-        currentTOF = loc(loc2i(i))-loc(1);
-
-        if i > 3
-            if currentNumPeaks > 0
-                if currentNumPeaks == pastNumPeaks && loc2i(i) ~= loc2i(i-1)
-                    inflection = true;
-                elseif peak2(i-2) > peak2(i-1) && peak2(i) > peak2(i-1)
-                    inflection = true;
-                elseif (peak2(i-3)-peak2(i)) == 0 && (peak2(i-2)-peak2(i-1)) == 0
-                    inflection = true;
-                end
-            end
-        end
-        
-        pastNumPeaks = currentNumPeaks;
-
-        if widePeak == false || (widePeak == true && widePeakLoc > loc(1))
-            if inflection == true ...
-                || i == 1 || i == length(points) ...
-                || (pastTOF == 0 && currentTOF ~= 0)
-
-                disp("1")
-                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
-                disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
-                TOFtest(i) = currentTOF;
-                startI = i;
-                pastTOF = currentTOF;
-            else
-                TOFtest(i) = currentTOF;
-            end
-        else
-            if pastTOF ~= 0
-                disp("2")
-                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
-                disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
-            end
-            startI = i;
-            pastTOF = 0;
-            TOFtest(i) = 0;
-        end
-    else
-        if pastTOF ~= 0
-            disp("3")
-            disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
-            disp(strcat("CurrentTOF: ",num2str(currentTOF)," PastTOF: ",num2str(pastTOF)));
-            TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
-        end
-        startI = i;
-        pastTOF = 0;
-        TOFtest(i) = 0;
+        TOFtest(i) = loc(loc2i(i))-loc1(i);
     end
 
     % Plot peaks
@@ -162,4 +100,61 @@ end
 
 sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
 
-TOFtest = [(1:length(TOFtest))', TOFtest']
+%%
+
+startI = 2;
+pastTOF = 0;
+
+for i = 2:length(points)-5
+
+    inflection = false;
+
+    if numPeaks(i)+1 >= 2
+
+        if numPeaks(i) > 0
+            if numPeaks(i) == numPeaks(i-1) && loc2i(i) ~= loc2i(i-1)
+                inflection = true;
+                disp('a')
+            elseif all(diff(peak2(startI:i))<=0) && all(diff(peak2(i+1:i+5))>=0)
+                inflection = true;
+                disp('b')
+            end
+        end
+        
+        if widePeak(i) == false || (widePeak(i) == true && widePeakLoc(i) > loc1(i))
+            if inflection == true ...
+                || i == 1 || i == length(points)-5 ...
+                || (pastTOF == 0 && TOFtest(i) ~= 0)
+
+                disp("1")
+                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
+                disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
+                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+                startI = i;
+                pastTOF = TOFtest(i);
+            end
+        else
+            if pastTOF ~= 0
+                disp("2")
+                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
+                disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
+                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+            end
+            startI = i;
+            pastTOF = 0;
+            TOFtest(i) = 0;
+        end
+    else
+        if pastTOF ~= 0
+            disp("3")
+            disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
+            disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
+            TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+        end
+        startI = i;
+        pastTOF = 0;
+        TOFtest(i) = 0;
+    end
+end
+
+dispTOF = [(1:length(TOFtest))', TOFtest']

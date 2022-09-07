@@ -51,17 +51,9 @@ for i = 1:length(row)
             [p, l] = findCenter(p,l,1,neighThresh,false);
         
             % Find and save locations of peaks in previously found peaks
-            [peak, loc,width] = findpeaks(p,l,...
+            [peak, loc] = findpeaks(p,l,...
                 'MinPeakHeight',minpeakheight,...
                 'WidthReference','halfheight');
-            
-            for k = 1:length(width)
-                if width(k) >= 0.80
-                    widePeak = true;
-                    widePeakLoc = loc(k);
-                    break;
-                end
-            end
 
             % Count number of peaks
             currentNumPeaks = length(peak)-1;
@@ -72,13 +64,18 @@ for i = 1:length(row)
                 loc2i(j) = loc2i(j) + 1;
                 currentTOF = loc(loc2i(j))-loc(1);
 
-                if j > 3
+                if j > 5
                     if currentNumPeaks > 0
                         if currentNumPeaks == pastNumPeaks && loc2i(j) ~= loc2i(j-1)
                             inflection = true;
-                        elseif peak2(j-2) > peak2(j-1) && peak2(j) > peak2(j-1)
+                        elseif peak2(j-4) > peak2(j-3) && ...
+                            peak2(j-3) > peak2(j-2) && ...
+                            peak2(j-1) > peak2(j-2) && ...
+                            peak2(j) > peak2(j-1)
+                            
                             inflection = true;
-                        elseif (peak2(j-3)-peak2(j)) == 0 && (peak2(j-2)-peak2(j-1)) == 0
+                        elseif (peak2(j-3)-peak2(j)) == 0 && ...
+                                (peak2(j-2)-peak2(j-1)) == 0
                             inflection = true;
                         end
                     end
