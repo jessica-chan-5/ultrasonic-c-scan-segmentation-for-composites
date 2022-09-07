@@ -28,7 +28,6 @@ figure;
 fontsizes = 18;
 axislabels = false;
 
-l2i = TOFtest;
 loc2i = TOFtest;
 peak2 = TOFtest;
 widePeak = false(1,length(points));
@@ -102,12 +101,13 @@ sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
 
 %%
 
-startI = 2;
+startI = 4;
 pastTOF = 0;
 
-for i = 2:length(points)-5
+for i = 4:length(points)-3
 
     inflection = false;
+    elseFlag = false;
 
     if numPeaks(i)+1 >= 2
 
@@ -115,7 +115,7 @@ for i = 2:length(points)-5
             if numPeaks(i) == numPeaks(i-1) && loc2i(i) ~= loc2i(i-1)
                 inflection = true;
                 disp('a')
-            elseif all(diff(peak2(startI:i))<=0) && all(diff(peak2(i+1:i+5))>=0)
+            elseif issorted(peak2(i-2:i),'descend') && issorted(peak2(i+1:i+2))
                 inflection = true;
                 disp('b')
             end
@@ -134,19 +134,15 @@ for i = 2:length(points)-5
                 pastTOF = TOFtest(i);
             end
         else
-            if pastTOF ~= 0
-                disp("2")
-                disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
-                disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
-            end
-            startI = i;
-            pastTOF = 0;
-            TOFtest(i) = 0;
+            elseFlag = true;
         end
     else
+        elseFlag = true;
+    end
+
+    if elseFlag == true
         if pastTOF ~= 0
-            disp("3")
+            disp("2")
             disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
             disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
             TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
