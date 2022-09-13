@@ -1,7 +1,4 @@
 %% Plot TOF
-% figure;
-% imshow(TOFplot,'XData',[0 vertScale],'YData',[385 0]);
-
 figure;
 contourf(TOF);
 
@@ -12,37 +9,56 @@ baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
 
 %% Plot A-Scans
-plotRow = 142;
-plotCol = 599;
 
+% Points to inspect
+plotRow = 190;
+plotCol = 332;
 spacing = 1;
-numPoints = 25;
-TOFtest = zeros(1,numPoints);
+numPoints = 516;
 points = 1:spacing:numPoints*spacing;
+
+% Figure properties
+plotFig = false;
+if plotFig == true
+    figure;
+    fontsizes = 18;
+    axislabels = false;
+
+    dt = 0.02;
+    tEnd = (size(cScan,3)-1)*dt;
+    t = 0:dt:tEnd;
+end
+
+% Initialize values
+TOFtest = zeros(1,numPoints);
+loc1 = TOFtest;
+loc2i = TOFtest;
+locs2i = TOFtest;
+peak2 = TOFtest;
+numPeaks = TOFtest;
+widePeakLoc = TOFtest;
+widePeak = false(1,length(points));
+peakLabels = cell(1,length(points));
+locs = peakLabels;
 
 % Sensitivity parameters
 neighThresh = 0.08; % 8 percent
-minpeakheight = 0.16;
+minpeakheight = 0.11;
 
-figure;
-fontsizes = 18;
-axislabels = false;
-
-loc2i = TOFtest;
-peak2 = TOFtest;
-widePeak = false(1,length(points));
-widePeakLoc = TOFtest;
-numPeaks = TOFtest;
-loc1 = TOFtest;
+labelList = 1:20;
 
 for i = 1:length(points)
     
     titleStr = strcat("Col ", num2str(plotCol+(points(i)-1))," i=",num2str(i));
+    
     aScan = squeeze(cScan(plotRow,plotCol+(points(i)-1),:))';
+    % Set values greater than 1 equal to 1
     aScan(aScan>1) = 1;
 
-    subplot(sqrt(numPoints),sqrt(numPoints),i); hold on;
-    plot(t,abs(aScan));
+    if plotFig == true
+        subplot(sqrt(numPoints),sqrt(numPoints),i); hold on;
+        plot(t,abs(aScan));
+    end
 
     % Find and save peaks/locations in signal
     [p, l] = findpeaks(aScan,t);
@@ -51,9 +67,9 @@ for i = 1:length(points)
     p = [0 p]; %#ok<AGROW> 
     l = [0 l]; %#ok<AGROW> 
     
-    % Flag wide peaks if max diff from 1 is less than neighoring threshold value
-    for k = 1:length(p)-2 
-        if max(1 - p(k:k+2)) <= neighThresh
+    % Flag wide peaks if max diff from max value is less than neighors by 8%
+    for k = 1:length(p)-2
+        if max(max(p(k:k+2)) - p(k:k+2)) <= neighThresh*max(p(k:k+2))
             widePeak(i) = true;
             widePeakLoc(i) = l(k);
             break;
@@ -68,54 +84,89 @@ for i = 1:length(points)
     [peak,loc,width] = findpeaks(p,l,...
         'MinPeakHeight',minpeakheight,...
         'WidthReference','halfheight');
+    locs{i} = loc;
 
     % Count number of peaks
-    numPeaks(i) = length(peak)-1;
-    
-    if numPeaks(i)+1 >= 2
+    numPeaks(i) = length(peak);
+
+    % Assign unique peak IDs
+    peakThresh = 0.16;
+
+    if i == 1
+        peakLabels{i} = 1:length(locs{i});
+        labelList = labelList(length(locs{i})+1:end);
+    else
+        tempCurr = locs{i};
+        tempPrev = locs{i-1};
+
+        for k = 1:length(tempPrev)
+            minDiff = min(abs(locs{i-1}(k)-tempCurr));
+            if minDiff > peakThresh
+                labelList = sort([peakLabels{i-1}(k), labelList]);
+            end
+        end
+
+        for k = 1:length(tempCurr)
+            [minDiff, minI] = min(abs(locs{i}(k)-tempPrev));
+            if minDiff < peakThresh
+                tempCurr(minI) = NaN;
+                peakLabels{i} = [peakLabels{i}, peakLabels{i-1}(minI)];
+            else
+                peakLabels{i} = [peakLabels{i}, labelList(1)];
+                labelList = labelList(2:end);
+            end
+        end
+    end
+
+    if numPeaks(i) >= 2
         loc1(i) = loc(1);
         [peak2(i), loc2i(i)] = max(peak(2:end));
         loc2i(i) = loc2i(i) + 1;
         TOFtest(i) = loc(loc2i(i))-loc1(i);
+        locs2i(i) = peakLabels{i}(loc2i(i));
     end
-
-    % Plot peaks
-    findpeaks(p,l,...
-        'Annotate','extents',...
-        'MinPeakHeight',minpeakheight,...
-        'WidthReference','halfheight')
-
-    % Format plot
-    title(titleStr);
-    if axislabels == true
-        xlabel("Time [us]");
-        ylabel("Amplitude");
+    
+    if plotFig == true
+        % Plot peaks
+        findpeaks(p,l,...
+            'Annotate','extents',...
+            'MinPeakHeight',minpeakheight,...
+            'WidthReference','halfheight')
+    
+        % Format plot
+        title(titleStr);
+        if axislabels == true
+            xlabel("Time [us]");
+            ylabel("Amplitude");
+        end
+        xlim([0,tEnd]);
+        hl=findobj(gcf,'type','legend');
+        delete(hl);
+        fontsize(gca,fontsizes,'pixels');
     end
-    xlim([0,tEnd]);
-    hl=findobj(gcf,'type','legend');
-    delete(hl);
-    fontsize(gca,fontsizes,'pixels');
 end
 
-sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
+if plotFig == true
+    sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
+end
 
-%%
-
-startI = 4;
+startI = 3;
 pastTOF = 0;
 
-for i = 4:length(points)-3
+for i = 3:length(points)-2
 
     inflection = false;
     elseFlag = false;
 
-    if numPeaks(i)+1 >= 2
+    if numPeaks(i) >= 2
 
-        if numPeaks(i) > 0
-            if numPeaks(i) == numPeaks(i-1) && loc2i(i) ~= loc2i(i-1)
+        if numPeaks(i) > 1
+            if locs2i(i) ~= locs2i(i-1)
                 inflection = true;
                 disp('a')
-            elseif issorted(peak2(i-2:i),'descend') && issorted(peak2(i+1:i+2))
+            elseif all(peak2(i-2:i+2) ~= 1) && ...
+                    issorted(peak2(i-2:i),'descend') && ...
+                    issorted(peak2(i:i+2))% ascend
                 inflection = true;
                 disp('b')
             end
@@ -123,7 +174,7 @@ for i = 4:length(points)-3
         
         if widePeak(i) == false || (widePeak(i) == true && widePeakLoc(i) > loc1(i))
             if inflection == true ...
-                || i == 1 || i == length(points)-5 ...
+                || i == 3 || i == length(points)-2 ...
                 || (pastTOF == 0 && TOFtest(i) ~= 0)
 
                 disp("1")
