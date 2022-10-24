@@ -1,4 +1,4 @@
-function aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale)
+function aScanSegmentation(TOF,inFile,numLayers,plateThick,baseTOF,vertScale,saveFig)
     
     % Calculate material velocity
     matVel = 2*plateThick/baseTOF; % mm/us
@@ -16,13 +16,17 @@ function aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale)
     % Create custom colormap that shows baseline TOF as white = [1, 1, 1]
     customColorMap = jet(numLayers);
     customColorMap = [customColorMap; [1 1 1]];
-    
-    % Plot
-    figure;
-    imshow(binTOF,customColorMap,'XData',[0 vertScale],'YData',[385 0]);
-    
-%     testBins = [1:2:numLayers+1,26,27];
-%     figure;
-%     contourf(size(TOF,2):-1:1,size(TOF,1):-1:1,binTOF,testBins);
-%     colormap(customColorMap);
+
+    if saveFig == false
+        figure('visible','on');
+        imshow(binTOF,customColorMap,'XData',[0 vertScale],'YData',[385 0]);
+        title(strcat("TOF ",inFile));
+    else
+        figure('visible','off');
+        imshow(binTOF,customColorMap,'XData',[0 vertScale],'YData',[385 0]);
+        title(strcat("TOF ",inFile));
+        ax = gca;
+        exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
+    end
+
 end

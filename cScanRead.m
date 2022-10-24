@@ -4,7 +4,6 @@ function cScanRead(inFile,outFile)
 % Inputs:
 %   inFile : Name of .csv C-scan input file
 %   outFile: Name of .mat TOF output file
-%
 
     % Read C-scan data from input .csv file
     rawCScan = readmatrix(inFile,'Delimiter','   ','TrimNonNumeric',true);
@@ -30,8 +29,5 @@ function cScanRead(inFile,outFile)
     
     % Save C-scan to .mat file
     save(strcat(outFile,"-cScan.mat"),'cScan','-mat');
-
-    sampleName = inFile{1}(7:end-4);
-    disp(sampleName);
 
 end

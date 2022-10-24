@@ -1,4 +1,4 @@
-function TOF = calcTOF(cScan,noiseThresh,t,row,col)
+function TOF = calcTOF(cScan,t,row,col)
 
 % Initialize values
 TOF = zeros(length(row),length(col));

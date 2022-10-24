@@ -1,5 +1,5 @@
 function [TOF, baseTOF] = aScanProcessing(cScan,inFile,outFile,dt,vertScale, ...
-    noiseThresh, cropDam, plotRow,plotCol,plotTOF,plotAScan,saveMat,saveFig)
+    noiseThresh, cropDam, saveMat)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
 % 
@@ -16,8 +16,6 @@ function [TOF, baseTOF] = aScanProcessing(cScan,inFile,outFile,dt,vertScale, ...
 %   plotAScan  : Plots A-scan for specified row, column location on plate
 %   saveMat    : Saves TOF as .mat file
 %   saveFig    : Saves plotted figures
-
-tic;
 
 % Find row, column, and data points info from C-scan
 [row, col, dataPointsPerAScan] = size(cScan);
@@ -55,7 +53,7 @@ if cropDam == true
     baseRows = 50:5:60;
     baseCols = 10:2:14;
     
-    tempTOF = calcTOF(cScan,noiseThresh,t,baseRows,baseCols);
+    tempTOF = calcTOF(cScan,t,baseRows,baseCols);
     baseTOF = mode(tempTOF(tempTOF~=0),'all');
 
     % From top to center
@@ -105,7 +103,7 @@ else
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
-cropTOF = calcTOF(cScan,noiseThresh,t,startRow:endRow,startCol:endCol+1);
+cropTOF = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
 baseTOF = mode(cropTOF,"all");
 
 TOF = zeros(row,col);
@@ -157,42 +155,6 @@ for i = 2:size(TOF,1)-1
         end
     end
 end
-
-% Plot TOF
-TOFplot = (1/max(TOF,[],'all')) .* TOF;
-
-if plotTOF == true && saveFig == false
-    figure('visible','on');
-    imshow(TOFplot,'XData',[vertScale 0]);
-    title(strcat("TOF ",sampleName));
-elseif plotTOF == true && saveFig == true
-    figure('visible','off');
-    imshow(TOFplot,'XData',[vertScale 0]);
-    title(strcat("TOF ",sampleName));
-    ax = gca;
-    exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
-end
-
-% Plot A-scan for max value of signal
-if plotAScan == true
-    titleStr = strcat("A-scan at row ",num2str(plotRow)," column ",num2str(plotCol));
-
-    figure("Name",titleStr);
-    plot(t,abs(cScan(plotRow,plotCol,:)));
-
-    title(titleStr);
-    xlabel("Time [us]");
-    ylabel("Amplitude");
-    xlim([0,tEnd]);
-
-    figure('visible','on');
-    imshow(TOF,'XData',[vertScale 0]);
-    title(strcat("TOF ",sampleName));
-end
-
-toc;
-disp(sampleName);
-disp('test');
 
 end
 

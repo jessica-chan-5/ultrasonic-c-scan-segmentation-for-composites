@@ -5,20 +5,23 @@ contourf(TOF);
 vertScale = 238;
 numLayers = 25;
 plateThick = 3.3;
+saveFig = false;
 baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
-aScanSegmentation(TOF,numLayers,plateThick,baseTOF,vertScale);
+inFile = "testing";
+aScanSegmentation(TOF,inFile,numLayers,plateThick,baseTOF,vertScale,saveFig);
 
 %% Plot A-Scans
 
 % Points to inspect
-plotRow = 190;
-plotCol = 332;
+plotRow = 244;
+plotCol = 559;
 spacing = 1;
-numPoints = 516;
+numPoints = 1;
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
-plotFig = false;
+plotFig = true;
+
 if plotFig == true
     figure;
     fontsizes = 18;
