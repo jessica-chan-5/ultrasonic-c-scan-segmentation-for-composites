@@ -17,6 +17,8 @@ vertScale    = 238;   % equal to "Scanning Length" in header
 % C-scan processing parameters
 noiseThresh  = 0.01;  % Currently only used for cropEdgeDetect
 cropDam      = true;  % Crop non-damaged areas?
+cropThresh   = 0.2;   % Crop threshold greater than abs(baseTOF - tof(i))
+padExtra     = 1.25;  % Extra padding on all 4 crop edges
 
 % Output requests
 saveMat      = false; % Save TOF mat?
@@ -87,11 +89,7 @@ fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to TOF for:\n\n");
 
 for i = 1:length(fileNames)
-    inFile = strcat(outFolder,"\",fileNames(i),'-cScan.mat');
-    outFile = strcat(outFolder,"\",fileNames(i),'-TOF.mat');
-    load(inFile);
-    [TOF{i}, baseTOF(i)] = aScanProcessing(cScan,inFile,outFile,dt,vertScale,noiseThresh,cropDam,saveMat);
-
+    [TOF{i}, baseTOF(i)] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
     disp(fileNames(i));
 end
 
