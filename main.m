@@ -3,6 +3,13 @@ close all; clear; format compact;
 
 %% Function inputs
 
+% .csv file parameters
+delimiter = "   ";   % Delimiter in .csv file
+
+% Folder names
+inFolder = "Input";   % .csv C-scan file location
+outFolder = "Output"; % .mat processed file output location
+
 % Raw c-scan parameters
 fs           = 50;    % Sampling frequency [MHz]
 vertScale    = 238;   % equal to "Scanning Length" in header
@@ -11,11 +18,7 @@ vertScale    = 238;   % equal to "Scanning Length" in header
 noiseThresh  = 0.01;  % Currently only used for cropEdgeDetect
 cropDam      = true;  % Crop non-damaged areas?
 
-% Folders
-inFolder = "Input";
-outFolder = "Output";
-
-% Output parameters
+% Output requests
 saveMat      = false; % Save TOF mat?
 saveFig      = true;  % Save segmented figure?
 
@@ -23,11 +26,10 @@ saveFig      = true;  % Save segmented figure?
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
 
-%% Calculated function inputs
-
+% Calculated function inputs
 dt = 1/fs; % Calculate sampling period [us]
 
-%% Input/output file names (user specific)
+% Input/output file names (user specific)
 
 panelType = ["BL","CONT","RPR"];
 impactEnergy = ["10","15","20"];
@@ -61,21 +63,22 @@ miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
 fileNames = [miscFileNames; fileNames];
 %}
 
-%% Read in .csv files
+%% Read in C-Scans
 
 % Uncomment when need to convert additional .csv files
-%{
-disp("Converted C-scans from .csv to .mat files for:");
+% %{
+fprintf("==============================================\n\n")
+fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 
-for i = 1:length(fileNames)
+for i = 1%:length(fileNames)
     inFile = strcat(inFolder,"\",fileNames(i),".csv");
     outFile = strcat(outFolder,"\",fileNames(i));
-    cScanRead(inFile,outFile);
+    cScanRead(inFile,outFile,delimiter);
     
     disp(fileNames(i));
 end
 
-disp("Finished converting all C-scan .csv files!")
+fprintf("\nFinished converting all C-scan .csv files!\n\n")
 %}
 
 %% Process C-Scans and calculate TOF
@@ -83,7 +86,8 @@ disp("Finished converting all C-scan .csv files!")
 TOF = cell(length(fileNames),1);
 baseTOF = nan(length(fileNames),1);
 
-disp("Processed C-scans and converted to TOF for:")
+fprintf("==============================================\n\n")
+fprintf("Processed C-scans and converted to TOF for:\n\n");
 
 for i = 1:length(fileNames)
     inFile = strcat(outFolder,"\",fileNames(i),'-cScan.mat');
@@ -94,11 +98,12 @@ for i = 1:length(fileNames)
     disp(fileNames(i));
 end
 
-disp("Finished processing all C-scan .mat files.")
+fprintf("\nFinished processing all C-scan .mat files.\n\n")
 
-%% Testing aScanSegmentation function call
+%% Segment TOF
 
-disp("Segmented TOF for:")
+fprintf("==============================================\n\n")
+fprintf("Segmented TOF for:\n\n")
 
 for i = 1:length(fileNames)
     inFile = strcat(fileNames(i));
@@ -107,7 +112,9 @@ for i = 1:length(fileNames)
     disp(fileNames(i));
 end
 
-disp("Finished segmenting all TOF.")
+fprintf("\nFinished segmenting all TOF.\n\n")
+fprintf("==============================================\n\n")
+
 
 
 

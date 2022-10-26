@@ -1,12 +1,12 @@
-function cScanRead(inFile,outFile)
-% Reads .csv file format C-scan and saves 3D matrix C-scan as .mat file
+function cScanRead(inFile,outFile,delimiter)
+% Converts C-scan from 2D .csv file to 3D .mat file
 % 
 % Inputs:
 %   inFile : Name of .csv C-scan input file
-%   outFile: Name of .mat TOF output file
+%   outFile: Name of .mat C-scan output file
 
     % Read C-scan data from input .csv file
-    rawCScan = readmatrix(inFile,'Delimiter','   ','TrimNonNumeric',true);
+    rawCScan = readmatrix(inFile,'Delimiter',delimiter,'TrimNonNumeric',true);
 
     % Calculate number of scans along x (row) and y (col) scan directions
     % Add 1 for x and 2 for y because the last line begins with (row,col)
