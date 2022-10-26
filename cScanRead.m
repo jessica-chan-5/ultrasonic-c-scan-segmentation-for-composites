@@ -1,9 +1,16 @@
-function cScanRead(inFile,outFile,delimiter)
+function cScanRead(inFolder,outFolder,fileName,delimiter)
 % Converts C-scan from 2D .csv file to 3D .mat file
 % 
 % Inputs:
-%   inFile : Name of .csv C-scan input file
-%   outFile: Name of .mat C-scan output file
+%   inFile :   Folder path to .csv C-scan input file
+%   outFile:   Folder path to .mat C-scan output file
+%   fileName:  Name of .csv C-scan input file
+%   delimiter: Sequence of characters separating each value
+%              (i.e. "," or " ")
+    
+    % Concatenate file names/paths
+    inFile = strcat(inFolder,"\",fileName,".csv");
+    outFile = strcat(outFolder,"\",fileName);
 
     % Read C-scan data from input .csv file
     rawCScan = readmatrix(inFile,'Delimiter',delimiter,'TrimNonNumeric',true);

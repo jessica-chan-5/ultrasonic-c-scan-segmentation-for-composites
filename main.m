@@ -66,15 +66,12 @@ fileNames = [miscFileNames; fileNames];
 %% Read in C-Scans
 
 % Uncomment when need to convert additional .csv files
-% %{
+%{
 fprintf("==============================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 
-for i = 1%:length(fileNames)
-    inFile = strcat(inFolder,"\",fileNames(i),".csv");
-    outFile = strcat(outFolder,"\",fileNames(i));
-    cScanRead(inFile,outFile,delimiter);
-    
+for i = 1:length(fileNames)
+    cScanRead(inFolder,outFolder,fileNames(i),delimiter);
     disp(fileNames(i));
 end
 
