@@ -22,7 +22,7 @@ padExtra     = 1.25;  % Extra padding on all 4 crop edges
 
 % Output requests
 saveMat      = false; % Save TOF mat?
-saveFig      = true;  % Save segmented figure?
+saveFig      = false;  % Save segmented figure?
 
 % Plate properties
 numLayers    = 25;    % # of layers in plate
@@ -88,7 +88,7 @@ baseTOF = nan(length(fileNames),1);
 fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to TOF for:\n\n");
 
-for i = 1:length(fileNames)
+for i = 1%:length(fileNames)
     [TOF{i}, baseTOF(i)] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
     disp(fileNames(i));
 end
@@ -100,7 +100,7 @@ fprintf("\nFinished processing all C-scan .mat files.\n\n")
 fprintf("==============================================\n\n")
 fprintf("Segmented TOF for:\n\n")
 
-for i = 1:length(fileNames)
+for i = 1%:length(fileNames)
     inFile = strcat(fileNames(i));
     aScanSegmentation(TOF{i},inFile,numLayers,plateThick,baseTOF(i),vertScale,saveFig)
 

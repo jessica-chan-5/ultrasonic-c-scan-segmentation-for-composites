@@ -22,7 +22,7 @@ inFile = strcat(outFolder,"\",fileName,'-cScan.mat');
 outFile = strcat(outFolder,"\",fileName,'-TOF.mat');
 
 % Load cScan
-load(inFile,cScan);
+load(inFile);
 
 % Find row, column, and data points info from C-scan
 [row, col, dataPointsPerAScan] = size(cScan);
@@ -106,16 +106,14 @@ baseTOF = mode(cropTOF,"all");
 TOF = zeros(row,col);
 TOF(startRow:endRow,startCol:endCol) = cropTOF(1:end,1:end-1);
 
-if cropDam == true
-    % Fill in area outside of crop with TOF = 0 (black)
-    TOF = fillArea([1:col, 1:startCol-1, endCol+1:col, 1:col],...
-        [1:startRow-1,endRow+1:row],0,TOF);
-    TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,0,TOF);
-    
+% Fill in area outside of crop with TOF = 0 (black)
+TOF = fillArea([1:col, 1:startCol-1, endCol+1:col, 1:col],...
+    [1:startRow-1,endRow+1:row],0,TOF);
+TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,0,TOF);
+
 %     % Black vertical and horizontal outlines
 %     TOF = fillArea([1:scaleRatio, col-scaleRatio+1:col],1:row,0,TOF);
 %     TOF = fillArea(1:col,[1, row],0,TOF);
-end
 
 % Save TOF to .mat file
 if saveMat == true

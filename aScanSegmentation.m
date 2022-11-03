@@ -26,7 +26,7 @@ function aScanSegmentation(TOF,inFile,numLayers,plateThick,baseTOF,vertScale,sav
         imshow(binTOF,customColorMap,'XData',[0 vertScale],'YData',[385 0]);
         title(strcat("TOF ",inFile));
         ax = gca;
-        exportgraphics(ax,strcat('Figures\',sampleName,'.png'),'Resolution',300);
+        exportgraphics(ax,strcat('Figures\',inFile,'.png'),'Resolution',300);
     end
 
 end
