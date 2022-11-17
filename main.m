@@ -22,7 +22,7 @@ padExtra     = 1.25;  % Extra padding on all 4 crop edges
 
 % Output requests
 saveMat      = false; % Save TOF mat?
-saveFig      = false;  % Save segmented figure?
+saveFig      = true;  % Save segmented figure?
 
 % Plate properties
 numLayers    = 25;    % # of layers in plate
@@ -39,6 +39,9 @@ impactEnergy = ["10","15","20"];
 n = length(impactEnergy);
 m = length(panelType);
 
+% fileNames = ["CSAI-CONT-S-20J-2-backside-CH1"];
+%%{ 
+
 fileNames = strings([n*m*2,1]);
 
 % Concat file names
@@ -51,8 +54,10 @@ for i = 1:n
     end
 end
 
+%}
+
 % "Hard" panel samples can be included as extra test cases
-%{
+%%{
 miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
                  "CSAI-CONT-H-10J-2-waveform-CH1";
 %                  "CSAI-CONT-H-10J-3-waveform-CH1";
@@ -82,37 +87,62 @@ fprintf("\nFinished converting all C-scan .csv files!\n\n")
 
 %% Process C-Scans and calculate TOF
 
+%{
 TOF = cell(length(fileNames),1);
 baseTOF = nan(length(fileNames),1);
 
 fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to TOF for:\n\n");
 
-for i = 1%:length(fileNames)
+for i = 1:length(fileNames)
+    tic;
     [TOF{i}, baseTOF(i)] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
     disp(fileNames(i));
+    toc
 end
 
 fprintf("\nFinished processing all C-scan .mat files.\n\n")
+%}
 
 %% Segment TOF
 
+%{
 fprintf("==============================================\n\n")
 fprintf("Segmented TOF for:\n\n")
 
-for i = 1%:length(fileNames)
+for i = 1:length(fileNames)
+    tic;
     inFile = strcat(fileNames(i));
     aScanSegmentation(TOF{i},inFile,numLayers,plateThick,baseTOF(i),vertScale,saveFig)
 
     disp(fileNames(i));
+    toc
 end
 
 fprintf("\nFinished segmenting all TOF.\n\n")
 fprintf("==============================================\n\n")
+%}
 
+%% Process and plot
 
+TOF = cell(length(fileNames),1);
+baseTOF = nan(length(fileNames),1);
 
+fprintf("==============================================\n\n")
+fprintf("Processed and plotted for:\n\n");
 
+for i = 1:length(fileNames)
+    tic;
+    [TOF{i}, baseTOF(i)] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
+    
+    inFile = strcat(fileNames(i));
+    aScanSegmentation(TOF{i},inFile,numLayers,plateThick,baseTOF(i),vertScale,saveFig)
+    
+    disp(fileNames(i));
+    toc
+end
+
+fprintf("\nFinished processing all C-scan .mat files.\n\n")
 
 
 

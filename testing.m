@@ -8,19 +8,34 @@ plateThick = 3.3;
 saveFig = false;
 baseTOF = mode(TOF(startRow:endRow,startCol:endCol),"all");
 inFile = "testing";
-aScanSegmentation(TOF,inFile,numLayers,plateThick,baseTOF,vertScale,saveFig);
+% aScanSegmentation(TOF,inFile,numLayers,plateThick,baseTOF,vertScale,saveFig);
+
+%% Plot imshow w/ jet w/o segmentation
+figure('visible','on');
+imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[385 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF ",inFile));
+
+%% Plot inflectionPts
+inflectPtWhole = zeros(row,col);
+inflectPtWhole(startRow:endRow,startCol:endCol) = inflectPt(1:end,1:end-1);
+
+figure('visible','on');
+imgray = imshow(inflectPtWhole,gray,'XData',[0 vertScale],'YData',[385 0]);
+imgray.CDataMapping = "scaled";
+title(strcat("TOF ",inFile));
 
 %% Plot A-Scans
 
 % Points to inspect
-plotRow = 244;
-plotCol = 559;
+plotRow = 206;
+plotCol = 1;
 spacing = 1;
-numPoints = 1;
+numPoints = 1000;
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
-plotFig = true;
+plotFig = false;
 
 if plotFig == true
     figure;
@@ -153,10 +168,16 @@ if plotFig == true
     sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
 end
 
-startI = 3;
-pastTOF = 0;
+% Find peaks in neg val of 2nd peak mag
+[~, magLoc] = findpeaks(-peak2,'MinPeakProminence',0.05);
+% [~, magLocPos] = findpeaks(peak2,'MinPeakProminence',0.05);
+% magLoc = sort([magLocNeg,magLocPos]);
 
-for i = 3:length(points)-2
+startI = 2;
+pastTOF = 0;
+magI = 1;
+
+for i = startI:length(points)
 
     inflection = false;
     elseFlag = false;
@@ -164,26 +185,27 @@ for i = 3:length(points)-2
     if numPeaks(i) >= 2
 
         if numPeaks(i) > 1
-            if locs2i(i) ~= locs2i(i-1)
+            if magI <= length(magLoc) && ...
+                    points(i) == magLoc(magI)
+                inflection = true;
+                magI = magI + 1;
+                disp('b')
+                disp(magI)
+            elseif locs2i(i) ~= locs2i(i-1)
                 inflection = true;
                 disp('a')
-            elseif all(peak2(i-2:i+2) ~= 1) && ...
-                    issorted(peak2(i-2:i),'descend') && ...
-                    issorted(peak2(i:i+2))% ascend
-                inflection = true;
-                disp('b')
             end
         end
         
         if widePeak(i) == false || (widePeak(i) == true && widePeakLoc(i) > loc1(i))
             if inflection == true ...
-                || i == 3 || i == length(points)-2 ...
+                || i == startI || i == length(points) ...
                 || (pastTOF == 0 && TOFtest(i) ~= 0)
 
                 disp("1")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+                TOFtest(startI:i-1) = mean(round(TOFtest(startI:i-1),2));
                 startI = i;
                 pastTOF = TOFtest(i);
             end
@@ -199,7 +221,7 @@ for i = 3:length(points)-2
             disp("2")
             disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
             disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-            TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+            TOFtest(startI:i-1) = mean(round(TOFtest(startI:i-1),2));
         end
         startI = i;
         pastTOF = 0;
@@ -208,3 +230,10 @@ for i = 3:length(points)-2
 end
 
 dispTOF = [(1:length(TOFtest))', TOFtest']
+
+%% Plot peak values across row
+figure;
+findpeaks(-peak2,'MinPeakProminence',0.05); % Take negative of magnitude to turn valleys into peaks
+hold on;
+findpeaks(peak2,'MinPeakProminence',0.05);
+

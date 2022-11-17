@@ -1,4 +1,4 @@
-function TOF = calcTOF(cScan,t,row,col)
+function [TOF,inflectionpts] = calcTOF(cScan,t,row,col)
 
 % Initialize values
 TOF = zeros(length(row),length(col));
@@ -11,6 +11,8 @@ widePeakLoc = TOF;
 widePeak = false(length(row),length(col));
 peakLabels = cell(length(row),length(col));
 locs = peakLabels;
+
+inflectionpts = TOF;
 
 % Sensitivity parameters
 neighThresh = 0.08; % 8 percent
@@ -48,7 +50,7 @@ for i = 1:length(row)
         [p, l] = findCenter(p,l,1,neighThresh,false);
     
         % Find and save locations of peaks in previously found peaks
-        [peak,loc,width] = findpeaks(p,l,...
+        [peak,loc] = findpeaks(p,l,...
             'MinPeakHeight',minpeakheight,...
             'WidthReference','halfheight');
         locs{i,j} = loc;
@@ -57,7 +59,7 @@ for i = 1:length(row)
         numPeaks(i,j) = length(peak);
     
         % Assign unique peak IDs
-        peakThresh = 0.16;
+        peakThresh = 0.08; % Pinned to dtTOF from aScanSegmentation
     
         if j == 1
             peakLabels{i,j} = 1:length(locs{i,j});
@@ -96,11 +98,18 @@ for i = 1:length(row)
 end
 
 for i = 1:length(row)
-
-    startI = 3;
-    pastTOF = 0;
     
-    for j = 3:length(col)-2
+    minPeakProm = 0.05;
+    [~,magLocNeg] = findpeaks(-peak2(i,:),'MinPeakProminence',minPeakProm);
+%     [~,magLocPos] = findpeaks(peak2(i,:),'MinPeakProminence',minPeakProm);
+%     magLoc = sort([magLocNeg,magLocPos]);
+    magLoc = magLocNeg;
+
+    startI = 2;
+    pastTOF = 0;
+    magI = 1;
+
+    for j = startI:length(col)
     
         inflection = false;
         elseFlag = false;
@@ -108,23 +117,25 @@ for i = 1:length(row)
         if numPeaks(i,j) >= 2
     
             if numPeaks(i,j) > 1
-                if locs2i(i,j) ~= locs2i(i,j-1)
+                if magI <= length(magLoc) && ...
+                        col(j) == magLoc(magI)
                     inflection = true;
-                elseif all(peak2(i,j-2:j+2) ~= 1) && ...
-                        issorted(peak2(i,j-2:j),'descend') && ...
-                        issorted(peak2(i,j:j+2))% ascend
+                    magI = magI + 1;
+                elseif locs2i(i,j) ~= locs2i(i,j-1)
                     inflection = true;
                 end
             end
             
             if widePeak(i,j) == false || (widePeak(i,j) == true && widePeakLoc(i,j) > loc1(i,j))
                 if inflection == true ...
-                    || j == 3 || j == length(col)-2 ...
+                    || j == startI || j == length(col) ...
                     || (pastTOF == 0 && TOF(i,j) ~= 0)
     
-                    TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
+                    TOF(i,startI:j-1) = mean(round(TOF(i,startI:j-1),2));
                     startI = j;
                     pastTOF = TOF(i,j);
+
+                    inflectionpts(i,j) = 1;
                 end
             else
                 elseFlag = true;
@@ -135,7 +146,8 @@ for i = 1:length(row)
     
         if elseFlag == true
             if pastTOF ~= 0
-                TOF(i,startI:j-1) = mode(round(TOF(i,startI:j-1),2));
+                TOF(i,startI:j-1) = mean(round(TOF(i,startI:j-1),2));
+                inflectionpts(i,j) = 1;
             end
             startI = j;
             pastTOF = 0;
