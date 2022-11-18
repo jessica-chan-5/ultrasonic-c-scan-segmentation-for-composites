@@ -18,7 +18,7 @@ title(strcat("TOF ",inFile));
 
 %% Plot inflectionPts
 inflectPtWhole = zeros(row,col);
-inflectPtWhole(startRow:endRow,startCol:endCol) = inflectPt(1:end,1:end-1);
+inflectPtWhole(startRow:endRow,startCol:endCol+1) = inflectPt(1:end,1:end);
 
 figure('visible','on');
 imgray = imshow(inflectPtWhole,gray,'XData',[0 vertScale],'YData',[385 0]);
@@ -28,10 +28,10 @@ title(strcat("TOF ",inFile));
 %% Plot A-Scans
 
 % Points to inspect
-plotRow = 206;
+plotRow = 160;
 plotCol = 1;
 spacing = 1;
-numPoints = 1000;
+numPoints = 848;
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
@@ -168,14 +168,29 @@ if plotFig == true
     sgtitle(strcat("Row ", num2str(plotRow)),'FontSize',fontsizes);
 end
 
-% Find peaks in neg val of 2nd peak mag
-[~, magLoc] = findpeaks(-peak2,'MinPeakProminence',0.05);
-% [~, magLocPos] = findpeaks(peak2,'MinPeakProminence',0.05);
-% magLoc = sort([magLocNeg,magLocPos]);
+% Find layer edges using peaks in 2nd peak mag values
+[~, magLoc] = findpeaks(peak2.^-1-1,'MinPeakProminence',0.12);
+
+% Find layer edges using 2nd peak label changes
+peakLoc = [];
+
+for i = 2:length(points)
+    if numPeaks(i) >= 2
+        if locs2i(i) ~= locs2i(i-1)
+            peakLoc = [peakLoc, i];
+        end
+    end
+end
+
+% Merge both methods and remove neighboring values differing by 1
+% When both methods detect a layer change, the peak change is correct and
+% the index is peakLoc = magLoc+1, not sure why
+locLocs = sort([magLoc, peakLoc]);
+locLocs(diff(locLocs)<=1) = [];
 
 startI = 2;
 pastTOF = 0;
-magI = 1;
+locI = 1;
 
 for i = startI:length(points)
 
@@ -184,28 +199,22 @@ for i = startI:length(points)
 
     if numPeaks(i) >= 2
 
-        if numPeaks(i) > 1
-            if magI <= length(magLoc) && ...
-                    points(i) == magLoc(magI)
-                inflection = true;
-                magI = magI + 1;
-                disp('b')
-                disp(magI)
-            elseif locs2i(i) ~= locs2i(i-1)
-                inflection = true;
-                disp('a')
-            end
+        if locI <= length(locLocs) && ...
+                points(i) == locLocs(locI)
+            inflection = true;
+            locI = locI + 1;
+            disp('Layer change detected');
         end
         
         if widePeak(i) == false || (widePeak(i) == true && widePeakLoc(i) > loc1(i))
             if inflection == true ...
-                || i == startI || i == length(points) ...
+                || i == 2 || i == length(points) ...
                 || (pastTOF == 0 && TOFtest(i) ~= 0)
 
                 disp("1")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = mean(round(TOFtest(startI:i-1),2));
+                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
                 startI = i;
                 pastTOF = TOFtest(i);
             end
@@ -221,7 +230,7 @@ for i = startI:length(points)
             disp("2")
             disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
             disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-            TOFtest(startI:i-1) = mean(round(TOFtest(startI:i-1),2));
+            TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
         end
         startI = i;
         pastTOF = 0;
@@ -233,7 +242,8 @@ dispTOF = [(1:length(TOFtest))', TOFtest']
 
 %% Plot peak values across row
 figure;
-findpeaks(-peak2,'MinPeakProminence',0.05); % Take negative of magnitude to turn valleys into peaks
+% findpeaks(-peak2,'MinPeakProminence',0.05); % Take negative of magnitude to turn valleys into peaks
 hold on;
-findpeaks(peak2,'MinPeakProminence',0.05);
+findpeaks(peak2.^-1-1,'MinPeakProminence',0.1,'Annotate','Extents','MinPeakProminence',0.12);
+[~,loctest,~,promtest] = findpeaks(peak2.^-1-1,'MinPeakProminence',0.12);
 
