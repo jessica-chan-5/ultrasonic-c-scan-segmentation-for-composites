@@ -1,6 +1,8 @@
 %% Clear workspace
 close all; clear; format compact;
 
+%% Timer
+tic
 %% Function inputs
 
 % .csv file parameters
@@ -39,10 +41,7 @@ impactEnergy = ["10","15","20"];
 n = length(impactEnergy);
 m = length(panelType);
 
-% fileNames = ["CSAI-CONT-S-20J-2-backside-CH1"];
-fileNames = ["CSAI-BL-H-15J-1-waveform-CH1"];
-
-%{ 
+%%{ 
 
 fileNames = strings([n*m*2,1]);
 
@@ -59,10 +58,10 @@ end
 %}
 
 % "Hard" panel samples can be included as extra test cases
-%{
+%%{
 miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
                  "CSAI-CONT-H-10J-2-waveform-CH1";
-%                  "CSAI-CONT-H-10J-3-waveform-CH1";
+                 "CSAI-CONT-H-10J-3-waveform-CH1";
                  "CSAI-CONT-H-20J-1-waveform-CH1";
                  "CSAI-CONT-H-20J-2-waveform-CH1";
                  "CSAI-CONT-H-20J-3-waveform-CH1";

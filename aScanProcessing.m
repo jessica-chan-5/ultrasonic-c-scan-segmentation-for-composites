@@ -57,7 +57,7 @@ right2cent = left2right(end:-1:halfHor+1);
 baseRows = 50:5:60;
 baseCols = 10:2:14;
 
-[tempTOF, ~] = calcTOF(cScan,t,baseRows,baseCols);
+tempTOF = calcTOF2(cScan,t,baseRows,baseCols);
 baseTOF = mode(tempTOF(tempTOF~=0),'all');
 
 % From top to center
@@ -100,7 +100,7 @@ if endCol > col
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
-[cropTOF, inflectPt] = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
+cropTOF = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
 baseTOF = mode(cropTOF,"all");
 
 TOF = zeros(row,col);
@@ -148,6 +148,10 @@ for i = 2:size(TOF,1)-1
         end
     end
 end
+
+% Timer
+toc
+disp("calcTOF")
 
 end
 
