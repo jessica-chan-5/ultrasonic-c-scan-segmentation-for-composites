@@ -19,7 +19,8 @@ function [TOF, baseTOF] = aScanProcessing(outFolder,fileName,dt,vertScale, ...
 
 % Concatenate file names/paths
 inFile = strcat(outFolder,"\",fileName,'-cScan.mat');
-outFile = strcat(outFolder,"\",fileName,'-TOF.mat');
+outFileTOF = strcat(outFolder,"\",fileName,'-TOF.mat');
+outFileFits = strcat(outFolder,'\',fileName,'-fits.mat');
 
 % Load cScan
 load(inFile);
@@ -100,7 +101,7 @@ if endCol > col
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
-cropTOF = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
+[cropTOF fits] = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
 baseTOF = mode(cropTOF,"all");
 
 TOF = zeros(row,col);
@@ -117,7 +118,8 @@ TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,0,TOF);
 
 % Save TOF to .mat file
 if saveMat == true
-    save(outFile,'TOF','-mat');
+    save(outFileTOF,'TOF','-mat');
+    save(outFileFits,'fits','-mat');
 end
 
 % Remove outliers
@@ -148,10 +150,6 @@ for i = 2:size(TOF,1)-1
         end
     end
 end
-
-% Timer
-toc
-disp("calcTOF")
 
 end
 

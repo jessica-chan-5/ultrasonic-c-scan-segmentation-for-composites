@@ -1,8 +1,6 @@
 %% Clear workspace
 close all; clear; format compact;
 
-%% Timer
-tic
 %% Function inputs
 
 % .csv file parameters
@@ -23,7 +21,7 @@ cropThresh   = 0.2;   % Crop threshold greater than abs(baseTOF - tof(i))
 padExtra     = 1.25;  % Extra padding on all 4 crop edges
 
 % Output requests
-saveMat      = false; % Save TOF mat?
+saveMat      = true;  % Save TOF and fits mat?
 saveFig      = true;  % Save segmented figure?
 
 % Plate properties
