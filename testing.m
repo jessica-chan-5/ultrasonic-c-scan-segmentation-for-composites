@@ -1,17 +1,120 @@
-%% Plot imshow of TOF w/ jet colormap
-figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+%% Variables
+fileName = "CSAI-CONT-S-20J-2";
+fileNameFront = strcat("Output\",fileName,"-CH1-TOF.mat");
+fileNameBack = strcat("Output\",fileName,"-backside-CH1-TOF.mat");
+vertScale = 238;
+row = 385;
+col = 1190;
+% Plate properties
+numLayers    = 25;    % # of layers in plate
+plateThick   = 3.3;   % plate thickness [mm]
+%% Load TOF - front
+load(fileNameFront);
+TOFfront = TOF; clear TOF;
+%% Load TOF - back
+load(fileNameBack);
+TOFback = TOF; clear TOF;
+%% Plot imshow of TOF w/ jet colormap - front
+figure; imjet = imshow(TOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",fileName));
-%% Plot filled contor of TOF
-figure; contourf(TOF);
-title(strcat("Contour TOF: ",fileName));
+title(strcat("TOF: ",fileName," - front"));
+%% Plot imshow of TOF w/ jet colormap - back
+figure; imjet = imshow(TOFback,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF: ",fileName," - back"));
+%% Plot filled contor of TOF - front
+figure; contourf(TOFfront);
+title(strcat("Contour TOF: ",fileName," - front"));
+%% Plot filled contor of TOF - back
+figure; contourf(TOFback);
+title(strcat("Contour TOF: ",fileName," - back"));
+%% Sort TOF into bins using discretize - front
+baseTOF = mode(mode(nonzeros(TOFfront))); % baseline TOF [us]
+matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
+plyThick = plateThick/numLayers; % Calculate ply thickness
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+
+% Calculate bins centered at interface between layers
+layersTOF = baseTOF-numLayers*dtTOF-dtTOF/2:dtTOF:baseTOF+dtTOF/2;
+binTOFfront = discretize(TOFfront,layersTOF);
+
+% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
+customColorMap = jet(numLayers);
+customColorMap = [customColorMap; [1 1 1]];
+
+figure;
+imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
+title(strcat("TOF ",fileNameFront));
+%% Sort TOF into bins using discretize - back
+baseTOF = mode(mode(nonzeros(TOFback))); % baseline TOF [us]
+matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
+plyThick = plateThick/numLayers; % Calculate ply thickness
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+
+% Calculate bins centered at interface between layers
+layersTOF = baseTOF-numLayers*dtTOF-dtTOF/2:dtTOF:baseTOF+dtTOF/2;
+binTOFback = discretize(TOFback,layersTOF);
+
+% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
+customColorMap = jet(numLayers);
+customColorMap = [customColorMap; [1 1 1]];
+
+figure;
+imshow(binTOFback,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
+title(strcat("TOF ",fileNameFront));
+%% 3D scatter plot - front and back
+binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback)-1);
+numRow = size(TOFfront,1);
+numCol = size(TOFfront,2);
+TOFfrontvec = reshape(binTOFfront,numRow*numCol,1);
+TOFfrontvec(TOFfrontvec==1) = NaN;
+TOFfrontvec(TOFfrontvec==max(TOFfrontvec)) = NaN;
+
+TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
+TOFbackvec(TOFbackvec==1) = NaN;
+TOFbackvec(TOFbackvec==max(TOFbackvec)) = NaN;
+
+xvec = repmat((1:numRow)',numCol,1);
+yvec = repelem(1:numCol,numRow)';
+
+figure;
+scatter3(xvec,yvec,TOFfrontvec,10,'filled');
+% scatter3(xvec,yvec,TOFfrontvec,10,TOFfrontvec,'filled');
+hold on;
+scatter3(xvec,yvec,TOFbackvec,10,'filled');
+% scatter3(xvec,yvec,TOFbackvec,10,TOFbackvec,'filled');
+
+% colormap(gca,'jet');
+%% Plot by layer
+
+for i = 2:25
+    TOFfrontlayer = binTOFfront;
+    TOFbacklayer = binTOFbackflipmirror;
+
+    TOFfrontlayer(binTOFfront~=i) = NaN;
+    TOFbacklayer(binTOFbackflipmirror~=i) = NaN;
+    
+    titlestr = strcat("Layer ",num2str(i));
+    figure;
+    
+    subplot(1,2,1);
+    imshow(TOFfrontlayer,'XData',[0 vertScale],'YData',[row 0]);
+    title(strcat(titlestr," front"));
+    
+    subplot(1,2,2);
+    imshow(TOFbacklayer,'XData',[0 vertScale],'YData',[row 0]);
+    title(strcat(titlestr," back"));
+end
+
+tabulate(TOFfrontvec)
+tabulate(TOFbackvec)
 %% Plot A-Scans - testing smoothing spline method
 
 % Points to inspect
-plotRow = 199;
-plotCol = 467;
+plotRow = 173;
+plotCol = 624;
 spacing = 1;
-numPoints = 36;
+numPoints = 4;
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
@@ -52,7 +155,7 @@ for i = 1:length(points)
     end
 
     % Find and save peaks/locations in signal
-    [p, l, ~, prom] = findpeaks(aScan,t,'MinPeakProminence',minPeakPromP);
+    [p, l, ~, prom] = findpeaks(aScan,t);
 %     disp('peak prom');
 %     disp(prom);
 
@@ -62,6 +165,7 @@ for i = 1:length(points)
     
     % Fit smoothing spline to find peak values
     f = fit(l',p','smoothingspline','SmoothingParam',smoothSplineParam);
+%     f = fit(l',p','smoothingspline');
     % Find peak values in smoothing spline
     pfit = feval(f,t);
 
@@ -71,7 +175,6 @@ for i = 1:length(points)
 %     disp(prom);
 
     if plotFig == true
-        plot(t,pfit);
         hold on;
         findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
 

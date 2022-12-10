@@ -6,7 +6,8 @@ fits = cell(length(row),length(col));
 
 % Sensitivity parameters
 minPeakPromP = 0.03; % For finding peaks of a-scan
-minPeakPromPeak = 0.02; % For finding peaks of spline fit
+% minPeakPromPeak = 0.02; % For finding peaks of spline fit
+minPeakPromPeak = 0.1; % For finding peaks of spline fit
 baseTOFthresh = 0.1; % For replacing values greater than baseTOF with zeros
 smoothSplineParam = 1; % For smoothparam when using fit with smoothingspline option
 noiseThresh = 0.01; % To check if signal is above noise threshold
@@ -22,6 +23,7 @@ for i = 1:length(row)
     
             % Find and save peaks/locations in signal
             [p, l] = findpeaks(point,t);
+            [p, l] = findpeaks(point,t);
         
             % Force signal to be zero at beginning and end
             p = [0 p 0];
@@ -29,7 +31,8 @@ for i = 1:length(row)
 
             
             % Fit smoothing spline to find peak values
-            fits{i,j} = fit(l',p',"smoothingspline");
+%             fits{i,j} = fit(l',p',"smoothingspline");
+            fits{i,j} = fit(l',p',"smoothingspline",'SmoothingParam',smoothSplineParam);
     
             % Evaluate smoothing spline for t
             pfit = feval(fits{i,j},t);
