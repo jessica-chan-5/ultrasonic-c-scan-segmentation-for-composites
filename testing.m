@@ -1,7 +1,7 @@
 %% Variables
 fileName = "CSAI-CONT-S-20J-2";
-fileNameFront = strcat("Output\",fileName,"-CH1-TOF.mat");
-fileNameBack = strcat("Output\",fileName,"-backside-CH1-TOF.mat");
+fileNameFront = strcat("Output\",fileName,"-CH1");
+fileNameBack = strcat("Output\",fileName,"-backside-CH1");
 vertScale = 238;
 row = 385;
 col = 1190;
@@ -9,10 +9,14 @@ col = 1190;
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
 %% Load TOF - front
-load(fileNameFront);
+load(strcat(fileNameFront,"-TOF"));
 TOFfront = TOF; clear TOF;
+%% Load spline fits - front
+load(strcat(fileNameFront,"-fits"));
+%% Load spline fits - back
+load(strcat(fileNameBack,"-fits"));
 %% Load TOF - back
-load(fileNameBack);
+load(strcat(fileNameBack,"-TOF"));
 TOFback = TOF; clear TOF;
 %% Plot imshow of TOF w/ jet colormap - front
 figure; imjet = imshow(TOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
@@ -63,28 +67,28 @@ figure;
 imshow(binTOFback,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
 title(strcat("TOF ",fileNameFront));
 %% 3D scatter plot - front and back
-binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback)-1);
+% binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback)-1);
 numRow = size(TOFfront,1);
 numCol = size(TOFfront,2);
 TOFfrontvec = reshape(binTOFfront,numRow*numCol,1);
 TOFfrontvec(TOFfrontvec==1) = NaN;
 TOFfrontvec(TOFfrontvec==max(TOFfrontvec)) = NaN;
 
-TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
-TOFbackvec(TOFbackvec==1) = NaN;
-TOFbackvec(TOFbackvec==max(TOFbackvec)) = NaN;
+% TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
+% TOFbackvec(TOFbackvec==1) = NaN;
+% TOFbackvec(TOFbackvec==max(TOFbackvec)) = NaN;
 
 xvec = repmat((1:numRow)',numCol,1);
 yvec = repelem(1:numCol,numRow)';
 
 figure;
-scatter3(xvec,yvec,TOFfrontvec,10,'filled');
-% scatter3(xvec,yvec,TOFfrontvec,10,TOFfrontvec,'filled');
+% scatter3(xvec,yvec,TOFfrontvec,10,'filled');
+scatter3(xvec,yvec,TOFfrontvec,10,TOFfrontvec,'filled');
 hold on;
 scatter3(xvec,yvec,TOFbackvec,10,'filled');
 % scatter3(xvec,yvec,TOFbackvec,10,TOFbackvec,'filled');
 
-% colormap(gca,'jet');
+colormap(gca,'jet');
 %% Plot by layer
 
 for i = 2:25
@@ -210,3 +214,11 @@ plot(TOFtest);
 xlim([startCol endCol]);
 xlabel("Column Index");
 ylabel("TOF");
+%% Test aScanLayers
+[cropTOF,inflectionpts] = aScanLayers(fits);
+%% Plot TOF
+TOF = zeros(row,col);
+TOF(91:285,1:1189) = cropTOF;
+figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF: ",fileName," - front"));
