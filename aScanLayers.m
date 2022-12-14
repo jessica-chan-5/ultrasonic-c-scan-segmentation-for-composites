@@ -21,9 +21,9 @@ locs = peakLabels;
 inflectionpts = TOF;
 
 % Sensitivity parameters
-minPeakPromPeak = 0.1;
+minPeakPromPeak = 0.03;
 minPeakPromPeak2 = 0.1;
-peakThresh = 0.02;
+peakThresh = 0.01;
 maxPeakWidth = 0.7;
 
 for i = 1:length(row)
@@ -34,7 +34,7 @@ for i = 1:length(row)
         % Evaluate smoothing spline for t
         pfit = feval(fits{i,j},t);
         % Find and save locations of peaks in splin fit
-        [peak, loc, width] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
+        [peak, loc, width] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'WidthReference','halfheight');
         locs{i,j} = loc;
         for k = 1:length(peak)
             if width(k) > maxPeakWidth

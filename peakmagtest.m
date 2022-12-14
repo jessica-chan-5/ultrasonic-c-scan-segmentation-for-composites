@@ -3,7 +3,7 @@ tic;
 format compact;
 
 % Points to inspect
-plotRow = floor(size(fits,1)/2);
+plotRow = 152-90; %floor(size(fits,1)/2);
 plotCol = 1;
 spacing = 1;
 numPoints = size(fits,2);
@@ -35,9 +35,9 @@ peakLabels = cell(1,length(points));
 locs = peakLabels;
 
 % Sensitivity parameters
-minPeakPromPeak = 0.1;
+minPeakPromPeak = 0.03;
 minPeakPromPeak2 = 0.1;
-peakThresh = 0.02;
+peakThresh = 0;
 maxPeakWidth = 0.7;
 
 labelList = 1:20;
@@ -54,7 +54,7 @@ for i = 1:length(points)
     pfit = feval(fits{row,col},t);
 
     % Find and save locations of peaks in previously found peaks
-    [peak,loc,width,prom] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
+    [peak,loc,width,prom] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'WidthReference','halfheight');
     locs{i} = loc;
     for k = 1:length(peak)
         if width(k) > maxPeakWidth
@@ -66,7 +66,7 @@ for i = 1:length(points)
         s = sqrt(length(points));
         subplot(s,s,i);
         hold on;
-        findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'Annotate','extents')
+        findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'Annotate','extents','WidthReference','halfheight')
         % Format plot
         title(titleStr);
         xlim([0 t(end)]);
@@ -182,6 +182,4 @@ end
 toc;
 %% Plot peak values across row
 figure;
-findpeaks(peak2.^-1-1,'MinPeakProminence',minPeakPromPeak2,'Annotate','Extents');
-[~,~,~,prom] = findpeaks(peak2.^-1-1,'MinPeakProminence',minPeakPromPeak2);
-prom(prom==Inf) = [];
+findpeaks(peak2.^-1-1,points+plotCol,'MinPeakProminence',minPeakPromPeak2,'Annotate','Extents');

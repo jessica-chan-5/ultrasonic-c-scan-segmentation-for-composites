@@ -112,6 +112,9 @@ end
 
 tabulate(TOFfrontvec)
 tabulate(TOFbackvec)
+%% Load C-Scan - front
+load(strcat(fileNameFront,"-TOF"));
+TOFfront = TOF; clear TOF;
 %% Plot A-Scans - testing smoothing spline method
 
 % Points to inspect
@@ -222,3 +225,16 @@ TOF(91:285,1:1189) = cropTOF;
 figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("TOF: ",fileName," - front"));
+%% Plot inflection points
+inflectionPts = zeros(row,col);
+inflectionPts(91:285,1:1189) = inflectionpts;
+figure; imjet = imshow(inflectionPts,gray,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("Inflection points: ",fileName," - front"));
+%% Plot filled contor of TOF - front
+figure; contourf(TOF);
+title(strcat("Contour TOF: ",fileName," - front"));
+%% Test 2D median filter
+figure; imjet = imshow(medfilt2(TOFfront,[5,5]),jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF: ",fileName," - front (medfilt2)"));
