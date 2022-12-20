@@ -1,4 +1,4 @@
-function [TOF, baseTOF,smoothingParamP] = aScanProcessing(outFolder,fileName,dt,vertScale, ...
+function [TOF, baseTOF, smoothingParamP] = aScanProcessing(outFolder,fileName,dt,vertScale, ...
     cropThresh, padExtra, noiseThresh, saveMat)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
@@ -101,7 +101,7 @@ if endCol > col
 end
 
 % Step through each A-scan to calculate time of flight (TOF)
-[cropTOF, fits,smoothingParamP] = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
+[cropTOF, fits, smoothingParamP] = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
 baseTOF = mode(cropTOF,"all");
 
 TOF = zeros(row,col);

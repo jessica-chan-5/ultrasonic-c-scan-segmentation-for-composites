@@ -1,4 +1,4 @@
-function [TOF,inflectionpts] = aScanLayers(fits)
+function [TOF,inflectionpts,peak2] = aScanLayers(fits)
 tic;
 row = 1:size(fits,1);
 col = 1:size(fits,2);
@@ -27,65 +27,68 @@ maxPeakWidth = 0.7;
 
 for i = 1:length(row)
     
-    labelList = 1:20;
+    labelList = 1:1e3;
     
     for j = 1:length(col)
         % Evaluate smoothing spline for t
-        pfit = feval(fits{i,j},t);
-        % Find and save locations of peaks in splin fit
-        [peak, loc, width] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'WidthReference','halfheight');
-        locs{i,j} = loc;
+        temp = fits{i,j};
+        if isempty(temp) == false
+            pfit = feval(temp,t);
+            % Find and save locations of peaks in splin fit
+            [peak, loc, width] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'WidthReference','halfheight');
+            locs{i,j} = loc;
+            
+            if length(width) >= 1 && width(1) > maxPeakWidth
+                widePeak(i,j) = true;
+            end
         
-        if width(1) > maxPeakWidth
-            widePeak(i,j) = true;
-        end
+            % Count number of peaks
+            numPeaks(i,j) = length(peak);
     
-        % Count number of peaks
-        numPeaks(i,j) = length(peak);
-
-        % Assign unique peak IDs
-
-        % Initialize first entry of a row
-        if j == 1
-            peakLabels{i,j} = 1:length(locs{i,j});
-            labelList = labelList(length(locs{i,j})+1:end);
-        % Check for peak changes
-        else
-            currLocs = locs{i,j};
-            prevLocs = locs{i,j-1};
+            % Assign unique peak IDs
     
-            for k = 1:length(prevLocs)
-                minDiff = min(abs(prevLocs(k)-currLocs));
-                % Old peak disappeared
-                if minDiff > peakThresh
-                    labelList = sort([peakLabels{i,j-1}(k), labelList]);
-                end
-            end
-    
-            for k = 1:length(currLocs)
-                [minDiff, minI] = min(abs(currLocs(k)-prevLocs));
-                % Current peak didn't change
-                if minDiff < peakThresh
-                    currLocs(minI) = NaN;
-                    peakLabels{i,j} = [peakLabels{i,j}, peakLabels{i,j-1}(minI)];
-                % New peak appeared
-                else
-                    peakLabels{i,j} = [peakLabels{i,j}, labelList(1)];
-                    labelList = labelList(2:end);
-                end
-            end
-        end
-    
-        if numPeaks(i,j) >= 2
-            loc1(i,j) = loc(1);
-            if widePeak(i,j) == false
-                [peak2(i,j), loc2i(i,j)] = max(peak(2:end));
+            % Initialize first entry of a row
+            if j == 1
+                peakLabels{i,j} = 1:length(locs{i,j});
+                labelList = labelList(length(locs{i,j})+1:end);
+            % Check for peak changes
             else
-                [~, loc2i(i,j)] = max(peak(2:end));                
+                currLocs = locs{i,j};
+                prevLocs = locs{i,j-1};
+        
+                for k = 1:length(prevLocs)
+                    minDiff = min(abs(prevLocs(k)-currLocs));
+                    % Old peak disappeared
+                    if minDiff > peakThresh
+                        labelList = sort([peakLabels{i,j-1}(k), labelList]);
+                    end
+                end
+        
+                for k = 1:length(currLocs)
+                    [minDiff, minI] = min(abs(currLocs(k)-prevLocs));
+                    % Current peak didn't change
+                    if minDiff < peakThresh
+                        currLocs(minI) = NaN;
+                        peakLabels{i,j} = [peakLabels{i,j}, peakLabels{i,j-1}(minI)];
+                    % New peak appeared
+                    else
+                        peakLabels{i,j} = [peakLabels{i,j}, labelList(1)];
+                        labelList = labelList(2:end);
+                    end
+                end
             end
-            loc2i(i,j) = loc2i(i,j) + 1;
-            TOF(i,j) = loc(loc2i(i,j))-loc1(i,j);
-            locs2i(i,j) = peakLabels{i,j}(loc2i(i,j));
+        
+            if numPeaks(i,j) >= 2
+                loc1(i,j) = loc(1);
+                if widePeak(i,j) == false
+                    [peak2(i,j), loc2i(i,j)] = max(peak(2:end));
+                else
+                    [~, loc2i(i,j)] = max(peak(2:end));                
+                end
+                loc2i(i,j) = loc2i(i,j) + 1;
+                TOF(i,j) = loc(loc2i(i,j))-loc1(i,j);
+                locs2i(i,j) = peakLabels{i,j}(loc2i(i,j));
+            end
         end
     end
 end

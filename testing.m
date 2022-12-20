@@ -1,5 +1,6 @@
 %% Variables
-fileName = "CSAI-CONT-S-20J-2";
+% fileName = "CSAI-CONT-S-20J-2";
+fileName = "CSAI-RPR-S-10J-2";
 fileNameFront = strcat("Output\",fileName,"-CH1");
 fileNameBack = strcat("Output\",fileName,"-backside-CH1");
 vertScale = 238;
@@ -121,10 +122,10 @@ load(strcat(fileNameFront,"-cScan"));
 %% Plot A-Scans - testing smoothing spline method
 
 % Points to inspect
-plotRow = 157;
-plotCol = 505;
-spacing = 1;
-numPoints = 25; %size(cScan,2);
+plotRow = 106;%floor(size(cScan,1)/2);
+plotCol = 1;
+spacing = 5;
+numPoints = 25;%size(cScan,2);
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
@@ -133,11 +134,13 @@ plotFig = true;
 % Initialize values
 TOFtest = zeros(1,numPoints);
 smoothParamP = zeros(1,numPoints);
+f = cell(1,numPoints);
 
 % Sensitivity parameters
 minPeakPromP = 0.03; % For finding peaks of a-scan
 minPeakPromPeak = 0.02; % For finding peaks of spline fit
-% smoothSplineParam = 1; % For smoothparam when using fit with smoothingspline option
+smoothSplineParam = 0.9998; % For smoothparam when using fit with smoothingspline option
+noiseThresh = 0.01;
 
 if plotFig == true
     figure;
@@ -155,57 +158,58 @@ cScanSlice = squeeze(cScan(plotRow,:,:));
 tic;
 
 for i = 1:length(points)
-
-    titleStr = strcat("Col ", num2str(plotCol+(points(i)-1))," i=",num2str(i));
-
-    aScan = cScanSlice(plotCol+(points(i)-1),:);
-
-    if plotFig == true
-        subplot(sqrt(numPoints),sqrt(numPoints),i); hold on;
-        plot(t,abs(aScan));
-    end
-
-    % Find and save peaks/locations in signal
-    [p, l] = findpeaks(aScan,t);
-%     disp('peak prom');
-%     disp(prom);
-
-    % Force signal to be zero at beginning and end
-    p = [0 p 0]; %#ok<AGROW> 
-    l = [0 l t(end)]; %#ok<AGROW> 
+        titleStr = strcat("Col ", num2str(plotCol+(points(i)-1))," i=",num2str(i));
     
-    % Fit smoothing spline to find peak values
-    [f, ~, out] = fit(l',p','smoothingspline'); %,'SmoothingParam',smoothSplineParam);
-    smoothParamP(i) = out.p;
-    
-    % Find peak values in smoothing spline
-    pfit = feval(f,t);
+        aScan = cScanSlice(plotCol+(points(i)-1),:);
+    if mean(aScan) > noiseThresh
 
-    % Find and save locations of peaks in previously found peaks
-    [peak,loc,~,~] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
-
-    if plotFig == true
-        hold on;
-        findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
-
-        % Format plot
-        title(titleStr);
-        if axislabels == true
-            xlabel("Time [us]");
-            ylabel("Amplitude");
+        if plotFig == true
+            subplot(sqrt(numPoints),sqrt(numPoints),i); hold on;
+            plot(t,abs(aScan));
         end
-        xlim([0,tEnd]);
-        hl=findobj(gcf,'type','legend');
-        delete(hl);
-        fontsize(gca,fontsizes,'pixels');
-    end
-
-    % Count number of peaks
-    numPeaks = length(peak);
-
-    if numPeaks > 1
-        [~, loc2i] = max(peak(2:end));
-        TOFtest(i) = loc(loc2i+1)-loc(1);
+    
+        % Find and save peaks/locations in signal
+        [p, l] = findpeaks(aScan,t);
+    %     disp('peak prom');
+    %     disp(prom);
+    
+        % Force signal to be zero at beginning and end
+        p = [0 p 0]; %#ok<AGROW> 
+        l = [0 l t(end)]; %#ok<AGROW> 
+        
+        % Fit smoothing spline to find peak values
+        [f{i}, ~, out] = fit(l',p','smoothingspline','SmoothingParam',smoothSplineParam);
+        smoothParamP(i) = out.p;
+        
+        % Find peak values in smoothing spline
+        pfit = feval(f{i},t);
+    
+        % Find and save locations of peaks in previously found peaks
+        [peak,loc,~,~] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
+    
+        if plotFig == true
+            hold on;
+            findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
+    
+            % Format plot
+            title(titleStr);
+            if axislabels == true
+                xlabel("Time [us]");
+                ylabel("Amplitude");
+            end
+            xlim([0,tEnd]);
+            hl=findobj(gcf,'type','legend');
+            delete(hl);
+            fontsize(gca,fontsizes,'pixels');
+        end
+    
+        % Count number of peaks
+        numPeaks = length(peak);
+    
+        if numPeaks > 1
+            [~, loc2i] = max(peak(2:end));
+            TOFtest(i) = loc(loc2i+1)-loc(1);
+        end
     end
 end
 
@@ -221,10 +225,10 @@ xlim([startCol endCol]);
 xlabel("Column Index");
 ylabel("TOF");
 %% Test aScanLayers
-[cropTOF,inflectionpts] = aScanLayers(fits);
- %% Plot TOF
+[cropTOF,inflectionpts,peak2] = aScanLayers(fits);
+%% Plot TOF
 TOF = zeros(row,col);
-TOF(91:285,1:1189) = cropTOF;
+TOF(1:size(cropTOF,1),1:size(cropTOF,2)) = cropTOF;
 figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("TOF: ",fileName," - front"));

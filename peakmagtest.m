@@ -3,11 +3,11 @@ tic;
 format compact;
 
 % Points to inspect
-plotRow = 235-90; %floor(size(fits,1)/2);
+plotRow = 1; %floor(size(fits,1)/2);
 plotCol = 1;
 spacing = 1;
-numPoints = size(fits,2);
-plotFig = false;
+numPoints = 9;%size(fits,2);
+plotFig = true;
 points = 1:spacing:numPoints*spacing;
 
 % Time vector

@@ -31,6 +31,9 @@ plateThick   = 3.3;   % plate thickness [mm]
 % Calculated function inputs
 dt = 1/fs; % Calculate sampling period [us]
 
+% Testing one file only
+fileNames =["CSAI-BL-H-15J-1-waveform-CH1"];
+
 % Input/output file names (user specific)
 
 panelType = ["BL","CONT","RPR"];
@@ -39,7 +42,6 @@ impactEnergy = ["10","15","20"];
 n = length(impactEnergy);
 m = length(panelType);
 
-fileNames = ["CSAI-CONT-S-20J-2-CH1"];
 %{ 
 
 fileNames = strings([n*m*2,1]);
@@ -127,14 +129,13 @@ fprintf("==============================================\n\n")
 
 TOF = cell(length(fileNames),1);
 baseTOF = nan(length(fileNames),1);
-smoothingParamP = cell(length(fileNames),1);
 
 fprintf("==============================================\n\n")
 fprintf("Processed and plotted for:\n\n");
 
 for i = 1:length(fileNames)
     tic;
-    [TOF{i}, baseTOF(i), smoothingParamP{i}] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
+    [TOF{i}, baseTOF(i), smoothingParamP] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
     
 %     inFile = strcat(fileNames(i));
 %     aScanSegmentation(TOF{i},inFile,numLayers,plateThick,baseTOF(i),vertScale,saveFig)
