@@ -22,6 +22,10 @@ TOFback = TOF; clear TOF;
 figure; imjet = imshow(TOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("TOF: ",fileName," - front"));
+%% Plot 1 row of TOF - front
+figure;
+rowI = 191;
+plot(TOFfront(rowI,:));
 %% Plot imshow of TOF w/ jet colormap - back
 figure; imjet = imshow(TOFback,jet,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
@@ -113,15 +117,14 @@ end
 tabulate(TOFfrontvec)
 tabulate(TOFbackvec)
 %% Load C-Scan - front
-load(strcat(fileNameFront,"-TOF"));
-TOFfront = TOF; clear TOF;
+load(strcat(fileNameFront,"-cScan"));
 %% Plot A-Scans - testing smoothing spline method
 
 % Points to inspect
-plotRow = 173;
-plotCol = 624;
+plotRow = 157;
+plotCol = 505;
 spacing = 1;
-numPoints = 4;
+numPoints = 25; %size(cScan,2);
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
@@ -129,11 +132,12 @@ plotFig = true;
 
 % Initialize values
 TOFtest = zeros(1,numPoints);
+smoothParamP = zeros(1,numPoints);
 
 % Sensitivity parameters
 minPeakPromP = 0.03; % For finding peaks of a-scan
-minPeakPromPeak = 0.1; % For finding peaks of spline fit
-smoothSplineParam = 1; % For smoothparam when using fit with smoothingspline option
+minPeakPromPeak = 0.02; % For finding peaks of spline fit
+% smoothSplineParam = 1; % For smoothparam when using fit with smoothingspline option
 
 if plotFig == true
     figure;
@@ -162,24 +166,23 @@ for i = 1:length(points)
     end
 
     % Find and save peaks/locations in signal
-    [p, l, ~, prom] = findpeaks(aScan,t);
+    [p, l] = findpeaks(aScan,t);
 %     disp('peak prom');
 %     disp(prom);
 
     % Force signal to be zero at beginning and end
-    p = [0 p 0];
-    l = [0 l t(end)];
+    p = [0 p 0]; %#ok<AGROW> 
+    l = [0 l t(end)]; %#ok<AGROW> 
     
     % Fit smoothing spline to find peak values
-    f = fit(l',p','smoothingspline','SmoothingParam',smoothSplineParam);
-%     f = fit(l',p','smoothingspline');
+    [f, ~, out] = fit(l',p','smoothingspline'); %,'SmoothingParam',smoothSplineParam);
+    smoothParamP(i) = out.p;
+    
     % Find peak values in smoothing spline
     pfit = feval(f,t);
 
     % Find and save locations of peaks in previously found peaks
-    [peak,loc,~,prom] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
-%     disp('peak prom');
-%     disp(prom);
+    [peak,loc,~,~] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
 
     if plotFig == true
         hold on;
@@ -219,22 +222,22 @@ xlabel("Column Index");
 ylabel("TOF");
 %% Test aScanLayers
 [cropTOF,inflectionpts] = aScanLayers(fits);
-%% Plot TOF
+ %% Plot TOF
 TOF = zeros(row,col);
 TOF(91:285,1:1189) = cropTOF;
 figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("TOF: ",fileName," - front"));
+%% Plot filled contor of TOF
+figure; contourf(TOF);
+title(strcat("Contour TOF: ",fileName," - front"));
+%% Plot 1 row of TOF - front
+figure;
+rowI = 167;
+plot(TOF(rowI,:));
 %% Plot inflection points
 inflectionPts = zeros(row,col);
 inflectionPts(91:285,1:1189) = inflectionpts;
 figure; imjet = imshow(inflectionPts,gray,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("Inflection points: ",fileName," - front"));
-%% Plot filled contor of TOF - front
-figure; contourf(TOF);
-title(strcat("Contour TOF: ",fileName," - front"));
-%% Test 2D median filter
-figure; imjet = imshow(medfilt2(TOFfront,[5,5]),jet,'XData',[0 vertScale],'YData',[row 0]);
-imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",fileName," - front (medfilt2)"));

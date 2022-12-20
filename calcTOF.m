@@ -1,15 +1,15 @@
-function [TOF, fits] = calcTOF(cScan,t,row,col)
+function [TOF, fits, smoothingParamP] = calcTOF(cScan,t,row,col)
 
 % Initialize values
 TOF = zeros(length(row),length(col));
 fits = cell(length(row),length(col));
+smoothingParamP = TOF;
 
 % Sensitivity parameters
 minPeakPromP = 0.03; % For finding peaks of a-scan
-% minPeakPromPeak = 0.02; % For finding peaks of spline fit
-minPeakPromPeak = 0.1; % For finding peaks of spline fit
+minPeakPromPeak = 0.02; % For finding peaks of spline fit
 baseTOFthresh = 0.1; % For replacing values greater than baseTOF with zeros
-smoothSplineParam = 1; % For smoothparam when using fit with smoothingspline option
+smoothSplineParam = 0.9998; % For smoothparam when using fit with smoothingspline option
 noiseThresh = 0.01; % To check if signal is above noise threshold
 
 for i = 1:length(row)
@@ -32,8 +32,9 @@ for i = 1:length(row)
             
             % Fit smoothing spline to find peak values
 %             fits{i,j} = fit(l',p',"smoothingspline");
-            fits{i,j} = fit(l',p',"smoothingspline",'SmoothingParam',smoothSplineParam);
-    
+            [fits{i,j},~,out] = fit(l',p',"smoothingspline",'SmoothingParam',smoothSplineParam);
+            smoothingParamP(i,j) = out.p;
+
             % Evaluate smoothing spline for t
             pfit = feval(fits{i,j},t);
     

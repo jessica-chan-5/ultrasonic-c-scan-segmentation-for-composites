@@ -3,7 +3,7 @@ tic;
 format compact;
 
 % Points to inspect
-plotRow = 152-90; %floor(size(fits,1)/2);
+plotRow = 235-90; %floor(size(fits,1)/2);
 plotCol = 1;
 spacing = 1;
 numPoints = size(fits,2);
@@ -36,8 +36,8 @@ locs = peakLabels;
 
 % Sensitivity parameters
 minPeakPromPeak = 0.03;
-minPeakPromPeak2 = 0.1;
-peakThresh = 0;
+minPeakPromPeak2 = 0.05;
+peakThresh = 0.02;
 maxPeakWidth = 0.7;
 
 labelList = 1:20;
@@ -56,12 +56,12 @@ for i = 1:length(points)
     % Find and save locations of peaks in previously found peaks
     [peak,loc,width,prom] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak,'WidthReference','halfheight');
     locs{i} = loc;
-    for k = 1:length(peak)
-        if width(k) > maxPeakWidth
-            widePeak(i) = true;
-            widePeakLoc(i) = k;
-        end
+    
+    % Check if first peak is wide
+    if width(1) > maxPeakWidth
+        widePeak(i) = true;
     end
+
     if plotFig == true
         s = sqrt(length(points));
         subplot(s,s,i);
@@ -76,6 +76,7 @@ for i = 1:length(points)
     end
     % Count number of peaks
     numPeaks(i) = length(peak);
+
     % Assign unique peak IDs
     if i == 1
         peakLabels{i} = 1:length(locs{i});
@@ -83,18 +84,26 @@ for i = 1:length(points)
     else
         tempCurr = locs{i};
         tempPrev = locs{i-1};
+
         for k = 1:length(tempPrev)
             minDiff = min(abs(locs{i-1}(k)-tempCurr));
             if minDiff > peakThresh
                 labelList = sort([peakLabels{i-1}(k), labelList]);
             end
         end
+        
         for k = 1:length(tempCurr)
             [minDiff, minI] = min(abs(locs{i}(k)-tempPrev));
-            tempCurr(minI) = NaN;
-            peakLabels{i} = [peakLabels{i}, peakLabels{i-1}(minI)];
+            if minDiff < peakThresh
+                tempCurr(minI) = NaN;
+                peakLabels{i} = [peakLabels{i}, peakLabels{i-1}(minI)];
+            else
+                peakLabels{i} = [peakLabels{i}, labelList(1)];
+                labelList = labelList(2:end);
+            end
         end
     end
+
     if numPeaks(i) >= 2
         loc1(i) = loc(1);
         if widePeak(i) == false
@@ -112,7 +121,9 @@ if plotFig == true
 end
 
 % Find layer edges using peaks in 2nd peak mag values
-[~, magLoc] = findpeaks(peak2.^-1-1,'MinPeakProminence',minPeakPromPeak2);
+invertPeak2 = peak2.^-1-1;
+invertPeak2(isinf(invertPeak2)) = 0;
+[~, magLoc] = findpeaks(invertPeak2,'MinPeakProminence',minPeakPromPeak2);
 
 % Find layer edges using 2nd peak label changes
 peakLoc = [];
@@ -128,8 +139,13 @@ end
 % Merge both methods and remove neighboring values differing by 1
 % When both methods detect a layer change, the peak change is correct and
 % the index is peakLoc = magLoc+1, not sure why
-locLocs = sort([magLoc, peakLoc]);
-locLocs(diff(locLocs)<=1) = [];
+locLocs = magLoc;
+for k = 1:length(peakLoc)
+    if min(abs(peakLoc(k)-magLoc))>5
+        locLocs = [locLocs, peakLoc(k)]; %#ok<AGROW> 
+    end
+end
+locLocs = sort(locLocs);
 
 startI = 2;
 pastTOF = 0;
@@ -148,7 +164,7 @@ for i = startI:length(points)
             disp('Layer change detected');
         end
 
-        if widePeak(i) == false || (widePeak(i) == true && widePeakLoc(i) > loc1(i))
+        if widePeak(i) == false || widePeak(i) == true
             if inflection == true ...
                 || i == 2 || i == length(points) ...
                 || (pastTOF == 0 && TOFtest(i) ~= 0)
@@ -156,7 +172,12 @@ for i = startI:length(points)
                 disp("1")
                 disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
                 disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-                TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+                localMode = mode(round(TOFtest(startI:i-1),2));
+                for k = startI:i-1
+                    if abs(TOFtest(k)-localMode) < 0.08
+                        TOFtest(k) = localMode;
+                    end
+                end
                 startI = i;
                 pastTOF = TOFtest(i);
             end
@@ -171,7 +192,12 @@ for i = startI:length(points)
             disp("2")
             disp(strcat("Current i: ",num2str(i)," Past i: ",num2str(startI)));
             disp(strcat("CurrentTOF: ",num2str(TOFtest(i))," PastTOF: ",num2str(pastTOF)));
-            TOFtest(startI:i-1) = mode(round(TOFtest(startI:i-1),2));
+            localMode = mode(round(TOFtest(startI:i-1),2));
+            for k = startI:i-1
+                if abs(TOFtest(k)-localMode) < 0.08
+                    TOFtest(k) = localMode;
+                end
+            end
         end
         startI = i;
         pastTOF = 0;
@@ -182,4 +208,6 @@ end
 toc;
 %% Plot peak values across row
 figure;
-findpeaks(peak2.^-1-1,points+plotCol,'MinPeakProminence',minPeakPromPeak2,'Annotate','Extents');
+invertPeak2 = peak2.^-1-1;
+invertPeak2(isinf(invertPeak2)) = 0;
+findpeaks(invertPeak2,points+plotCol,'MinPeakProminence',minPeakPromPeak2,'Annotate','Extents');
