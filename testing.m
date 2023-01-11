@@ -1,6 +1,7 @@
 %% Variables
-% fileName = "CSAI-CONT-S-20J-2";
-fileName = "CSAI-RPR-S-10J-2";
+format compact
+fileName = "CSAI-CONT-S-20J-2";
+% fileName = "CSAI-RPR-S-10J-2";
 fileNameFront = strcat("Output\",fileName,"-CH1");
 fileNameBack = strcat("Output\",fileName,"-backside-CH1");
 vertScale = 238;
@@ -10,10 +11,10 @@ col = 1190;
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
 %% Load TOF - front
-load(strcat(fileNameFront,"-TOF"));
+load(strcat(fileNameFront,"-TOF-auto"));
 TOFfront = TOF; clear TOF;
 %% Load spline fits - front
-load(strcat(fileNameFront,"-fits"));
+load(strcat(fileNameFront,"-fits-auto"));
 %% Load spline fits - back
 load(strcat(fileNameBack,"-fits"));
 %% Load TOF - back
@@ -37,7 +38,7 @@ title(strcat("Contour TOF: ",fileName," - front"));
 %% Plot filled contor of TOF - back
 figure; contourf(TOFback);
 title(strcat("Contour TOF: ",fileName," - back"));
-%% Sort TOF into bins using discretize - front
+%% Sort TOF into bins using discretize - front (center on interface)
 baseTOF = mode(mode(nonzeros(TOFfront))); % baseline TOF [us]
 matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
 plyThick = plateThick/numLayers; % Calculate ply thickness
@@ -54,7 +55,26 @@ customColorMap = [customColorMap; [1 1 1]];
 figure;
 imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
 title(strcat("TOF ",fileNameFront));
-%% Sort TOF into bins using discretize - back
+%% Sort TOF into bins using discretize - front (center on layer)
+baseTOF = mode(mode(nonzeros(TOFfront))); % baseline TOF [us]
+matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
+plyThick = plateThick/numLayers; % Calculate ply thickness
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+
+% Calculate bins centered at interface between layers
+layersTOF = linspace(0,baseTOF,numLayers+1);
+layersTOF(1) = 0-dtTOF;
+layersTOF(end) = baseTOF+dtTOF;
+binTOFfront = discretize(TOFfront,layersTOF);
+
+% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
+customColorMap = jet(numLayers);
+customColorMap = [customColorMap; [1 1 1]];
+
+figure;
+imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
+title(strcat("TOF ",fileNameFront));
+%% Sort TOF into bins using discretize - back (center on interface)
 baseTOF = mode(mode(nonzeros(TOFback))); % baseline TOF [us]
 matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
 plyThick = plateThick/numLayers; % Calculate ply thickness
@@ -70,6 +90,25 @@ customColorMap = [customColorMap; [1 1 1]];
 
 figure;
 imshow(binTOFback,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
+title(strcat("TOF ",fileNameFront));
+%% Sort TOF into bins using discretize - back (center on layer)
+baseTOF = mode(mode(nonzeros(TOFback))); % baseline TOF [us]
+matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
+plyThick = plateThick/numLayers; % Calculate ply thickness
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+
+% Calculate bins centered at interface between layers
+layersTOF = 0:dtTOF:baseTOF;
+layersTOF(1) = 0-dtTOF;
+layersTOF(end) = baseTOF+dtTOF;
+binTOFfront = discretize(TOFback,layersTOF);
+
+% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
+customColorMap = jet(numLayers);
+customColorMap = [customColorMap; [1 1 1]];
+
+figure;
+imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
 title(strcat("TOF ",fileNameFront));
 %% 3D scatter plot - front and back
 % binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback)-1);
@@ -122,10 +161,10 @@ load(strcat(fileNameFront,"-cScan"));
 %% Plot A-Scans - testing smoothing spline method
 
 % Points to inspect
-plotRow = 106;%floor(size(cScan,1)/2);
-plotCol = 1;
-spacing = 5;
-numPoints = 25;%size(cScan,2);
+plotRow = 191;%floor(size(cScan,1)/2);
+plotCol = 480;
+spacing = 1;
+numPoints = 9;%size(cScan,2);
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
@@ -226,6 +265,12 @@ xlabel("Column Index");
 ylabel("TOF");
 %% Test aScanLayers
 [cropTOF,inflectionpts,peak2] = aScanLayers(fits);
+%% Plot peak2 along a col
+figure;
+minPeakPromPeak2 = 0.1;
+invertPeak2 = peak2(:,1077).^-1-1;
+invertPeak2(isinf(invertPeak2)) = 0;
+findpeaks(invertPeak2,'MinPeakProminence',minPeakPromPeak2,'Annotate','Extents');
 %% Plot TOF
 TOF = zeros(row,col);
 TOF(1:size(cropTOF,1),1:size(cropTOF,2)) = cropTOF;
@@ -235,13 +280,16 @@ title(strcat("TOF: ",fileName," - front"));
 %% Plot filled contor of TOF
 figure; contourf(TOF);
 title(strcat("Contour TOF: ",fileName," - front"));
+%% Plot filled contor of inflection points
+figure; contourf(inflectionpts);
+title(strcat("Contour Inflection Points: ",fileName," - front"));
 %% Plot 1 row of TOF - front
 figure;
 rowI = 167;
 plot(TOF(rowI,:));
 %% Plot inflection points
 inflectionPts = zeros(row,col);
-inflectionPts(91:285,1:1189) = inflectionpts;
+inflectionPts(1:size(cropTOF,1),1:size(cropTOF,2)) = inflectionpts;
 figure; imjet = imshow(inflectionPts,gray,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("Inflection points: ",fileName," - front"));

@@ -9,7 +9,7 @@ smoothingParamP = TOF;
 minPeakPromP = 0.03; % For finding peaks of a-scan
 minPeakPromPeak = 0.02; % For finding peaks of spline fit
 baseTOFthresh = 0.1; % For replacing values greater than baseTOF with zeros
-% smoothSplineParam = 0.9998; % For smoothparam when using fit with smoothingspline option
+smoothSplineParam = 0.9998; % For smoothparam when using fit with smoothingspline option
 noiseThresh = 0.01; % To check if signal is above noise threshold
 
 for i = 1:length(row)
@@ -32,9 +32,9 @@ for i = 1:length(row)
             
             % Fit smoothing spline to find peak values
 %             fits{i,j} = fit(l',p',"smoothingspline");
-%             fits{i,j} = fit(l',p',"smoothingspline",'SmoothingParam',smoothSplineParam);
-            [fits{i,j},~,out] = fit(l',p',"smoothingspline");
-            smoothingParamP(i,j) = out.p;
+            fits{i,j} = fit(l',p',"smoothingspline",'SmoothingParam',smoothSplineParam);
+%             [fits{i,j},~,out] = fit(l',p',"smoothingspline");
+%             smoothingParamP(i,j) = out.p;
 
             % Evaluate smoothing spline for t
             pfit = feval(fits{i,j},t);
@@ -54,10 +54,10 @@ for i = 1:length(row)
 end
 
 % Replace all values higher than baseTOF with 0
-baseTOF = mode(mode(TOF));
-TOF((TOF-baseTOF)>baseTOFthresh) = 0;
+% baseTOF = mode(mode(TOF));
+% TOF((TOF-baseTOF)>baseTOFthresh) = 0;
 
 % Reshape for tabulate function input requirement
-smoothingParamP = reshape(smoothingParamP,...
-    size(smoothingParamP,1)*size(smoothingParamP,2),1);
+% smoothingParamP = reshape(smoothingParamP,...
+%     size(smoothingParamP,1)*size(smoothingParamP,2),1);
 end

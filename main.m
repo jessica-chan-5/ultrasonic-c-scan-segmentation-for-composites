@@ -32,7 +32,7 @@ plateThick   = 3.3;   % plate thickness [mm]
 dt = 1/fs; % Calculate sampling period [us]
 
 % Testing one file only
-fileNames =["CSAI-BL-H-15J-1-waveform-CH1"];
+fileNames =["CSAI-CONT-S-20J-2-CH1"];
 
 % Input/output file names (user specific)
 
@@ -89,7 +89,7 @@ fprintf("\nFinished converting all C-scan .csv files!\n\n")
 
 %% Process C-Scans and calculate TOF
 
-%{
+%%{
 TOF = cell(length(fileNames),1);
 baseTOF = nan(length(fileNames),1);
 

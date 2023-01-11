@@ -3,11 +3,11 @@ tic;
 format compact;
 
 % Points to inspect
-plotRow = 1; %floor(size(fits,1)/2);
+plotRow = 9; %floor(size(fits,1)/2);
 plotCol = 1;
 spacing = 1;
-numPoints = 9;%size(fits,2);
-plotFig = true;
+numPoints = size(fits,2);
+plotFig = false;
 points = 1:spacing:numPoints*spacing;
 
 % Time vector
@@ -36,7 +36,7 @@ locs = peakLabels;
 
 % Sensitivity parameters
 minPeakPromPeak = 0.03;
-minPeakPromPeak2 = 0.05;
+minPeakPromPeak2 = 0.1;
 peakThresh = 0.02;
 maxPeakWidth = 0.7;
 
@@ -164,7 +164,7 @@ for i = startI:length(points)
             disp('Layer change detected');
         end
 
-        if widePeak(i) == false || widePeak(i) == true
+        if widePeak(i) == false
             if inflection == true ...
                 || i == 2 || i == length(points) ...
                 || (pastTOF == 0 && TOFtest(i) ~= 0)

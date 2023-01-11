@@ -1,1 +1,1 @@
-[cropTOF,inflectionpts] = aScanLayers(fits);
+[cropTOF,inflectionpts,peak2] = aScanLayers(fits);
