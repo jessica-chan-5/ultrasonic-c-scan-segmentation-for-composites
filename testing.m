@@ -38,58 +38,20 @@ title(strcat("Contour TOF: ",fileName," - front"));
 %% Plot filled contor of TOF - back
 figure; contourf(TOFback);
 title(strcat("Contour TOF: ",fileName," - back"));
-%% Sort TOF into bins using discretize - front (center on interface)
-baseTOF = mode(mode(nonzeros(TOFfront))); % baseline TOF [us]
-matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
-plyThick = plateThick/numLayers; % Calculate ply thickness
-dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
-
-% Calculate bins centered at interface between layers
-layersTOF = baseTOF-numLayers*dtTOF-dtTOF/2:dtTOF:baseTOF+dtTOF/2;
-binTOFfront = discretize(TOFfront,layersTOF);
-
-% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
-customColorMap = jet(numLayers);
-customColorMap = [customColorMap; [1 1 1]];
-
-figure;
-imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
-title(strcat("TOF ",fileNameFront));
 %% Sort TOF into bins using discretize - front (center on layer)
 baseTOF = mode(mode(nonzeros(TOFfront))); % baseline TOF [us]
 matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
 plyThick = plateThick/numLayers; % Calculate ply thickness
-dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+dtTOF = plyThick/matVel; % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers
-layersTOF = linspace(0,baseTOF,numLayers+1);
-layersTOF(1) = 0-dtTOF;
+layersTOF = 0:dtTOF:baseTOF;
 layersTOF(end) = baseTOF+dtTOF;
 binTOFfront = discretize(TOFfront,layersTOF);
 
-% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
-customColorMap = jet(numLayers);
-customColorMap = [customColorMap; [1 1 1]];
-
 figure;
-imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
-title(strcat("TOF ",fileNameFront));
-%% Sort TOF into bins using discretize - back (center on interface)
-baseTOF = mode(mode(nonzeros(TOFback))); % baseline TOF [us]
-matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
-plyThick = plateThick/numLayers; % Calculate ply thickness
-dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
-
-% Calculate bins centered at interface between layers
-layersTOF = baseTOF-numLayers*dtTOF-dtTOF/2:dtTOF:baseTOF+dtTOF/2;
-binTOFback = discretize(TOFback,layersTOF);
-
-% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
-customColorMap = jet(numLayers);
-customColorMap = [customColorMap; [1 1 1]];
-
-figure;
-imshow(binTOFback,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
+imjet = imshow(binTOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
 title(strcat("TOF ",fileNameFront));
 %% Sort TOF into bins using discretize - back (center on layer)
 baseTOF = mode(mode(nonzeros(TOFback))); % baseline TOF [us]
@@ -99,40 +61,125 @@ dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers
 layersTOF = 0:dtTOF:baseTOF;
-layersTOF(1) = 0-dtTOF;
 layersTOF(end) = baseTOF+dtTOF;
 binTOFfront = discretize(TOFback,layersTOF);
 
-% Create custom colormap that shows baseline TOF as white = [1, 1, 1]
-customColorMap = jet(numLayers);
-customColorMap = [customColorMap; [1 1 1]];
+figure;
+imjet = imshow(binTOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF ",fileNameFront));
+%% Sort TOF into bins using discretize - front (center on interface)
+baseTOF = mode(mode(nonzeros(TOFfront))); % baseline TOF [us]
+matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
+plyThick = plateThick/numLayers; % Calculate ply thickness
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+
+% Calculate bins centered at interface between layers
+layersTOF = -dtTOF/2:dtTOF:baseTOF-dtTOF;
+layersTOF(end) = baseTOF+dtTOF;
+binTOFfront = discretize(TOFfront,layersTOF);
 
 figure;
-imshow(binTOFfront,customColorMap,'XData',[0 vertScale],'YData',[row 0]);
+imjet = imshow(binTOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
 title(strcat("TOF ",fileNameFront));
-%% 3D scatter plot - front and back
-% binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback)-1);
+%% Sort TOF into bins using discretize - front (center on interface)
+baseTOF = mode(mode(nonzeros(TOFback))); % baseline TOF [us]
+matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
+plyThick = plateThick/numLayers; % Calculate ply thickness
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+
+% Calculate bins centered at interface between layers
+layersTOF = -dtTOF/2:dtTOF:baseTOF-dtTOF;
+layersTOF(end) = baseTOF+dtTOF;
+binTOFfront = discretize(TOFback,layersTOF);
+
+figure;
+imjet = imshow(binTOFfront,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF ",fileNameFront));
+%% 3D scatter plot - front
 numRow = size(TOFfront,1);
 numCol = size(TOFfront,2);
 TOFfrontvec = reshape(binTOFfront,numRow*numCol,1);
-TOFfrontvec(TOFfrontvec==1) = NaN;
-TOFfrontvec(TOFfrontvec==max(TOFfrontvec)) = NaN;
+% TOFfrontvec(TOFfrontvec==0) = NaN;
+% TOFfrontvec(TOFfrontvec>2) = NaN;
+% TOFfrontvec(1) = 0;
+% TOFfrontvec(end) = 2.12;
 
-% TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
-% TOFbackvec(TOFbackvec==1) = NaN;
-% TOFbackvec(TOFbackvec==max(TOFbackvec)) = NaN;
+TOFfrontvec(TOFfrontvec==1) = NaN;
+TOFfrontvec(TOFfrontvec==length(layersTOF)-1) = NaN;
+TOFfrontvec(1) = 1;
+TOFfrontvec(end) = length(layersTOF);
 
 xvec = repmat((1:numRow)',numCol,1);
 yvec = repelem(1:numCol,numRow)';
 
 figure;
-% scatter3(xvec,yvec,TOFfrontvec,10,'filled');
+scatter3(xvec,yvec,TOFfrontvec,10,TOFfrontvec,'filled');
+colormap(gca,'jet');
+xlabel('Row #');
+ylabel('Col #');
+zlabel('TOF (us)');
+
+%% 3D scatter plot - back
+numRow = size(TOFfront,1);
+numCol = size(TOFfront,2);
+binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback));
+horzOffset = 33;
+binTOFbackflipmirror(:,1:end-horzOffset+1) = binTOFbackflipmirror(:,horzOffset:end);
+TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
+% TOFbackvec(TOFbackvec<0.12) = NaN;
+% TOFbackvec(TOFbackvec>2) = NaN;
+% TOFbackvec(1) = 0;
+% TOFbackvec(end) = 2.12;
+
+TOFbackvec(TOFbackvec<=0) = NaN;
+TOFbackvec(TOFbackvec==length(layersTOF)-2) = NaN;
+TOFbackvec(1) = 0;
+TOFbackvec(end) = length(layersTOF);
+
+xvec = repmat((1:numRow)',numCol,1);
+yvec = repelem(1:numCol,numRow)';
+
+figure;
+scatter3(xvec,yvec,TOFbackvec,10,TOFbackvec,'filled');
+colormap(gca,'jet');
+xlabel('Row #');
+ylabel('Col #');
+zlabel('TOF (us)');
+%% 3D scatter plot - front and back
+% numRow = size(TOFfront,1);
+% numCol = size(TOFfront,2);
+% 
+% TOFfrontvec = reshape(binTOFfront,numRow*numCol,1);
+% TOFfrontvec(TOFfrontvec==0) = NaN;
+% TOFfrontvec(TOFfrontvec>2) = NaN;
+% TOFfrontvec(1) = 0;
+% TOFfrontvec(end) = 2.12;
+% 
+% horzOffset = 33;
+% binTOFbackflipmirror = -(fliplr(binTOFback)-max(binTOFback));
+% binTOFbackflipmirror(:,1:end-horzOffset+1) = binTOFbackflipmirror(:,horzOffset:end);
+% TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
+% TOFbackvec(TOFbackvec<0.12) = NaN;
+% TOFbackvec(TOFbackvec>2) = NaN;
+% TOFbackvec(1) = 0;
+% TOFbackvec(end) = 2.12;
+% 
+% xvec = repmat((1:numRow)',numCol,1);
+% yvec = repelem(1:numCol,numRow)';
+
+figure;
 scatter3(xvec,yvec,TOFfrontvec,10,TOFfrontvec,'filled');
 hold on;
-scatter3(xvec,yvec,TOFbackvec,10,'filled');
-% scatter3(xvec,yvec,TOFbackvec,10,TOFbackvec,'filled');
+scatter3(xvec,yvec,TOFbackvec,10,TOFbackvec,'filled');
 
 colormap(gca,'jet');
+xlabel('Row #');
+ylabel('Col #');
+zlabel('TOF (us)');
+
 %% Plot by layer
 
 for i = 2:25
@@ -162,13 +209,13 @@ load(strcat(fileNameFront,"-cScan"));
 
 % Points to inspect
 plotRow = 191;%floor(size(cScan,1)/2);
-plotCol = 480;
+plotCol = 1;
 spacing = 1;
-numPoints = 9;%size(cScan,2);
+numPoints = size(cScan,2);
 points = 1:spacing:numPoints*spacing;
 
 % Figure properties
-plotFig = true;
+plotFig = false;
 
 % Initialize values
 TOFtest = zeros(1,numPoints);
@@ -260,7 +307,6 @@ end
 %% Plot peak values across row
 figure; hold on; 
 plot(TOFtest);
-xlim([startCol endCol]);
 xlabel("Column Index");
 ylabel("TOF");
 %% Test aScanLayers
@@ -288,8 +334,8 @@ figure;
 rowI = 167;
 plot(TOF(rowI,:));
 %% Plot inflection points
-inflectionPts = zeros(row,col);
-inflectionPts(1:size(cropTOF,1),1:size(cropTOF,2)) = inflectionpts;
+inflectionPts = ones(row,col);
+inflectionPts(1:size(cropTOF,1),1:size(cropTOF,2)) = uint8(~inflectionpts);
 figure; imjet = imshow(inflectionPts,gray,'XData',[0 vertScale],'YData',[row 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("Inflection points: ",fileName," - front"));
