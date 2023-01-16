@@ -7,7 +7,7 @@ close all; clear; format compact;
 delimiter = "   ";   % Delimiter in .csv file
 
 % Folder names
-inFolder = "Input";   % .csv C-scan file location
+inFolder  = "Input";  % .csv C-scan file location
 outFolder = "Output"; % .mat processed file output location
 
 % Raw c-scan parameters
@@ -32,9 +32,9 @@ plateThick   = 3.3;   % plate thickness [mm]
 dt = 1/fs; % Calculate sampling period [us]
 
 % Testing one file only
-fileNames =["CSAI-CONT-S-20J-2-CH1"];
+% fileNames =["CSAI-CONT-H-10J-2-waveform-CH1"];
 
-% Input/output file names (user specific)
+%% Input/output file names (user specific)
 
 panelType = ["BL","CONT","RPR"];
 impactEnergy = ["10","15","20"];
@@ -42,7 +42,7 @@ impactEnergy = ["10","15","20"];
 n = length(impactEnergy);
 m = length(panelType);
 
-%{ 
+%%{ 
 
 fileNames = strings([n*m*2,1]);
 
@@ -51,15 +51,17 @@ count = 0;
 for i = 1:n
     for j = 1:m
         count = count + 1;
-        fileNames(count) = strcat("CSAI-",panelType(j),"-S-",impactEnergy(i),"J-2-CH1");
-        fileNames(count+n*m) = strcat("CSAI-",panelType(j),"-S-",impactEnergy(i),"J-2-backside-CH1");
+        fileNames(count) = ...
+            strcat("CSAI-",panelType(j),"-S-",impactEnergy(i),"J-2-CH1");
+        fileNames(count+n*m) = ...
+            strcat("CSAI-",panelType(j),"-S-",impactEnergy(i),"J-2-backside-CH1");
     end
 end
 
 %}
 
 % "Hard" panel samples can be included as extra test cases
-%{
+%%{
 miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
                  "CSAI-CONT-H-10J-2-waveform-CH1";
                  "CSAI-CONT-H-10J-3-waveform-CH1";
@@ -75,12 +77,12 @@ fileNames = [miscFileNames; fileNames];
 %% Read in C-Scans
 
 % Uncomment when need to convert additional .csv files
-%{
+%%{
 fprintf("==============================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 
 for i = 1:length(fileNames)
-    cScanRead(inFolder,outFolder,fileNames(i),delimiter);
+    cScanRead(fileNames(i),delimiter,inFolder,outFolder);
     disp(fileNames(i));
 end
 
@@ -90,15 +92,12 @@ fprintf("\nFinished converting all C-scan .csv files!\n\n")
 %% Process C-Scans and calculate TOF
 
 %%{
-TOF = cell(length(fileNames),1);
-baseTOF = nan(length(fileNames),1);
-
 fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to TOF for:\n\n");
 
 for i = 1:length(fileNames)
     tic;
-    [TOF{i}, baseTOF(i)] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
+    aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
     disp(fileNames(i));
     toc
 end

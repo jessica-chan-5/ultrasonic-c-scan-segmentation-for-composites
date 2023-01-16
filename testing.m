@@ -45,8 +45,8 @@ plyThick = plateThick/numLayers; % Calculate ply thickness
 dtTOF = plyThick/matVel; % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers
-layersTOF = 0:dtTOF:baseTOF;
-layersTOF(end) = baseTOF+dtTOF;
+layersTOF = 0:dtTOF:baseTOF+dtTOF;
+layersTOF(end) = baseTOF+2*dtTOF;
 binTOFfront = discretize(TOFfront,layersTOF);
 
 figure;
@@ -108,7 +108,7 @@ TOFfrontvec = reshape(binTOFfront,numRow*numCol,1);
 % TOFfrontvec(end) = 2.12;
 
 TOFfrontvec(TOFfrontvec==1) = NaN;
-TOFfrontvec(TOFfrontvec==length(layersTOF)-1) = NaN;
+TOFfrontvec(TOFfrontvec>=length(layersTOF)-2) = NaN;
 TOFfrontvec(1) = 1;
 TOFfrontvec(end) = length(layersTOF);
 
@@ -134,7 +134,7 @@ TOFbackvec = reshape(binTOFbackflipmirror,numRow*numCol,1);
 % TOFbackvec(1) = 0;
 % TOFbackvec(end) = 2.12;
 
-TOFbackvec(TOFbackvec<=0) = NaN;
+TOFbackvec(TOFbackvec<=1) = NaN;
 TOFbackvec(TOFbackvec==length(layersTOF)-2) = NaN;
 TOFbackvec(1) = 0;
 TOFbackvec(end) = length(layersTOF);
