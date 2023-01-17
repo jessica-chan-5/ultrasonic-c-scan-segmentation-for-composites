@@ -16,7 +16,7 @@ outFile = strcat(outFolder,"\",fileName,"-cScan.mat");
 % Read C-scan data from input .csv file
 rawCScan = readmatrix(inFile,'Delimiter',delimiter,'TrimNonNumeric',true);
 
-% Calculate number of A-scans along x (row) and y (col) scan directions
+% Calculate # of A-scans along x (row) and y (col) scan directions
 % Add 1 to change indexing from starting at 0 to starting at 1
 row = rawCScan(end,1) + 1;
 col = rawCScan(end,2) + 1;

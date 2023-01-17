@@ -1,5 +1,5 @@
-function TOF = aScanProcessing(outFolder,fileName,dt,vertScale, ...
-    cropThresh, padExtra, noiseThresh, saveMat)
+function TOF = aScanProcessing(fileName,outFolder,dt,scaleVal,scaleDir,...
+    cropIncr,cropThresh, padExtra, noiseThresh, saveMat)
 % Take .csv C-scan input file, calculate time of flight (TOF), and save
 % normalized TOF data as .mat file
 % 
@@ -25,31 +25,38 @@ outFileFits = strcat(outFolder,'\',fileName,'-fits.mat');
 % Load cScan
 load(inFile);
 
-% Find row, column, and data points info from C-scan
+% Find # of data points per A-scan, rows, and columns
 [row, col, dataPointsPerAScan] = size(cScan);
 
 % Create time vector
 tEnd = (dataPointsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
-% Calculate vertical scale ratio
-scaleRatio = col/vertScale;
+% Calculate scaling ratios
+if strcmp('col',scaleDir) == true
+    vertIncr = floor(scaleVal/cropIncr);
+    horIncr = vertIncr*col/scaleVal;
+elseif strcmp('row',scaleDir) == true
+    horIncr = floor(scaleVal/cropIncr);
+    vertIncr = horIncr*row/scaleVal;
+else                                                % No scaling required
+    vertIncr = floor(col/cropIncr);
+    horIncr = vertIncr*col/scaleVal;
+end
 
 % Search for rectangular bounding box of damage
+
 % Calculate spacing
-numPts = 10;
-vertSpace = floor(min(row,vertScale)/numPts);
-horSpace = vertSpace*scaleRatio;
 yNoiseSpace = 50;
 xNoiseSpace = 15;
 
 % Calculate horizontal and vertical indices
-top2bot = yNoiseSpace:vertSpace:row-vertSpace;
+top2bot = yNoiseSpace:vertIncr:row-vertIncr;
 halfVert = floor(length(top2bot)/2);
 top2cent = top2bot(1:halfVert);
 bot2cent = top2bot(end:-1:halfVert+1);
 
-left2right = xNoiseSpace:horSpace:col-horSpace;
+left2right = xNoiseSpace:horIncr:col-horIncr;
 halfHor = floor(length(left2right)/2);
 left2cent = left2right(1:halfHor);
 right2cent = left2right(end:-1:halfHor+1);
@@ -72,7 +79,7 @@ endRowI = find(top2bot==endRow);
 searchRows = top2bot(startRowI:endRowI);
 
 % Add padding
-vertPad = floor(vertSpace*padExtra);
+vertPad = floor(vertIncr*padExtra);
 startRow = startRow - vertPad;
 endRow = endRow + vertPad;
 
@@ -89,7 +96,7 @@ startCol = cropEdgeDetect(baseTOF,left2cent,searchRows,cScan,noiseThresh,t,cropT
 endCol = cropEdgeDetect(baseTOF,right2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
 
 % Add padding
-horPad = floor(horSpace*padExtra);
+horPad = floor(horIncr*padExtra);
 startCol = startCol - horPad;
 endCol = endCol + horPad;
 

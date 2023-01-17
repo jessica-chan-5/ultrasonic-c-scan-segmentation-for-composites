@@ -11,8 +11,9 @@ inFolder  = "Input";  % .csv C-scan file location
 outFolder = "Output"; % .mat processed file output location
 
 % Raw c-scan parameters
-fs           = 50;    % Sampling frequency [MHz]
-vertScale    = 238;   % equal to "Scanning Length" in header
+dt           = 1/50;  % Sampling period [us]
+scaleVal     = 238;   % equal to "Scanning Length" in header
+scaleDir     = 'col'; % Direction to scale along
 
 % C-scan processing parameters
 noiseThresh  = 0.01;  % Currently only used for cropEdgeDetect
@@ -27,9 +28,6 @@ saveFig      = true;  % Save segmented figure?
 % Plate properties
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
-
-% Calculated function inputs
-dt = 1/fs; % Calculate sampling period [us]
 
 % Testing one file only
 % fileNames =["CSAI-CONT-H-10J-2-waveform-CH1"];
@@ -98,6 +96,8 @@ fprintf("Processed C-scans and converted to TOF for:\n\n");
 for i = 1:length(fileNames)
     tic;
     aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
+    aScanProcessing(fileNames(i),outFolder,dt,scaleRatio, ...
+    cropIncr,cropThresh, padExtra, noiseThresh, saveMat)
     disp(fileNames(i));
     toc
 end
