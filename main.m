@@ -12,25 +12,25 @@ outFolder = "Output"; % .mat processed file output location
 
 % Raw c-scan parameters
 dt           = 1/50;  % Sampling period [us]
-scaleVal     = 238;   % equal to "Scanning Length" in header
+scaleVal     = 5;     % equal to #col/"Scanning Length" in header
 scaleDir     = 'col'; % Direction to scale along
 
 % C-scan processing parameters
-noiseThresh  = 0.01;  % Currently only used for cropEdgeDetect
-cropDam      = true;  % Crop non-damaged areas?
+startI       = 5;
+cropIncr     = 20;
+baseRow      = 50:5:60;
+baseCol      = 10:2:14;
 cropThresh   = 0.2;   % Crop threshold greater than abs(baseTOF - tof(i))
-padExtra     = 1.25;  % Extra padding on all 4 crop edges
+padExtra     = 0.25;  % Extra padding on all 4 crop edges
 
 % Output requests
-saveMat      = true;  % Save TOF and fits mat?
+saveMat      = true;  % Save TOF mat?
+saveFits     = true;  % Save fits mat?
 saveFig      = true;  % Save segmented figure?
 
 % Plate properties
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
-
-% Testing one file only
-% fileNames =["CSAI-CONT-H-10J-2-waveform-CH1"];
 
 %% Input/output file names (user specific)
 
@@ -72,14 +72,17 @@ miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
 fileNames = [miscFileNames; fileNames];
 %}
 
+numFiles = length(fileNames);
+% numFiles = 1;
+
 %% Read in C-Scans
 
 % Uncomment when need to convert additional .csv files
-%%{
+%{
 fprintf("==============================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 
-for i = 1:length(fileNames)
+for i = 1:numFiles
     cScanRead(fileNames(i),delimiter,inFolder,outFolder);
     disp(fileNames(i));
 end
@@ -87,17 +90,41 @@ end
 fprintf("\nFinished converting all C-scan .csv files!\n\n")
 %}
 
-%% Process C-Scans and calculate TOF
+%% Process C-Scans and calculate raw TOF
 
 %%{
 fprintf("==============================================\n\n")
-fprintf("Processed C-scans and converted to TOF for:\n\n");
+fprintf("Processed C-scans and converted to raw TOF for:\n\n");
 
-for i = 1:length(fileNames)
+
+dataPtsPerAScan = zeros(1,numFiles);
+cropCoord = cell(1,numFiles);
+rawTOF = cell(1,numFiles);
+fits = cell(1,numFiles);
+
+for i = 1:numFiles
     tic;
-    aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
-    aScanProcessing(fileNames(i),outFolder,dt,scaleRatio, ...
-    cropIncr,cropThresh, padExtra, noiseThresh, saveMat)
+    [rawTOF{i},fits{i},dataPtsPerAScan(i),cropCoord{i}] = ...
+    aScanProcessing(fileNames(i),outFolder,dt,scaleVal,scaleDir,...
+    startI,cropIncr,baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits);
+    disp(fileNames(i));
+    toc
+end
+
+fprintf("\nFinished processing all C-scan .mat files.\n\n")
+%}
+
+%% Process TOF
+
+%{
+fprintf("==============================================\n\n")
+fprintf("Processed TOF for:\n\n");
+
+TOF = cell(1,numFiles);
+
+for i = 1:numFiles
+    tic;
+    [TOF{i},~] = aScanLayers(fits{i},dataPtsPerAScan(i));
     disp(fileNames(i));
     toc
 end
@@ -113,8 +140,7 @@ fprintf("Segmented TOF for:\n\n")
 
 for i = 1:length(fileNames)
     tic;
-    inFile = strcat(fileNames(i));
-    aScanSegmentation(TOF{i},inFile,numLayers,plateThick,baseTOF(i),vertScale,saveFig)
+    aScanSegmentation();
 
     disp(fileNames(i));
     toc
@@ -124,29 +150,6 @@ fprintf("\nFinished segmenting all TOF.\n\n")
 fprintf("==============================================\n\n")
 %}
 
-%% Process and plot
+%% Combine front and back to create hybrid C-scans
 
-TOF = cell(length(fileNames),1);
-baseTOF = nan(length(fileNames),1);
-
-fprintf("==============================================\n\n")
-fprintf("Processed and plotted for:\n\n");
-
-for i = 1:length(fileNames)
-    tic;
-    [TOF{i}, baseTOF(i), smoothingParamP] = aScanProcessing(outFolder,fileNames(i),dt,vertScale,cropThresh,padExtra,noiseThresh,saveMat);
-    
-%     inFile = strcat(fileNames(i));
-%     aScanSegmentation(TOF{i},inFile,numLayers,plateThick,baseTOF(i),vertScale,saveFig)
-    
-    disp(fileNames(i));
-    toc
-end
-
-fprintf("\nFinished processing all C-scan .mat files.\n\n")
-
-%% Testing hybrid C-scans
-
-
-
-
+%% Plot 3D and layer by layer

@@ -1,163 +1,137 @@
-function TOF = aScanProcessing(fileName,outFolder,dt,scaleVal,scaleDir,...
-    cropIncr,cropThresh, padExtra, noiseThresh, saveMat)
-% Take .csv C-scan input file, calculate time of flight (TOF), and save
-% normalized TOF data as .mat file
+function [rawTOF,fits,dataPtsPerAScan,cropCoord] = ...
+aScanProcessing(fileName,outFolder,dt,scaleVal,scaleDir,startI,cropIncr, ...
+baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits)
+% Take .csv C-scan input file, calculate fits andraw TOF, and saves raw TOF
+% and fits data as .mat files if requested
 % 
 % Inputs:
-%   outFile:   Folder path to .mat C-scan output file
-%   fileName:  Name of .csv C-scan input file
+%   fileName   : Name of .csv C-scan input file
+%   outFile    : Folder path to .mat C-scan output file
 %   dt         : Sampling period [us]
-%   vertScale  : Vertical scaling factor for TOF plot
-%   noiseThresh: If mean signal value is below value of noise threshold, 
-%                TOF is set to zero
-%   plotRow    : Row of A-scan plot
-%   plotCol    : Column of A-scan plot
-%   plotTOF    : Plots TOF image
-%   plotAScan  : Plots A-scan for specified row, column location on plate
+%   scaleVal   : Scaling factor for TOF plot
+%   scaleDir   : Scaling direction for TOF plot, 'row','col', or 'none'
+%   startI     : Starting searching for crop edges at this index
+%   cropIncr   : Scaling factor for TOF plot
+%   baseRow    : Vector of rows to calculate baseline TOF
+%   baseCol    : Vector of cols to calculate baseline TOF
+%   cropThresh : Crop threshold greater than abs(baseTOF - tof(i))
+%   padExtra   : Amount of extra row/col to add to crop boundaries
 %   saveMat    : Saves TOF as .mat file
-%   saveFig    : Saves plotted figures
+%   saveFits  : Save fits as .mat file
 
 % Concatenate file names/paths
 inFile = strcat(outFolder,"\",fileName,'-cScan.mat');
-outFileTOF = strcat(outFolder,"\",fileName,'-TOF.mat');
+outFileRawTOF = strcat(outFolder,"\",fileName,'-raw-TOF.mat');
 outFileFits = strcat(outFolder,'\',fileName,'-fits.mat');
 
 % Load cScan
-load(inFile);
+load(inFile,'cScan');
 
 % Find # of data points per A-scan, rows, and columns
-[row, col, dataPointsPerAScan] = size(cScan);
+[row, col, dataPtsPerAScan] = size(cScan);
 
 % Create time vector
-tEnd = (dataPointsPerAScan-1)*dt;
+tEnd = (dataPtsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
 % Calculate scaling ratios
-if strcmp('col',scaleDir) == true
-    vertIncr = floor(scaleVal/cropIncr);
-    horIncr = vertIncr*col/scaleVal;
-elseif strcmp('row',scaleDir) == true
-    horIncr = floor(scaleVal/cropIncr);
-    vertIncr = horIncr*row/scaleVal;
-else                                                % No scaling required
-    vertIncr = floor(col/cropIncr);
-    horIncr = vertIncr*col/scaleVal;
+if strcmp('col',scaleDir) == true ...       % resolution along col > row
+    || (strcmp('none',scaleDir) == true ... % resolution along col = row
+    && col >= row)                          % # of points along col >= row
+    xStartI = startI*scaleVal;
+    yStartI = startI;
+    vertIncr = floor((row-yStartI*2)/cropIncr);
+    horIncr = vertIncr*scaleVal;
+%     horPad = padExtra*scaleVal;
+%     vertPad = padExtra;
+elseif strcmp('row',scaleDir) == true ...   % resolution along col < row
+    || (strcmp('none',scaleDir) == true ... % resolution along col = row
+    && col < row)                           % # of points along col < row    
+    xStartI = startI;
+    yStartI = startI*scaleVal;    
+    horIncr = floor((col-xStartI*2)/cropIncr);
+    vertIncr = horIncr*scaleVal;
+%     horPad = padExtra;
+%     vertPad = padExtra*scaleVal;
 end
 
 % Search for rectangular bounding box of damage
 
-% Calculate spacing
-yNoiseSpace = 50;
-xNoiseSpace = 15;
-
 % Calculate horizontal and vertical indices
-top2bot = yNoiseSpace:vertIncr:row-vertIncr;
+top2bot = xStartI:vertIncr:row-xStartI;
 halfVert = floor(length(top2bot)/2);
 top2cent = top2bot(1:halfVert);
 bot2cent = top2bot(end:-1:halfVert+1);
 
-left2right = xNoiseSpace:horIncr:col-horIncr;
+left2right = yStartI:horIncr:col-yStartI;
 halfHor = floor(length(left2right)/2);
 left2cent = left2right(1:halfHor);
 right2cent = left2right(end:-1:halfHor+1);
 
 % Calculate baseline TOF
-baseRows = 50:5:60;
-baseCols = 10:2:14;
+tempTOF = calcTOF(cScan,t,baseRow,baseCol);
+baseTOF = mode(tempTOF,'all');
 
-tempTOF = calcTOF2(cScan,t,baseRows,baseCols);
-baseTOF = mode(tempTOF(tempTOF~=0),'all');
+% Search for start row moving from top most to center row
+startRow = cropEdge(baseTOF,top2cent,left2right,cScan,t,cropThresh,'row');
+% Search for end row moving from bottom most to center row
+endRow = cropEdge(baseTOF,bot2cent,left2right,cScan,t,cropThresh,'row');
 
-% From top to center
-startRow = cropEdgeDetect(baseTOF,top2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
-% From bottom to center
-endRow = cropEdgeDetect(baseTOF,bot2cent,left2right,cScan,noiseThresh,t,cropThresh,0);
-
-% Set rows to search
+% Set row indices to search
 startRowI = find(top2bot==startRow);
 endRowI = find(top2bot==endRow);
 searchRows = top2bot(startRowI:endRowI);
 
-% Add padding
-vertPad = floor(vertIncr*padExtra);
+% Add padding in vertical direction
+vertPad = floor((1+padExtra)*vertIncr);
 startRow = startRow - vertPad;
 endRow = endRow + vertPad;
-
-if startRow <= 0
-    startRow = 2;
+if startRow <=0
+    startRow = 1;
 end
 if endRow > row
-    endRow = row-1;
+    endRow = row;
 end
 
 % From left to center
-startCol = cropEdgeDetect(baseTOF,left2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
+startCol = cropEdge(baseTOF,left2cent,searchRows,cScan,t,cropThresh,'col');
 % From right to center
-endCol = cropEdgeDetect(baseTOF,right2cent,searchRows,cScan,noiseThresh,t,cropThresh,1);
+endCol = cropEdge(baseTOF,right2cent,searchRows,cScan,t,cropThresh,'col');
 
-% Add padding
-horPad = floor(horIncr*padExtra);
+% Add padding in horizontal direction
+horPad = floor((1+padExtra)*horIncr);
 startCol = startCol - horPad;
 endCol = endCol + horPad;
-
 if startCol <= 0
-    startCol = 2;
+    startCol = 1;
 end
-if endCol > col
-    endCol = col-1;
+if endCol <= 0 
+    endCol = col;
 end
 
-% Step through each A-scan to calculate time of flight (TOF)
-[cropTOF, fits, smoothingParamP] = calcTOF(cScan,t,startRow:endRow,startCol:endCol+1);
-baseTOF = mode(cropTOF,"all");
+% Step through cropped C-scan to calculate raw TOF
+if saveFits == false
+    [rawCropTOF, ~] = calcTOF(cScan,t,startRow:endRow,startCol:endCol);
+else
+    [rawCropTOF, fits] = calcTOF(cScan,t,startRow:endRow,startCol:endCol);
+end
 
-TOF = zeros(row,col);
-TOF(startRow:endRow,startCol:endCol) = cropTOF(1:end,1:end-1);
+% Calculate updated baseline TOF and fill in cropped areas w/ baseline TOF
+% baseTOF = mode(rawCropTOF,'all');
+% rawTOF = ones(row,col)*baseTOF;
+rawTOF = zeros(row,col);
+rawTOF(startRow:endRow,startCol:endCol) = rawCropTOF(1:end,1:end);
 
-% Fill in area outside of crop with TOF = 0 (black)
-TOF = fillArea([1:col, 1:startCol-1, endCol+1:col, 1:col],...
-    [1:startRow-1,endRow+1:row],0,TOF);
-TOF = fillArea([1:startCol-1, endCol+1:col],startRow-1:endRow+1,0,TOF);
-
-%     % Black vertical and horizontal outlines
-%     TOF = fillArea([1:scaleRatio, col-scaleRatio+1:col],1:row,0,TOF);
-%     TOF = fillArea(1:col,[1, row],0,TOF);
-
-% Save TOF to .mat file
+% Save raw TOF to .mat file
 if saveMat == true
-    save(outFileTOF,'TOF','-mat');
+    save(outFileRawTOF,'rawTOF','-mat');
+end
+
+if saveFits == true
     save(outFileFits,'fits','-mat');
 end
 
-% Remove outliers
-for i = 2:size(TOF,1)-1
-    for j = 2:size(TOF,2)-1
-        L = j-1;
-        R = j+1;
-        T = i+1;
-        B = i-1;
-        Mi = i;
-        Mj = j;
-        
-        TL = TOF(T,L);
-        TMj = TOF(T,Mj);
-        TR = TOF(T,R);
-        
-        MiL = TOF(Mi,L);
-        MiR = TOF(Mi,R);
-
-        BL = TOF(B,L);
-        BMj = TOF(B,Mj);
-        BR = TOF(B,R);
-        
-        freqTab = tabulate([TL,TMj,TR,MiL,MiR,BL,BMj,BR]);
-
-        if freqTab(1,2) >= 8
-            TOF(i,j) = freqTab(1,1);
-        end
-    end
-end
-
+cropCoord = [startRow startCol; endRow, endCol];
 end
 
 
