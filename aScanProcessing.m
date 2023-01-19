@@ -1,5 +1,5 @@
 function [rawTOF,fits,dataPtsPerAScan,cropCoord] = ...
-aScanProcessing(fileName,outFolder,dt,scaleVal,scaleDir,startI,cropIncr, ...
+aScanProcessing(fileName,outFolder,dt,scaleVal,scaleDir,searchArea,cropIncr, ...
 baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits)
 % Take .csv C-scan input file, calculate fits andraw TOF, and saves raw TOF
 % and fits data as .mat files if requested
@@ -38,32 +38,30 @@ t = 0:dt:tEnd;
 if strcmp('col',scaleDir) == true ...       % resolution along col > row
     || (strcmp('none',scaleDir) == true ... % resolution along col = row
     && col >= row)                          % # of points along col >= row
-    xStartI = startI*scaleVal;
-    yStartI = startI;
-    vertIncr = floor((row-yStartI*2)/cropIncr);
+    vertIncr = floor(row/cropIncr);
     horIncr = vertIncr*scaleVal;
-%     horPad = padExtra*scaleVal;
-%     vertPad = padExtra;
 elseif strcmp('row',scaleDir) == true ...   % resolution along col < row
     || (strcmp('none',scaleDir) == true ... % resolution along col = row
-    && col < row)                           % # of points along col < row    
-    xStartI = startI;
-    yStartI = startI*scaleVal;    
-    horIncr = floor((col-xStartI*2)/cropIncr);
+    && col < row)                           % # of points along col < row      
+    horIncr = floor(col/cropIncr);
     vertIncr = horIncr*scaleVal;
-%     horPad = padExtra;
-%     vertPad = padExtra*scaleVal;
 end
+
+searchArea = max(searchArea,[horIncr vertIncr; horIncr vertIncr]);
+xStartI = searchArea(1,1);
+yStartI = searchArea(1,2);
+xEndI = searchArea(2,1);
+yEndI = searchArea(2,2);
 
 % Search for rectangular bounding box of damage
 
 % Calculate horizontal and vertical indices
-top2bot = xStartI:vertIncr:row-xStartI;
+top2bot = yStartI:vertIncr:row-yEndI;
 halfVert = floor(length(top2bot)/2);
 top2cent = top2bot(1:halfVert);
 bot2cent = top2bot(end:-1:halfVert+1);
 
-left2right = yStartI:horIncr:col-yStartI;
+left2right = xStartI:horIncr:col-xEndI;
 halfHor = floor(length(left2right)/2);
 left2cent = left2right(1:halfHor);
 right2cent = left2right(end:-1:halfHor+1);
@@ -105,7 +103,7 @@ endCol = endCol + horPad;
 if startCol <= 0
     startCol = 1;
 end
-if endCol <= 0 
+if endCol > col 
     endCol = col;
 end
 
@@ -132,6 +130,7 @@ if saveFits == true
 end
 
 cropCoord = [startRow startCol; endRow, endCol];
+
 end
 
 

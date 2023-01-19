@@ -1,11 +1,11 @@
-function [TOF,inflectionpts] = aScanLayers(fits,dataPointsPerAScan)
+function [TOF,inflectionpts] = aScanLayers(fits,dataPtsPerAScan)
 
 row = size(fits,1);
 col = size(fits,2);
 
 % Time vector
 dt = 0.02;
-tEnd = (dataPointsPerAScan-1)*dt;
+tEnd = (dataPtsPerAScan-1)*dt;
 t = 0:dt:tEnd;
 
 % Initialize values

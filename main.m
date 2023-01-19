@@ -16,12 +16,16 @@ scaleVal     = 5;     % equal to #col/"Scanning Length" in header
 scaleDir     = 'col'; % Direction to scale along
 
 % C-scan processing parameters
-startI       = 5;
+xStartI      = 125;
+yStartI      = 30;
+xEndI        = 0;
+yEndI        = 0;
+searchArea   = [xStartI yStartI; xEndI, yEndI];
 cropIncr     = 20;
 baseRow      = 50:5:60;
 baseCol      = 10:2:14;
 cropThresh   = 0.2;   % Crop threshold greater than abs(baseTOF - tof(i))
-padExtra     = 0.25;  % Extra padding on all 4 crop edges
+padExtra     = 0.5;  % Extra padding on all 4 crop edges
 
 % Output requests
 saveMat      = true;  % Save TOF mat?
@@ -102,11 +106,12 @@ cropCoord = cell(1,numFiles);
 rawTOF = cell(1,numFiles);
 fits = cell(1,numFiles);
 
-for i = 1:numFiles
+for i = 26:numFiles
+% for i = 2
     tic;
     [rawTOF{i},fits{i},dataPtsPerAScan(i),cropCoord{i}] = ...
     aScanProcessing(fileNames(i),outFolder,dt,scaleVal,scaleDir,...
-    startI,cropIncr,baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits);
+    searchArea,cropIncr,baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits);
     disp(fileNames(i));
     toc
 end
