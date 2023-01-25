@@ -14,6 +14,7 @@ outFolder = "Output"; % .mat processed file output location
 dt           = 1/50;  % Sampling period [us]
 scaleVal     = 5;     % equal to #col/"Scanning Length" in header
 scaleDir     = 'col'; % Direction to scale along
+dataPtsPerAScan = 205;
 
 % C-scan processing parameters
 xStartI      = 125;
@@ -31,10 +32,14 @@ padExtra     = 0.5;  % Extra padding on all 4 crop edges
 saveMat      = true;  % Save TOF mat?
 saveFits     = true;  % Save fits mat?
 saveFig      = true;  % Save segmented figure?
+saveTOF      = true;
+saveInflectionPts = true; % temp testing
 
 % Plate properties
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
+
+numFiles = 1; % temp testing
 
 %% Input/output file names (user specific)
 
@@ -101,15 +106,13 @@ fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to raw TOF for:\n\n");
 
 
-dataPtsPerAScan = zeros(1,numFiles);
 cropCoord = cell(1,numFiles);
 rawTOF = cell(1,numFiles);
 fits = cell(1,numFiles);
 
-for i = 26:numFiles
-% for i = 2
+for i = 1:numFiles
     tic;
-    [rawTOF{i},fits{i},dataPtsPerAScan(i),cropCoord{i}] = ...
+    [~,~,cropCoord{i}] = ...
     aScanProcessing(fileNames(i),outFolder,dt,scaleVal,scaleDir,...
     searchArea,cropIncr,baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits);
     disp(fileNames(i));
@@ -121,15 +124,17 @@ fprintf("\nFinished processing all C-scan .mat files.\n\n")
 
 %% Process TOF
 
-%{
+%%{
 fprintf("==============================================\n\n")
 fprintf("Processed TOF for:\n\n");
 
 TOF = cell(1,numFiles);
+inflectionptsRow = TOF;
 
-for i = 1:numFiles
+% for i = 1:numFiles
+for i = 1
     tic;
-    [TOF{i},~] = aScanLayers(fits{i},dataPtsPerAScan(i));
+    [~,~,inflectionptsRow{i}] = aScanLayers(fileNames(i),outFolder,205,saveTOF,saveInflectionPts);
     disp(fileNames(i));
     toc
 end

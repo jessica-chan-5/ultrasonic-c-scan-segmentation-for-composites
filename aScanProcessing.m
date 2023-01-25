@@ -1,6 +1,6 @@
-function [rawTOF,fits,dataPtsPerAScan,cropCoord] = ...
+function [rawTOF,fits,cropCoord] = ...
 aScanProcessing(fileName,outFolder,dt,scaleVal,scaleDir,searchArea,cropIncr, ...
-baseRow,baseCol,cropThresh,padExtra,saveMat,saveFits)
+baseRow,baseCol,cropThresh,padExtra,saveOutput)
 % Take .csv C-scan input file, calculate fits andraw TOF, and saves raw TOF
 % and fits data as .mat files if requested
 % 
@@ -120,12 +120,9 @@ end
 rawTOF = zeros(row,col);
 rawTOF(startRow:endRow,startCol:endCol) = rawCropTOF(1:end,1:end);
 
-% Save raw TOF to .mat file
-if saveMat == true
+% Save raw TOF and spline fits
+if saveOutput == true
     save(outFileRawTOF,'rawTOF','-mat');
-end
-
-if saveFits == true
     save(outFileFits,'fits','-mat');
 end
 

@@ -1,4 +1,13 @@
-function [TOF,inflectionpts] = aScanLayers(fits,dataPtsPerAScan)
+function [TOF,inflectionpts,inflectionptsRow] = aScanLayers(fileName,outFolder,...
+    dataPtsPerAScan,saveTOF,saveInflectionPts)
+
+% Concatenate file names/paths
+inFile = strcat(outFolder,"\",fileName,'-fits.mat');
+outFileTOF = strcat(outFolder,"\",fileName,'-TOF.mat');
+outFileInflectionPts = strcat(outFolder,'\',fileName,'-InflectionPts.mat');
+
+% Load cScan
+load(inFile,'fits');
 
 row = size(fits,1);
 col = size(fits,2);
@@ -98,6 +107,9 @@ for i = 1:row
 end
 
 inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2,minPeakPromPeak2,numPeaks,locs2i);
+
+inflectionptsRow = inflectionpts; % temp testing
+
 inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2,minPeakPromPeak2,numPeaks,locs2i);
 
 TOF = unprocessedTOF;
@@ -169,6 +181,15 @@ for i = 1:row
         end
 
     end
+end
+
+% Save TOF and inflection points to .mat file
+if saveTOF == true
+    save(outFileTOF,'TOF','-mat');
+end
+
+if saveInflectionPts == true
+    save(outFileInflectionPts,'fits','-mat');
 end
 
 end

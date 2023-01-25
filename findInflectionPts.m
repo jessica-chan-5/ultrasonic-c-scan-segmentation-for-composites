@@ -4,11 +4,11 @@ if strcmp(direction,'row') == true
     for i = 1:row
     
         % Find layer edges using peaks in 2nd peak mag values
-        invertPeak2 = peak2(i,:).^-1-1;
-        invertPeak2(isinf(invertPeak2)) = 0;
-        [~,magLoc] = findpeaks(invertPeak2,'MinPeakProminence',minPeakPromPeak2);
+%         invertPeak2 = peak2(i,:).^-1-1;
+%         invertPeak2(isinf(invertPeak2)) = 0;
+%         [~,magLoc] = findpeaks(invertPeak2,'MinPeakProminence',minPeakPromPeak2);
         
-        % Find layer edges using 2nd peak label changes
+%         % Find layer edges using 2nd peak label changes
         peakLoc = [];
         
         for k = 2:col
@@ -18,15 +18,16 @@ if strcmp(direction,'row') == true
                 end
             end
         end
-        
-        % Merge both methods
-        locLocs = magLoc;
-        for k = 1:length(peakLoc)
-            if min(abs(peakLoc(k)-magLoc))>0
-                locLocs = [locLocs, peakLoc(k)]; %#ok<AGROW> 
-            end
-        end
-        locLocs = sort(locLocs);
+%         
+%         % Merge both methods
+%         locLocs = magLoc;
+          locLocs = peakLoc;
+%         for k = 1:length(peakLoc)
+%             if min(abs(peakLoc(k)-magLoc))>0
+%                 locLocs = [locLocs, peakLoc(k)]; %#ok<AGROW> 
+%             end
+%         end
+%         locLocs = sort(locLocs);
         inflectionpts(i,locLocs) = 1;
     
     end

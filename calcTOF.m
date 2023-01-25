@@ -2,7 +2,6 @@ function [rawTOF,fits] = calcTOF(cScan,t,row,col)
 
 % Initialize values
 rawTOF = zeros(length(row),length(col));
-fits = cell(length(row),length(col));
 
 % Sensitivity parameters
 minPeakPromPeak = 0.02; % For finding peaks of spline fit
