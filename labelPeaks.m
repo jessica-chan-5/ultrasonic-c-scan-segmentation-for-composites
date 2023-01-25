@@ -1,14 +1,26 @@
-function [peak2,unprocessedTOF,locs2i] = labelPeaks(row,col,locs,peaks,numPeaks,widePeak,peakThresh)
+function [peak2,unprocessedTOF,locs2i] = labelPeaks(direction,row,col,locs,peaks,numPeaks,widePeak,peakThresh)
 
-peakLabels = cell(row,col);
-peak2 = zeros(row,col);
-loc2i = zeros(row,col);
-unprocessedTOF = zeros(row,col);
-locs2i = zeros(row,col);
+if strcmp(direction,'row')
+    dir1 = row;
+    dir2 = col;
+elseif strcmp(direction,'col')
+    dir1 = col;
+    dir2 = row;
+    locs = locs';
+    peaks = peaks';
+    numPeaks = numPeaks';
+    widePeak = widePeak';
+end
 
-for i = 1:row    
+peakLabels = cell(dir1,dir2);
+peak2 = zeros(dir1,dir2);
+loc2i = zeros(dir1,dir2);
+unprocessedTOF = zeros(dir1,dir2);
+locs2i = zeros(dir1,dir2);
+
+for i = 1:dir1    
     labelList = 1:1e3;
-    for j = 1:col
+    for j = 1:dir2
         % Assign unique peak IDs
         
         if isempty(peaks{i,j}) == false
@@ -55,6 +67,12 @@ for i = 1:row
             end
         end
     end
+end
+
+if strcmp(direction,'col')
+    peak2 = peak2';
+    unprocessedTOF = unprocessedTOF';
+    locs2i = locs2i';
 end
 
 end

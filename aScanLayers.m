@@ -1,4 +1,4 @@
-function [TOF,inflectionpts,inflectionptsRow] = aScanLayers(fileName,outFolder,...
+function [TOF,inflectionpts] = aScanLayers(fileName,outFolder,...
     dataPtsPerAScan,saveTOF,saveInflectionPts)
 
 % Concatenate file names/paths
@@ -51,12 +51,11 @@ for i = 1:row
     end
 end
 
-[peak2,unprocessedTOF,locs2i] = labelPeaks(row,col,locs,peaks,numPeaks,widePeak,peakThresh);
-inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2,minPeakPromPeak2,numPeaks,locs2i);
+[peak2row,unprocessedTOF,locs2irow] = labelPeaks('row',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
+[peak2col,~,locs2icol] = labelPeaks('col',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
 
-inflectionptsRow = inflectionpts; % temp testing
-
-inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2,minPeakPromPeak2,numPeaks,locs2i);
+inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2row,minPeakPromPeak2,numPeaks,locs2irow);
+inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2col,minPeakPromPeak2,numPeaks,locs2icol);
 
 TOF = unprocessedTOF;
 
@@ -91,7 +90,7 @@ for i = 1:row
                         modeCol = repmat(unprocessedTOF(upLoc:downLoc,k)',1,5);
                         localMode = mode(round([modeCol,modeRow],2));
 
-                        if abs(unprocessedTOF(i,k)-localMode) < 0.04
+                        if abs(unprocessedTOF(i,k)-localMode) < 0.5 %0.04
                             TOF(i,k) = localMode;
                         end
                     end
@@ -116,7 +115,7 @@ for i = 1:row
                     modeCol = repmat(unprocessedTOF(upLoc:downLoc,k)',1,5);
                     localMode = mode(round([modeCol,modeRow],2));
 
-                    if abs(unprocessedTOF(i,k)-localMode) < 0.04
+                    if abs(unprocessedTOF(i,k)-localMode) < 0.5 %0.04
                         TOF(i,k) = localMode;
                     end
                 end

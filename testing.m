@@ -1,7 +1,6 @@
 %% Variables
 format compact
 sampleName = "CSAI-BL-H-15J-1-waveform";
-% sampleName = "CSAI-CONT-S-20J-2-CH1-backside-CH1";
 fileName = strcat("Output\",sampleName,"-CH1");
 vertScale = 238;
 row = 385;

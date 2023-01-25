@@ -129,12 +129,12 @@ fprintf("==============================================\n\n")
 fprintf("Processed TOF for:\n\n");
 
 TOF = cell(1,numFiles);
-inflectionptsRow = TOF;
+inflectionpts = TOF;
 
 % for i = 1:numFiles
 for i = 1
     tic;
-    [~,~,inflectionptsRow{i}] = aScanLayers(fileNames(i),outFolder,205,saveTOF,saveInflectionPts);
+    [~,inflectionpts{i}] = aScanLayers(fileNames(i),outFolder,205,saveTOF,saveInflectionPts);
     disp(fileNames(i));
     toc
 end
