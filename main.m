@@ -82,7 +82,6 @@ fileNames = [miscFileNames; fileNames];
 %}
 
 numFiles = length(fileNames);
-% numFiles = 1;
 
 %% Read in C-Scans
 
@@ -128,13 +127,12 @@ fprintf("\nFinished processing all C-scan .mat files.\n\n")
 fprintf("==============================================\n\n")
 fprintf("Processed TOF for:\n\n");
 
-TOF = cell(1,numFiles);
-inflectionpts = TOF;
+% TOF = cell(numFiles,1);
+% inflectionpts = cell(numFiles,1);
 
-% for i = 1:numFiles
-for i = 1
+for i = 25:numFiles
     tic;
-    [~,inflectionpts{i}] = aScanLayers(fileNames(i),outFolder,205,saveTOF,saveInflectionPts);
+    aScanLayers(fileNames(i),outFolder,205,saveTOF,saveInflectionPts);
     disp(fileNames(i));
     toc
 end

@@ -29,7 +29,7 @@ locs = cell(row,col);
 minPeakPromPeak = 0.03;
 minPeakPromPeak2 = 0.1;
 peakThresh = 0.08;
-maxPeakWidth = 0.7;
+maxPeakWidth = 0.75;
 
 for i = 1:row    
     for j = 1:col
@@ -57,76 +57,37 @@ end
 inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2row,minPeakPromPeak2,numPeaks,locs2irow);
 inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2col,minPeakPromPeak2,numPeaks,locs2icol);
 
+% Set edges to be inflection points
+inflectionpts(1,:) = 1;
+inflectionpts(end,:) = 1;
+inflectionpts(:,1) = 1;
+inflectionpts(:,end) = 1;
+
+% Set numPeaks < 2 and widePeak to be inflection points
+inflectionpts(numPeaks < 2) = 1;
+% inflectionpts(widePeak == true) = 1;
+
 TOF = unprocessedTOF;
 
-for i = 1:row
+% Close gaps in inflection points
+SE = strel('line',6,-45); 
+J = imclose(inflectionpts,SE);
 
-    startI = 2;
-    pastTOF = 0;
-    locI = 1;
+SE = strel('line',6,45); 
+J = imclose(J,SE);
 
-    for j = startI:col
+% Label separate layer regions of C-scan
+[L,n] = bwlabel(uint8(~J),4);
 
-        inflection = false;
-        elseFlag = false;
-
-        if numPeaks(i,j) >= 2
-            
-            locLocs = find(inflectionpts(i,:)==1);
-            if locI <= length(locLocs) && j == locLocs(locI)
-                inflection = true;
-                locI = locI + 1;
-            end
-
-            if widePeak(i,j) == false
-                if inflection == true ...
-                    || j == 2 || j == col
-                    
-                    modeRow = unprocessedTOF(i,startI:j-1);
-
-                    for k = startI:j-1
-                        upLoc = find(inflectionpts(i:-1:1,k)==1,1);
-                        downLoc = find(inflectionpts(i:end,k)==1,1)+i-1;
-                        modeCol = repmat(unprocessedTOF(upLoc:downLoc,k)',1,5);
-                        localMode = mode(round([modeCol,modeRow],2));
-
-                        if abs(unprocessedTOF(i,k)-localMode) < 0.5 %0.04
-                            TOF(i,k) = localMode;
-                        end
-                    end
-                    startI = j;
-                    pastTOF = unprocessedTOF(i,j);
-                end
-            else
-                elseFlag = true;
-            end
-        else
-            elseFlag = true;
-        end
-
-        if elseFlag == true
-            if pastTOF ~= 0
-
-                modeRow = unprocessedTOF(i,startI:j-1);
-
-                for k = startI:j-1
-                    upLoc = find(inflectionpts(i:-1:1,k)==1,1);
-                    downLoc = find(inflectionpts(i:end,k)==1,1)+i-1;
-                    modeCol = repmat(unprocessedTOF(upLoc:downLoc,k)',1,5);
-                    localMode = mode(round([modeCol,modeRow],2));
-
-                    if abs(unprocessedTOF(i,k)-localMode) < 0.5 %0.04
-                        TOF(i,k) = localMode;
-                    end
-                end
-            end
-            startI = j;
-            pastTOF = 0;
-            TOF(i,j) = 0;
-        end
-
-    end
+for i = 1:n
+    [areaI, areaJ] = find(L==i);
+    areaInd = sub2ind(size(L),areaI,areaJ);
+    TOF(areaInd) = mode(round(unprocessedTOF(areaInd),2),'all');
 end
+
+% Set numPeaks < 2 and widePeak to be zero TOF
+TOF(numPeaks < 2) = 0;
+% TOF(widePeak == true) = 0;
 
 % Save TOF and inflection points to .mat file
 if saveTOF == true
@@ -134,7 +95,17 @@ if saveTOF == true
 end
 
 if saveInflectionPts == true
-    save(outFileInflectionPts,'fits','-mat');
+    save(outFileInflectionPts,'inflectionpts','-mat');
 end
+
+plotTOF = zeros(385,1190);
+plotTOF(1:row,1:col) = TOF;
+
+figure('visible','off');
+imjet = imshow(plotTOF,jet,'XData',[0 238],'YData',[385 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF ",inFile));
+ax = gca;
+exportgraphics(ax,strcat('NewFigures\',fileName,'.png'),'Resolution',300);
 
 end

@@ -43,10 +43,10 @@ TOFvec = reshape(binTOF,numRow*numCol,1);
 % TOFvec(1) = 0;
 % TOFvec(end) = 2.12;
 
-TOFvec(TOFvec==1) = NaN;
-TOFvec(TOFvec>=length(layersTOF)-2) = NaN;
-TOFvec(1) = 1;
-TOFvec(end) = length(layersTOF);
+% TOFvec(TOFvec==1) = NaN;
+% TOFvec(TOFvec>=length(layersTOF)-2) = NaN;
+% TOFvec(1) = 1;
+% TOFvec(end) = length(layersTOF);
 
 xvec = repmat((1:numRow)',numCol,1);
 yvec = repelem(1:numCol,numRow)';
@@ -111,3 +111,36 @@ title(strcat("Inflection points: ",sampleName));
 %% Plot filled contor of inflection points
 figure; contourf(inflectionpts);
 title(strcat("Contour Inflection Points: ",sampleName));
+
+%% Dilate image
+
+SE = strel('line',6,-45); 
+J = imclose(inflectionpts,SE);
+
+SE = strel('line',6,45); 
+J = imclose(J,SE);
+
+Jfull = zeros(row,col);
+Jfull(1:size(cropTOF,1),1:size(cropTOF,2)) = uint8(~J);
+figure; imjet = imshow(Jfull,gray,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF: ",sampleName));
+
+[L,n] = bwlabel(Jfull,4);
+
+figure; imjet = imshow(L,colorcube,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF: ",sampleName));
+
+%%
+finalTOF = TOF;
+
+for i = 1:n
+    [areaI, areaJ] = find(L==i);
+    areaInd = sub2ind(size(L),areaI,areaJ);
+    finalTOF(areaInd) = mode(round(TOF(areaInd),2),'all');
+end
+
+figure; imjet = imshow(finalTOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet.CDataMapping = "scaled";
+title(strcat("TOF: ",sampleName));
