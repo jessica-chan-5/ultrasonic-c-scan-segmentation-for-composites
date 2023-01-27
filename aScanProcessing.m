@@ -47,21 +47,20 @@ elseif strcmp('row',scaleDir) == true ...   % resolution along col < row
     vertIncr = horIncr*scaleVal;
 end
 
-searchArea = max(searchArea,[horIncr vertIncr; horIncr vertIncr]);
-xStartI = searchArea(1,1);
-yStartI = searchArea(1,2);
-xEndI = searchArea(2,1);
-yEndI = searchArea(2,2);
+xStartI = max([searchArea(1),horIncr]);
+xEndI = min([searchArea(2),col-horIncr]);
+yStartI = max([searchArea(3),vertIncr]);
+yEndI = min([searchArea(4),row-vertIncr]);
 
 % Search for rectangular bounding box of damage
 
 % Calculate horizontal and vertical indices
-top2bot = yStartI:vertIncr:row-yEndI;
+top2bot = yStartI:vertIncr:yEndI;
 halfVert = floor(length(top2bot)/2);
 top2cent = top2bot(1:halfVert);
 bot2cent = top2bot(end:-1:halfVert+1);
 
-left2right = xStartI:horIncr:col-xEndI;
+left2right = xStartI:horIncr:xEndI;
 halfHor = floor(length(left2right)/2);
 left2cent = left2right(1:halfHor);
 right2cent = left2right(end:-1:halfHor+1);
@@ -108,7 +107,7 @@ if endCol > col
 end
 
 % Step through cropped C-scan to calculate raw TOF
-if saveFits == false
+if saveOutput == false
     [rawCropTOF, ~] = calcTOF(cScan,t,startRow:endRow,startCol:endCol);
 else
     [rawCropTOF, fits] = calcTOF(cScan,t,startRow:endRow,startCol:endCol);

@@ -4,7 +4,8 @@ function [rawTOF,fits] = calcTOF(cScan,t,row,col)
 rawTOF = zeros(length(row),length(col));
 
 % Sensitivity parameters
-minPeakPromPeak = 0.02; % For finding peaks of spline fit
+% minPeakPromPeak = 0.02; % For finding peaks of spline fit
+minPeakPromPeak = 0.05; % For finding peaks of spline fit
 noiseThresh = 0.01; % To check if signal is above noise threshold
 
 for i = 1:length(row)
@@ -25,11 +26,13 @@ for i = 1:length(row)
 
             
             % Fit smoothing spline to find peak values
-            fits{i,j} = fit(l',p',"smoothingspline");
-
+%             fits{i,j} = fit(l',p',"smoothingspline");
+              fits{i,j} = makima(l',p');
+              
             % Evaluate smoothing spline for t
-            pfit = feval(fits{i,j},t);
-    
+%             pfit = feval(fits{i,j},t);
+              pfit = ppval(fits{i,j},t);
+
             % Find and save locations of peaks in previously found peaks
             [peak,loc] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
         
@@ -43,9 +46,5 @@ for i = 1:length(row)
         end
     end
 end
-
-% Set values greater than baseline TOF to zero
-baseTOF = mode(rawTOF,'all');
-rawTOF(rawTOF>(baseTOF+0.1)) = 0;
 
 end

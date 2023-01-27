@@ -6,7 +6,8 @@ vertScale = 238;
 row = 385;
 col = 1190;
 % Plate properties
-numLayers    = 25;    % # of layers in plate
+% numLayers    = 25;    % # of layers in plate
+numLayers = 24;
 plateThick   = 3.3;   % plate thickness [mm]
 %% Load TOF
 load(strcat(fileName,"-TOF"));
@@ -23,7 +24,7 @@ title(strcat("Contour TOF: ",sampleName));
 baseTOF = mode(mode(nonzeros(TOF))); % baseline TOF [us]
 matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
 plyThick = plateThick/numLayers; % Calculate ply thickness
-dtTOF = plyThick/matVel; % Calculate TOF for each layer
+dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers
 layersTOF = 0:dtTOF:baseTOF+dtTOF;
@@ -103,9 +104,9 @@ title(strcat("TOF: ",sampleName));
 figure; contourf(TOF);
 title(strcat("Contour TOF: ",sampleName));
 %% Plot inflection points
-inflectionPts = ones(row,col);
+inflectionPts = ones(385,1190);
 inflectionPts(1:size(cropTOF,1),1:size(cropTOF,2)) = uint8(~inflectionpts);
-figure; imjet = imshow(inflectionPts,gray,'XData',[0 vertScale],'YData',[row 0]);
+figure; imjet = imshow(inflectionPts,gray,'XData',[0 238],'YData',[385 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("Inflection points: ",sampleName));
 %% Plot filled contor of inflection points
@@ -120,17 +121,15 @@ J = imclose(inflectionpts,SE);
 SE = strel('line',6,45); 
 J = imclose(J,SE);
 
-Jfull = zeros(row,col);
+Jfull = zeros(385,1190);
 Jfull(1:size(cropTOF,1),1:size(cropTOF,2)) = uint8(~J);
-figure; imjet = imshow(Jfull,gray,'XData',[0 vertScale],'YData',[row 0]);
+figure; imjet = imshow(Jfull,gray,'XData',[0 238],'YData',[385 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",sampleName));
 
 [L,n] = bwlabel(Jfull,4);
 
-figure; imjet = imshow(L,colorcube,'XData',[0 vertScale],'YData',[row 0]);
+figure; imjet = imshow(L,colorcube,'XData',[0 238],'YData',[385 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",sampleName));
 
 %%
 finalTOF = TOF;
