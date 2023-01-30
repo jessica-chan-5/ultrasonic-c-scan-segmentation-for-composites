@@ -123,6 +123,8 @@ end
 % figure; imshow(BW,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 BW2 = imfill(BW);
 % figure; imshow(BW2,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
+outline = bwperim(BW2,8);
+% figure; imshow(outline,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 
 %% Apply mask before
 J = inflectionpts;
@@ -141,7 +143,7 @@ SEpos45 = strel('line',6,45);
 J2 = imclose(J,SEpos45);
 J = J1+J2;
 
-J = bwmorph(J,"thin",3); % Thin 3x to remove triangles where 3 lines meet
+J = bwmorph(J,"thin",2); % Remove triangles where 3 lines meet
 J = bwmorph(J,"spur",inf); % Remove inf spurs
 J = bwmorph(J,"clean",inf); % Remove random pixels
 
@@ -149,11 +151,15 @@ J(numPeaks < 2) = 1;
 
 %% Apply mask after
 J = ~J + ~BW2;
+J(J>1) = 1;
 
-figure; imjet = imshow(uint8(~J),gray,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
+J = ~J + outline;
+J(J>1) = 1;
+
+figure; imjet = imshow(int8(~J),gray,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 imjet.CDataMapping = "scaled";
 
-[L,n] = bwlabel(J,4);
+[L,n] = bwlabel(int8(~J),4);
 
 figure; imjet = imshow(L,colorcube,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 imjet.CDataMapping = "scaled";
