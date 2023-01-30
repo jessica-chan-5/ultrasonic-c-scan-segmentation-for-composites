@@ -11,29 +11,29 @@ inFolder  = "Input";  % .csv C-scan file location
 outFolder = "Output"; % .mat processed file output location
 
 % Raw c-scan parameters
-% dt           = 1/50;  % Sampling period [us]
-dt           = 1/100;  % Sampling period [us]
+dt           = 1/50;  % Sampling period [us]
+% dt           = 1/100;  % Sampling period [us]
 % scaleVal     = 5;     % equal to #col/"Scanning Length" in header
 scaleVal = 1;
 scaleDir     = 'col'; % Direction to scale along
-% dataPtsPerAScan = 205;
-dataPtsPerAScan = 535;
+dataPtsPerAScan = 205;
+% dataPtsPerAScan = 535;
 
 % C-scan processing parameters
-% xStartI      = 125;
-% yStartI      = 30;
-% xEndI        = 385;
-% yEndI        = 1190;
-xStartI    = 81;
-xEndI      = 336;
-yStartI    = 11;
-yEndI      = 552;
+xStartI      = 125;
+yStartI      = 30;
+xEndI        = 385;
+yEndI        = 1190;
+% xStartI    = 81;
+% xEndI      = 336;
+% yStartI    = 11;
+% yEndI      = 552;
 searchArea   = [xStartI xEndI yStartI yEndI];
 cropIncr     = 20;
-% baseRow      = 50:5:60;
-% baseCol      = 10:2:14;
-baseRow      = 470:5:480;
-baseCol      = 160:5:170;
+baseRow      = 50:5:60;
+baseCol      = 10:2:14;
+% baseRow      = 470:5:480;
+% baseCol      = 160:5:170;
 cropThresh   = 0.2;   % Crop threshold greater than abs(baseTOF - tof(i))
 padExtra     = 0.5;  % Extra padding on all 4 crop edges
 
@@ -49,8 +49,7 @@ saveOutput   = true;
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
 
-fileNames = ["LV-162-WhiteSide-CH1"];
-numFiles = length(fileNames);
+% fileNames = ["LV-162-WhiteSide-CH1"];
 
 %% Input/output file names (user specific)
 
@@ -60,7 +59,7 @@ impactEnergy = ["10","15","20"];
 n = length(impactEnergy);
 m = length(panelType);
 
-%{ 
+%%{ 
 
 fileNames = strings([n*m*2,1]);
 
@@ -79,7 +78,7 @@ end
 %}
 
 % "Hard" panel samples can be included as extra test cases
-%{
+%%{
 miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
                  "CSAI-CONT-H-10J-2-waveform-CH1";
                  "CSAI-CONT-H-10J-3-waveform-CH1";
@@ -91,6 +90,9 @@ miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
 
 fileNames = [miscFileNames; fileNames];
 %}
+
+numFiles = length(fileNames);
+
 %% Read in C-Scans
 
 % Uncomment when need to convert additional .csv files
@@ -131,16 +133,17 @@ fprintf("\nFinished processing all C-scan .mat files.\n\n")
 
 %% Process TOF
 
-%{
+%%{
 fprintf("==============================================\n\n")
 fprintf("Processed TOF for:\n\n");
 
 % TOF = cell(numFiles,1);
-% inflectionpts = cell(numFiles,1);
+inflectionpts = cell(numFiles,1);
 
-for i = 25:numFiles
+% for i = 1:numFiles
+for i = 25
     tic;
-    aScanLayers(fileNames(i),outFolder,205,saveTOF,saveInflectionPts);
+    [~,inflectionpts{i}] = aScanLayers(fileNames(i),outFolder,dataPtsPerAScan,saveTOF,saveInflectionPts);
     disp(fileNames(i));
     toc
 end

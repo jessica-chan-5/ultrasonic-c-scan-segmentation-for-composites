@@ -8,6 +8,9 @@ outFileInflectionPts = strcat(outFolder,'\',fileName,'-InflectionPts.mat');
 
 % Load cScan
 load(inFile,'fits');
+colSpacing = 5;
+selectCol = [1,colSpacing:colSpacing:size(fits,2)];
+fits = fits(:,selectCol);
 
 row = size(fits,1);
 col = size(fits,2);
@@ -28,7 +31,7 @@ locs = cell(row,col);
 % Sensitivity parameters
 minPeakPromPeak = 0.03;
 minPeakPromPeak2 = 0.1;
-peakThresh = 0.08;
+peakThresh = 0.04;
 maxPeakWidth = 0.75;
 
 for i = 1:row    
@@ -51,17 +54,17 @@ for i = 1:row
     end
 end
 
-[peak2row,unprocessedTOF,locs2irow] = labelPeaks('row',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
-[peak2col,~,locs2icol] = labelPeaks('col',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
+[peak2,unprocessedTOF,locs2irow] = labelPeaks('row',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
+[~,~,locs2icol] = labelPeaks('col',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
 
-inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2row,minPeakPromPeak2,numPeaks,locs2irow);
-inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2col,minPeakPromPeak2,numPeaks,locs2icol);
+inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2,minPeakPromPeak2,numPeaks,locs2irow);
+inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2,minPeakPromPeak2,numPeaks,locs2icol);
 
 % Set edges to be inflection points
-inflectionpts(1,:) = 1;
-inflectionpts(end,:) = 1;
-inflectionpts(:,1) = 1;
-inflectionpts(:,end) = 1;
+% inflectionpts(1,:) = 1;
+% inflectionpts(end,:) = 1;
+% inflectionpts(:,1) = 1;
+% inflectionpts(:,end) = 1;
 
 % Set numPeaks < 2 and widePeak to be inflection points
 inflectionpts(numPeaks < 2) = 1;
@@ -70,11 +73,19 @@ inflectionpts(numPeaks < 2) = 1;
 TOF = unprocessedTOF;
 
 % Close gaps in inflection points
-SE = strel('line',6,-45); 
-J = imclose(inflectionpts,SE);
+SE = strel('line',8,-45); 
+J1 = imclose(inflectionpts,SE);
 
-SE = strel('line',6,45); 
-J = imclose(J,SE);
+SE = strel('line',8,45); 
+J2 = imclose(inflectionpts,SE);
+
+SE = strel('line',6,0); 
+J3 = imclose(inflectionpts,SE);
+
+SE = strel('line',6,90); 
+J4 = imclose(inflectionpts,SE);
+
+J = J1+J2+J3+J4;
 
 % Label separate layer regions of C-scan
 [L,n] = bwlabel(uint8(~J),4);

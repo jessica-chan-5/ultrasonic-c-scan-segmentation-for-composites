@@ -24,7 +24,7 @@ title(strcat("Contour TOF: ",sampleName));
 baseTOF = mode(mode(nonzeros(TOF))); % baseline TOF [us]
 matVel = 2*plateThick/baseTOF; % Calculate material velocity [mm/us]
 plyThick = plateThick/numLayers; % Calculate ply thickness
-dtTOF = plyThick/matVel*2; % Calculate TOF for each layer
+dtTOF = plyThick/matVel; % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers
 layersTOF = 0:dtTOF:baseTOF+dtTOF;
@@ -32,7 +32,7 @@ layersTOF(end) = baseTOF+2*dtTOF;
 binTOF = discretize(TOF,layersTOF);
 
 figure;
-imjet = imshow(binTOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+imjet = imshow(binTOF,jet,'XData',[0 size(TOF,2)],'YData',[size(TOF,1) 0]);
 imjet.CDataMapping = "scaled";
 title(strcat("TOF ",fileName));
 %% 3D scatter plot - front
@@ -95,40 +95,67 @@ tabulate(TOFbackvec)
 %% Test aScanLayers
 [cropTOF,inflectionpts] = aScanLayers(fits,205);
 %% Plot TOF
-TOF = zeros(row,col);
-TOF(1:size(cropTOF,1),1:size(cropTOF,2)) = cropTOF;
-figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+figure; imjet = imshow(TOF,jet,'XData',[0 size(TOF,2)],'YData',[size(TOF,1) 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",sampleName));
 %% Plot filled contor of TOF
-figure; contourf(TOF);
-title(strcat("Contour TOF: ",sampleName));
+figure; contourf(rawTOF);
 %% Plot inflection points
-inflectionPts = ones(385,1190);
-inflectionPts(1:size(cropTOF,1),1:size(cropTOF,2)) = uint8(~inflectionpts);
-figure; imjet = imshow(inflectionPts,gray,'XData',[0 238],'YData',[385 0]);
+figure; imjet = imshow(int8(~inflectionpts),gray,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("Inflection points: ",sampleName));
 %% Plot filled contor of inflection points
-figure; contourf(inflectionpts);
+figure; contourf(inflectionpts,1);
 title(strcat("Contour Inflection Points: ",sampleName));
+%% Create Mask
 
-%% Dilate image
+% Clean up inflection points
+J = bwmorph(inflectionpts,'spur',inf);
+J = bwmorph(J,'clean',inf);
+J = bwmorph(J,'remove',inf);
+J = bwmorph(J,'thin',inf);
+% figure; imshow(J,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
+[B,~] = bwboundaries(J,'noholes');
+BW = zeros(size(J));
+for i = 1:length(B)
+    for j = 1:size(B{i},1)
+        BW(B{i}(j,1),B{i}(j,2)) = 1;
+    end
+end
+% figure; imshow(BW,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
+BW2 = imfill(BW);
+% figure; imshow(BW2,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 
-SE = strel('line',6,-45); 
-J = imclose(inflectionpts,SE);
+%% Apply mask before
+J = inflectionpts;
+J = ~J + ~BW2;
+% figure; imshow(J,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 
-SE = strel('line',6,45); 
-J = imclose(J,SE);
+%% Morphologically operate on image
 
-Jfull = zeros(385,1190);
-Jfull(1:size(cropTOF,1),1:size(cropTOF,2)) = uint8(~J);
-figure; imjet = imshow(Jfull,gray,'XData',[0 238],'YData',[385 0]);
+J = ~J;
+J = bwmorph(J,'bridge',inf); % Bridge gaps
+
+% imclose in 2 independent operations using +/- 45 line elements
+SEneg45 = strel('line',6,-45);
+J1 = imclose(J,SEneg45);
+SEpos45 = strel('line',6,45); 
+J2 = imclose(J,SEpos45);
+J = J1+J2;
+
+J = bwmorph(J,"thin",3); % Thin 3x to remove triangles where 3 lines meet
+J = bwmorph(J,"spur",inf); % Remove inf spurs
+J = bwmorph(J,"clean",inf); % Remove random pixels
+
+J(numPeaks < 2) = 1;
+
+%% Apply mask after
+J = ~J + ~BW2;
+
+figure; imjet = imshow(uint8(~J),gray,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 imjet.CDataMapping = "scaled";
 
-[L,n] = bwlabel(Jfull,4);
+[L,n] = bwlabel(J,4);
 
-figure; imjet = imshow(L,colorcube,'XData',[0 238],'YData',[385 0]);
+figure; imjet = imshow(L,colorcube,'XData',[0 size(inflectionpts,2)],'YData',[size(inflectionpts,1) 0]);
 imjet.CDataMapping = "scaled";
 
 %%
@@ -140,6 +167,5 @@ for i = 1:n
     finalTOF(areaInd) = mode(round(TOF(areaInd),2),'all');
 end
 
-figure; imjet = imshow(finalTOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+figure; imjet = imshow(finalTOF,jet,'XData',[0 size(finalTOF,2)],'YData',[size(finalTOF,1) 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",sampleName));
