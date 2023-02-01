@@ -1,4 +1,4 @@
-function [TOF,inflectionpts] = aScanLayers(fileName,outFolder,...
+function [TOF,inflpt] = aScanLayers(fileName,outFolder,...
     dataPtsPerAScan,saveTOF,saveInflectionPts)
 
 % Concatenate file names/paths
@@ -24,7 +24,7 @@ t = 0:dt:tEnd;
 TOF = zeros(row,col);
 numPeaks = TOF;
 widePeak = false(row,col);
-inflectionpts = TOF;
+inflpt = TOF;
 peaks = cell(row,col);
 locs = cell(row,col);
 
@@ -57,38 +57,100 @@ end
 [peak2,unprocessedTOF,locs2irow] = labelPeaks('row',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
 [~,~,locs2icol] = labelPeaks('col',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
 
-inflectionpts = findInflectionPts(inflectionpts,'row',row,col,peak2,minPeakPromPeak2,numPeaks,locs2irow);
-inflectionpts = findInflectionPts(inflectionpts,'col',row,col,peak2,minPeakPromPeak2,numPeaks,locs2icol);
+inflpt = findInflectionPts(inflpt,'row',row,col,peak2,minPeakPromPeak2,numPeaks,locs2irow);
+inflpt = findInflectionPts(inflpt,'col',row,col,peak2,minPeakPromPeak2,numPeaks,locs2icol);
 
-% Set edges to be inflection points
-% inflectionpts(1,:) = 1;
-% inflectionpts(end,:) = 1;
-% inflectionpts(:,1) = 1;
-% inflectionpts(:,end) = 1;
+% Set 1 pixel border equal to zero
+inflpt(1,:) = 0;
+inflpt(:,1) = 0;
+inflpt(end,:) = 0;
+inflpt(:,end) = 0;
+
+test = false; % temp
 
 % Set numPeaks < 2 and widePeak to be inflection points
-inflectionpts(numPeaks < 2) = 1;
-% inflectionpts(widePeak == true) = 1;
+inflpt(numPeaks < 2) = 1;
+if test == true
+    figure('visible','on');
+    subplot(1,3,1); imjet = imshow(inflpt,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+    imjet.CDataMapping = "scaled"; title("Original"); 
+end
 
-TOF = unprocessedTOF;
+% Create concave hull of damage area
+concHull = bwmorph(inflpt,'spur',inf); % Remove spurs
+if test == true
+    subplot(1,3,2); imjet = imshow(concHull,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+    imjet.CDataMapping = "scaled"; title("Spur");
+end
 
-% Close gaps in inflection points
-SE = strel('line',8,-45); 
-J1 = imclose(inflectionpts,SE);
+concHull = bwmorph(concHull,'clean',inf); % Remove isolated pixels
+if test == true
+    subplot(1,3,3); imjet = imshow(concHull,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+    imjet.CDataMapping = "scaled"; title("Clean");
+    exportgraphics(gcf,strcat('ConcaveHulls\',fileName,'.png'),'Resolution',300);
+end
 
-SE = strel('line',8,45); 
-J2 = imclose(inflectionpts,SE);
+% Trace exterior boundary, ignore interior holes
+[concBoundC,~] = bwboundaries(concHull,'noholes');
+% Convert boundaries from cell to binary image
+concBound = zeros(size(concHull));
+for i = 1:length(concBoundC)
+    for j = 1:size(concBoundC{i},1)
+        concBound(concBoundC{i}(j,1),concBoundC{i}(j,2)) = 1;
+    end
+end
+% Flood-fill boundary
+concFill = imfill(concBound,4);
+if test == true
+    figure('visible','off');
+    subplot(1,2,1); imjet = imshow(concFill,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+    imjet.CDataMapping = "scaled"; title("Mask");
+end
+% Find perimeter using 8 pixel connectivity
+concPerim = bwperim(concFill,8);
+if test == true
+    subplot(1,2,2); imjet = imshow(concPerim,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+    imjet.CDataMapping = "scaled"; title("Boundary");
+    exportgraphics(gcf,strcat('Masks\',fileName,'.png'),'Resolution',300);
+end
 
-SE = strel('line',6,0); 
-J3 = imclose(inflectionpts,SE);
+% Apply mask to inflection points map before morphological operations
+J = inflpt & concFill;
 
-SE = strel('line',6,90); 
-J4 = imclose(inflectionpts,SE);
+% Close gaps in inflection points using morphological operations
+J = bwmorph(J,'clean',inf); % Remove isolated pixels
 
-J = J1+J2+J3+J4;
+% Close w/ 2 independent operations
+seNeg45 = strel('line',3,-45); 
+neg45 = imclose(J,seNeg45); % Close w/ -45 degree line
+sePos45 = strel('line',3,45); 
+pos45 = imclose(J,sePos45); % Close w/ +45 degree line
+J = neg45|pos45;
+
+% Remove excess pixels outside concave hull and add outline where missing
+J = J & concFill;
+J = J | concPerim;
+
+% Clean up w/ a few operations
+J = bwmorph(J,'spur',inf); % Remove spurs
+J = bwmorph(J,'clean',inf); % Remove isolated pixels
+
+% Add any missing zero TOF values
+J(numPeaks < 2) = 1;
+
+figure('visible','off');
+subplot(1,4,1); imjet = imshow(inflpt,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+imjet.CDataMapping = "scaled"; title("Original");
+subplot(1,4,2); imjet = imshow(J,gray,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+imjet.CDataMapping = "scaled"; title("Processed");
 
 % Label separate layer regions of C-scan
 [L,n] = bwlabel(uint8(~J),4);
+
+subplot(1,4,3); imjet = imshow(L,colorcube,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+imjet.CDataMapping = "scaled"; title("Labeled");
+
+TOF = unprocessedTOF;
 
 for i = 1:n
     [areaI, areaJ] = find(L==i);
@@ -98,15 +160,19 @@ end
 
 % Set numPeaks < 2 and widePeak to be zero TOF
 TOF(numPeaks < 2) = 0;
-% TOF(widePeak == true) = 0;
 
+subplot(1,4,4); imjet = imshow(TOF,jet,'XData',[0 size(inflpt,2)],'YData',[size(inflpt,1) 0]);
+imjet.CDataMapping = "scaled"; title("Labeled");
+exportgraphics(gcf,strcat('Processed\',fileName,'.png'),'Resolution',300);
+end
+%{
 % Save TOF and inflection points to .mat file
 if saveTOF == true
     save(outFileTOF,'TOF','-mat');
 end
 
 if saveInflectionPts == true
-    save(outFileInflectionPts,'inflectionpts','-mat');
+    save(outFileInflectionPts,'inflpt','-mat');
 end
 
 plotTOF = zeros(385,1190);
@@ -120,3 +186,4 @@ ax = gca;
 exportgraphics(ax,strcat('NewFigures\',fileName,'.png'),'Resolution',300);
 
 end
+%}

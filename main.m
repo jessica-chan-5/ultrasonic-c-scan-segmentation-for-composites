@@ -96,7 +96,7 @@ numFiles = length(fileNames);
 %% Read in C-Scans
 
 % Uncomment when need to convert additional .csv files
-%%{
+%{
 fprintf("==============================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 
@@ -110,7 +110,7 @@ fprintf("\nFinished converting all C-scan .csv files!\n\n")
 
 %% Process C-Scans and calculate raw TOF
 
-%%{
+%{
 fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to raw TOF for:\n\n");
 
@@ -140,8 +140,8 @@ fprintf("Processed TOF for:\n\n");
 % TOF = cell(numFiles,1);
 inflectionpts = cell(numFiles,1);
 
-% for i = 1:numFiles
-for i = 25
+for i = 1:numFiles
+% for i = 7
     tic;
     [~,inflectionpts{i}] = aScanLayers(fileNames(i),outFolder,dataPtsPerAScan,saveTOF,saveInflectionPts);
     disp(fileNames(i));
