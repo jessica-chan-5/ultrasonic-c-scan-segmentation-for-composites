@@ -1,5 +1,5 @@
 function [TOF,inflpt] = aScanLayers(fileName,outFolder,...
-    dataPtsPerAScan,saveTOF,saveInflectionPts)
+    dataPtsPerAScan,saveTOF,saveInflectionPts,modeThresh)
 
 % Concatenate file names/paths
 inFile = strcat(outFolder,"\",fileName,'-fits.mat');
@@ -67,6 +67,7 @@ inflpt(end,:) = 0;
 inflpt(:,end) = 0;
 
 test = true; % Testing ====================================================
+dispFig = 'off';
 width = size(inflpt,1);
 height = size(inflpt,2);
 
@@ -74,13 +75,13 @@ height = size(inflpt,2);
 inflpt(numPeaks < 2) = 1;
 
 if test == true
-    figure('visible','on');
+    figure('visible',dispFig);
     imjet = imshow(inflpt,gray,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Inflection Points"); 
 end
 
 if test == true
-    figure('visible','on');
+    figure('visible',dispFig);
     subplot(1,3,1); imjet = imshow(inflpt,gray,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Original"); 
 end
@@ -111,7 +112,7 @@ end
 % Flood-fill boundary
 concFill = imfill(concBound,4);
 if test == true
-    figure('visible','on');
+    figure('visible',dispFig);
     subplot(1,2,1); imjet = imshow(concFill,gray,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Mask");
 end
@@ -149,7 +150,7 @@ J = bwmorph(J,'clean',inf); % Remove isolated pixels
 % Add any missing zero TOF values
 J(numPeaks < 2) = 1;
 if test == true
-    figure('visible','on');
+    figure('visible',dispFig);
     subplot(1,4,1); imjet = imshow(inflpt,gray,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Original");
     subplot(1,4,2); imjet = imshow(J,gray,'XData',[0 height],'YData',[width 0]);
@@ -171,7 +172,7 @@ for i = 1:n
     areaInd = sub2ind(size(L),areaI,areaJ);
     areaMode = mode(round(unprocessedTOF(areaInd),2),'all');
     for k = 1:length(areaI)
-        if abs(TOF(areaI(k),areaJ(k)) - areaMode) < 0.14
+        if abs(TOF(areaI(k),areaJ(k)) - areaMode) < modeThresh
             TOF(areaI(k),areaJ(k)) = areaMode;
         end
     end
@@ -195,7 +196,18 @@ if saveInflectionPts == true
     save(outFileInflectionPts,'inflpt','-mat');
 end
 
-figure('visible','on');
+if test == true
+    figure('Visible',dispFig);
+    subplot(1,2,1); imjet = imshow(unprocessedTOF,jet,'XData',[0 height],'YData',[width 0]);
+    imjet.CDataMapping = "scaled"; title("Unprocessed");
+    exportgraphics(gcf,strcat('Processed\',fileName,'.png'),'Resolution',300);
+    subplot(1,2,2); imjet = imshow(TOF,jet,'XData',[0 height],'YData',[width 0]);
+    imjet.CDataMapping = "scaled"; title("Processed");
+    sgtitle(fileName);
+    exportgraphics(gcf,strcat('Comparison\',fileName,'.png'),'Resolution',300);
+end
+
+figure('visible',dispFig);
 imjet = imshow(TOF,jet,'XData',[0 height],'YData',[width 0]);
 imjet.CDataMapping = "scaled";
 ax = gca;
