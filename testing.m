@@ -14,9 +14,8 @@ load(strcat(fileName,"-TOF"));
 %% Load spline fits
 load(strcat(fileName,"-fits"));
 %% Plot imshow of TOF w/ jet colormap
-figure; imjet = imshow(TOF,jet,'XData',[0 vertScale],'YData',[row 0]);
+figure; imjet = imshow(rawTOF,jet,'XData',[0 238],'YData',[385 0]);
 imjet.CDataMapping = "scaled";
-title(strcat("TOF: ",sampleName));
 %% Plot filled contor of TOF
 figure; contourf(TOF);
 title(strcat("Contour TOF: ",sampleName));
