@@ -140,35 +140,36 @@ fprintf("Processed TOF for:\n\n");
 % TOF = cell(numFiles,1);
 inflectionpts = cell(numFiles,1);
 hi = 0.25;
-lo = 0.14;
+md = 0.14;
+lo = 0.06;
 modeThresh = [hi % 1
               hi % 2
               hi % 3
-              lo % 4 
+              hi % 4 
               hi % 5
-              hi % 6
-              lo % 7
-              lo % 8
-              lo % 9
+              md % 6
+              hi % 7
+              hi % 8
+              md % 9
               hi % 10
               hi % 11
-              hi % 12
-              hi % 13
-              hi % 14
-              hi % 15
-              lo % 16
-              lo % 17
+              md % 12
+              lo % 13
+              lo % 14
+              lo % 15
+              md % 16
+              md % 17
               hi % 18
               hi % 19
               hi % 20
               hi % 21
               hi % 22
               hi % 23
-              lo % 24
-              lo % 25
-              lo]; % 26
+              md % 24
+              md % 25
+              hi]; % 26
 % for i = 1:numFiles
-for i = 9
+for i = [4, 8]
     tic;
     [~,inflectionpts{i}] = aScanLayers(fileNames(i),outFolder,dataPtsPerAScan,saveTOF,saveInflectionPts,modeThresh(i));
     disp(fileNames(i));

@@ -30,7 +30,7 @@ locs = cell(row,col);
 
 % Sensitivity parameters
 minPeakProm1 = 0.03;
-minPeakProm2 = 0.015; % Testing ============================================
+minPeakProm2 = 0.013; % Testing ============================================
 peakThresh = 0.04;
 maxPeakWidth = 0.75;
 
@@ -86,17 +86,23 @@ if test == true
     imjet.CDataMapping = "scaled"; title("Original"); 
 end
 
-% Create concave hull of damage area
-concHull = bwmorph(inflpt,'spur',inf); % Remove spurs
-if test == true
-    subplot(1,3,2); imjet = imshow(concHull,gray,'XData',[0 height],'YData',[width 0]);
-    imjet.CDataMapping = "scaled"; title("Spur");
-end
+concHull = inflpt;
 
+% Create concave hull of damage area
 concHull = bwmorph(concHull,'clean',inf); % Remove isolated pixels
 if test == true
-    subplot(1,3,3); imjet = imshow(concHull,gray,'XData',[0 height],'YData',[width 0]);
+    subplot(1,3,2); imjet = imshow(concHull,gray,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Clean");
+end
+
+if strcmp(fileName,'CSAI-RPR-H-20J-2-waveform-CH1') == true
+    se90 = strel('line',2,90);
+    concHull = imclose(concHull,se90);
+end
+concHull = bwmorph(concHull,'spur',inf); % Remove spurs
+if test == true
+    subplot(1,3,3); imjet = imshow(concHull,gray,'XData',[0 height],'YData',[width 0]);
+    imjet.CDataMapping = "scaled"; title("Spur");
     exportgraphics(gcf,strcat('ConcaveHulls\',fileName,'.png'),'Resolution',300);
 end
 
@@ -128,8 +134,19 @@ end
 J = inflpt & concFill;
 
 % Close gaps in inflection points using morphological operations
+
 J = bwmorph(J,'clean',inf);
 J = bwmorph(J,'bridge',inf); % Remove isolated pixels
+
+if strcmp(fileName,'CSAI-RPR-S-20J-2-backside-CH1') == true
+    se45 = strel('line',6,-45);
+    J = imclose(J,se45);
+end
+
+if strcmp(fileName,'CSAI-RPR-S-15J-2-backside-CH1') == true
+    se45 = strel('line',6,45);
+    J = imclose(J,se45);
+end
 
 % Close w/ 2 independent operations
 % se0 = strel('line',2,45); 
@@ -200,17 +217,17 @@ if test == true
     figure('Visible',dispFig);
     subplot(1,2,1); imjet = imshow(unprocessedTOF,jet,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Unprocessed");
-    exportgraphics(gcf,strcat('Processed\',fileName,'.png'),'Resolution',300);
+    exportgraphics(gcf,strcat('NewFigures\',fileName,'.png'),'Resolution',300);
     subplot(1,2,2); imjet = imshow(TOF,jet,'XData',[0 height],'YData',[width 0]);
     imjet.CDataMapping = "scaled"; title("Processed");
     sgtitle(fileName);
     exportgraphics(gcf,strcat('Comparison\',fileName,'.png'),'Resolution',300);
 end
 
-figure('visible',dispFig);
-imjet = imshow(TOF,jet,'XData',[0 height],'YData',[width 0]);
-imjet.CDataMapping = "scaled";
-ax = gca;
-exportgraphics(ax,strcat('NewFigures\',fileName,'.png'),'Resolution',300);
+% figure('visible',dispFig);
+% imjet = imshow(TOF,jet,'XData',[0 height],'YData',[width 0]);
+% imjet.CDataMapping = "scaled";
+% ax = gca;
+% exportgraphics(ax,strcat('NewFigures\',fileName,'.png'),'Resolution',300);
 
 end
