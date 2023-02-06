@@ -1,14 +1,42 @@
 %% Clear workspace
 close all; clearvars; format compact;
 
+%% C-scan .csv file names
+
+panelType = ["BL","CONT","RPR"];
+impactEnergy = ["10","15","20"];
+n = length(impactEnergy);
+m = length(panelType);
+fileNames = strings([n*m*2,1]);
+count = 0;
+for i = 1:n
+    for j = 1:m
+        count = count + 1;
+        fileNames(count) = strcat(panelType(j),"-S-",...
+            impactEnergy(i),"J-2");
+        fileNames(count+n*m) = strcat(panelType(j),"-S-",...
+            impactEnergy(i),"J-2-back");
+    end
+end
+miscFileNames = ["BL-H-15J-1";
+                 "CONT-H-10J-2";"CONT-H-10J-3";
+                 "CONT-H-20J-1";"CONT-H-20J-2";"CONT-H-20J-3";
+                  "RPR-H-20J-2";"RPR-H-20J-3"];
+fileNames = [miscFileNames; fileNames];
+numFiles = length(fileNames);
+
 %% Function inputs
 
-% .csv file parameters
-delimiter = "   ";   % Delimiter in .csv file
-
-% Folder names
-inFolder  = "Input";  % .csv C-scan file location
-outFolder = "Output"; % .mat processed file output location
+% READCSCAN options =======================================================
+runcscan   = true;       % Run readcscan?
+cscanfiles = 1:numFiles; % Indices of files to read
+% READCSCAN inputs --------------------------------------------------------
+delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
+infolder   = "Input";    % Folder location of .csv C-scan input file
+outfolder  = "Output";   % Folder to write .mat C-scan output file
+drow       = 1;          % # rows to down sample
+dcol       = 5;          % # col to down sample
+% END READCSCAN____________________________________________________________
 
 % Raw c-scan parameters
 dt           = 1/50;  % Sampling period [us]
@@ -49,68 +77,26 @@ saveOutput   = true;
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
 
-% fileNames = ["LV-162-WhiteSide-CH1"];
-
-%% Input/output file names (user specific)
-
-panelType = ["BL","CONT","RPR"];
-impactEnergy = ["10","15","20"];
-
-n = length(impactEnergy);
-m = length(panelType);
-
-%%{ 
-
-fileNames = strings([n*m*2,1]);
-
-% Concat file names
-count = 0;
-for i = 1:n
-    for j = 1:m
-        count = count + 1;
-        fileNames(count) = ...
-            strcat("CSAI-",panelType(j),"-S-",impactEnergy(i),"J-2-CH1");
-        fileNames(count+n*m) = ...
-            strcat("CSAI-",panelType(j),"-S-",impactEnergy(i),"J-2-backside-CH1");
-    end
-end
-
-%}
-
-% "Hard" panel samples can be included as extra test cases
-%%{
-miscFileNames = ["CSAI-BL-H-15J-1-waveform-CH1";
-                 "CSAI-CONT-H-10J-2-waveform-CH1";
-                 "CSAI-CONT-H-10J-3-waveform-CH1";
-                 "CSAI-CONT-H-20J-1-waveform-CH1";
-                 "CSAI-CONT-H-20J-2-waveform-CH1";
-                 "CSAI-CONT-H-20J-3-waveform-CH1";
-                 "CSAI-RPR-H-20J-2-waveform-CH1";
-                 "CSAI-RPR-H-20J-3-waveform-CH1"];
-
-fileNames = [miscFileNames; fileNames];
-%}
-
-numFiles = length(fileNames);
-
 %% Read C-scans from .csv file(s)
+% Note: parfor results in file processing to complete out of order
 
-fprintf("==============================================\n\n")
+if runcscan == true
+tic
+fprintf("READCSCAN=====================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
-
-for i = 1:numFiles
-    readcscan(fileNames(i),delimiter,inFolder,outFolder);
-    disp(fileNames(i));
+parfor i = cscanfiles
+    readcscan(fileNames(i),delim,infolder,outfolder,drow,dcol);
+    disp(strcat(num2str(i),'.',fileNames(i)));
 end
-
 fprintf("\nFinished converting all C-scan .csv files!\n\n")
-
-%% Process C-Scans and calculate raw TOF
-
+sec = toc;
+disp('Elapsed time is:')
+disp(duration(0,0,sec))
+end
+%% Spline fit A-scans & calculate raw TOF
 %{
 fprintf("==============================================\n\n")
 fprintf("Processed C-scans and converted to raw TOF for:\n\n");
-
 
 cropCoord = cell(1,numFiles);
 rawTOF = cell(1,numFiles);
@@ -126,11 +112,10 @@ for i = 1:numFiles
 end
 
 fprintf("\nFinished processing all C-scan .mat files.\n\n")
-%}
 
 %% Process TOF
 
-%%{
+%{
 fprintf("==============================================\n\n")
 fprintf("Processed TOF for:\n\n");
 
@@ -168,7 +153,7 @@ modeThresh = [hi % 1
 % for i = 1:numFiles
 for i = [4, 8]
     tic;
-    [~,inflectionpts{i}] = aScanLayers(fileNames(i),outFolder,dataPtsPerAScan,saveTOF,saveInflectionPts,modeThresh(i));
+    [~,inflectionpts{i}] = aScanLayers(fileNames(i),outfolder,dataPtsPerAScan,saveTOF,saveInflectionPts,modeThresh(i));
     disp(fileNames(i));
     toc
 end
@@ -197,3 +182,4 @@ fprintf("==============================================\n\n")
 %% Combine front and back to create hybrid C-scans
 
 %% Plot 3D and layer by layer
+%}
