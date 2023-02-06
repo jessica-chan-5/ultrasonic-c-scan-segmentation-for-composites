@@ -224,10 +224,4 @@ if test == true
     exportgraphics(gcf,strcat('Comparison\',fileName,'.png'),'Resolution',300);
 end
 
-% figure('visible',dispFig);
-% imjet = imshow(TOF,jet,'XData',[0 height],'YData',[width 0]);
-% imjet.CDataMapping = "scaled";
-% ax = gca;
-% exportgraphics(ax,strcat('NewFigures\',fileName,'.png'),'Resolution',300);
-
 end

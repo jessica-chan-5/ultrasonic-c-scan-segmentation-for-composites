@@ -1,5 +1,5 @@
 %% Clear workspace
-close all; clear; format compact;
+close all; clearvars; format compact;
 
 %% Function inputs
 
@@ -93,20 +93,17 @@ fileNames = [miscFileNames; fileNames];
 
 numFiles = length(fileNames);
 
-%% Read in C-Scans
+%% Read C-scans from .csv file(s)
 
-% Uncomment when need to convert additional .csv files
-%{
 fprintf("==============================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 
 for i = 1:numFiles
-    cScanRead(fileNames(i),delimiter,inFolder,outFolder);
+    readcscan(fileNames(i),delimiter,inFolder,outFolder);
     disp(fileNames(i));
 end
 
 fprintf("\nFinished converting all C-scan .csv files!\n\n")
-%}
 
 %% Process C-Scans and calculate raw TOF
 
