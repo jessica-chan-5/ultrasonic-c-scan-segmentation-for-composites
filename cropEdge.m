@@ -12,7 +12,7 @@ for j = 1:length(searchj)
             point = cScan(searchj(j),searchi(i),:);
         end
 
-        TOF(i,j) = calcTOF(point,t,1,1,minprom,noisethresh,maxwidth);
+        TOF(i,j) = calctof(point,t,1,1,minprom,noisethresh,maxwidth);
 
         if abs(baseTOF - TOF(i,j)) >= cropThresh
             edgeCandidates(j) = i;

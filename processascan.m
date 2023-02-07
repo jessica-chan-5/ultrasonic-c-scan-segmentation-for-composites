@@ -8,7 +8,7 @@ function processascan(filename,outfolder,dt,bounds,incr,baserow, ...
 %    and associated peak/location info for segmentcscan.
 % 
 %    Inputs:
-%
+% 
 %    FILENAME   : Name of sample, same as readcscan
 %    OUTFOLDER  : Folder path to .mat output files
 %    DT         : Sampling period in microseconds
@@ -54,7 +54,7 @@ l2c   = l2r(1:halfx);
 r2c   = l2r(end:-1:halfx+1);
 
 % Calculate baseline TOF
-temptof = calcTOF(cscan,t,baserow,basecol,minprom,noisethresh,maxwidth);
+temptof = calctof(cscan,t,baserow,basecol,minprom,noisethresh,maxwidth);
 basetof = mode(temptof,'all');
 
 % Search for start row scanning from top to center row
@@ -98,7 +98,7 @@ if endcol > col
 end
 
 % Calculate raw TOF and corresponding peak/location info in crop region
-[croptof,peaks,locs,wide,npeaks] = calcTOF(cscan,t,startrow:endrow, ...
+[croptof,peaks,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
     startcol:endcol,minprom,noisethresh,maxwidth); %#ok<ASGLU> 
 rawtof = zeros(row,col);
 rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end); %#ok<NASGU> 

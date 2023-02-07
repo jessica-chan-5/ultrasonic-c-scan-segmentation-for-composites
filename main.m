@@ -55,16 +55,6 @@ noisethresh = 0.01;    % If average signal lower, then pt is not processed
 maxwidth    = 0.75;    % Max width for a peak to be marked as wide
 % END PROCESSASCAN ________________________________________________________
 
-dataPtsPerAScan = 205;
-
-% Output requests
-saveMat      = true;  % Save TOF mat?
-saveFits     = true;  % Save fits mat?
-saveFig      = true;  % Save segmented figure?
-saveTOF      = true;
-saveInflectionPts = true; % temp testing
-saveOutput   = true;
-
 % Plate properties
 numLayers    = 25;    % # of layers in plate
 plateThick   = 3.3;   % plate thickness [mm]
