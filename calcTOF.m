@@ -1,19 +1,18 @@
-function [rawTOF,fits] = calcTOF(cScan,t,row,col)
+function [rawTOF,peaks,locs,wide,npeaks] = calcTOF(cScan,t,row,col,minprom,noisethresh,maxwidth)
 
 % Initialize values
 rawTOF = zeros(length(row),length(col));
-
-% Sensitivity parameters
-% minPeakPromPeak = 0.02; % For finding peaks of spline fit
-minPeakPromPeak = 0.05; % For finding peaks of spline fit
-noiseThresh = 0.01; % To check if signal is above noise threshold
+peaks = cell(length(row),length(col));
+locs = cell(length(row),length(col));
+wide = zeros(length(row),length(col));
+npeaks = zeros(length(row),length(col));
 
 for i = 1:length(row)
     
     cScanSlice = cScan(row(i),:,:);
 
     parfor j = 1:length(col)
-        if mean(cScanSlice(:,col(j),:)) > noiseThresh %#ok<PFBNS> 
+        if mean(cScanSlice(:,col(j),:)) > noisethresh %#ok<PFBNS> 
 
             point = squeeze(cScanSlice(:,col(j),:))';
     
@@ -26,22 +25,26 @@ for i = 1:length(row)
 
             
             % Fit smoothing spline to find peak values
-%             fits{i,j} = fit(l',p',"smoothingspline");
-              fits{i,j} = makima(l',p');
-              
+%             fit = makima(l',p');
+            fits = fit(l',p','smoothingspline');
+
             % Evaluate smoothing spline for t
-%             pfit = feval(fits{i,j},t);
-              pfit = ppval(fits{i,j},t);
+%             pfit = ppval(fits,t);
+            pfit = feval(fits,t);
 
             % Find and save locations of peaks in previously found peaks
-            [peak,loc] = findpeaks(pfit,t,'MinPeakProminence',minPeakPromPeak);
-        
+            [peaks{i,j}, locs{i,j}, width] = findpeaks(pfit,t,'MinPeakProminence',minprom);
+            
+            if length(width) >= 1 && width(1) > maxwidth
+                wide(i,j) = true;
+            end
+
             % Count number of peaks
-            numPeaks = length(peak);
+            npeaks(i,j) = length(peaks{i,j});
     
-            if numPeaks > 1
-                [~, loc2i] = max(peak(2:end));
-                rawTOF(i,j) = loc(loc2i+1)-loc(1);
+            if npeaks(i,j) > 1
+                [~, loc2i] = max(peaks{i,j}(2:end));
+                rawTOF(i,j) = locs{i,j}(loc2i+1)-locs{i,j}(1);
             end
         end
     end

@@ -1,5 +1,4 @@
-function [TOF,inflpt] = aScanLayers(fileName,outFolder,...
-    dataPtsPerAScan,saveTOF,saveInflectionPts,modeThresh)
+function [TOF,inflpt] = aScanLayers(fileName,outFolder,saveTOF,saveInflectionPts,modeThresh)
 
 % Concatenate file names/paths
 inFile = strcat(outFolder,"\",fileName,'-fits.mat');
@@ -15,11 +14,6 @@ fits = fits(:,selectCol);
 row = size(fits,1);
 col = size(fits,2);
 
-% Time vector
-dt = 0.02;
-tEnd = (dataPtsPerAScan-1)*dt;
-t = 0:dt:tEnd;
-
 % Initialize values
 TOF = zeros(row,col);
 numPeaks = TOF;
@@ -29,30 +23,8 @@ peaks = cell(row,col);
 locs = cell(row,col);
 
 % Sensitivity parameters
-minPeakProm1 = 0.03;
 minPeakProm2 = 0.013; % Testing ============================================
 peakThresh = 0.04;
-maxPeakWidth = 0.75;
-
-for i = 1:row    
-    for k = 1:col
-        fit = fits{i,k};
-
-        if isempty(fit) == false
-            % Evaluate smoothing spline for t
-            pfit = feval(fit,t);
-            % Find and save locations of peaks in spline fit
-            [peaks{i,k}, locs{i,k}, width] = findpeaks(pfit,t,'MinPeakProminence',minPeakProm1,'WidthReference','halfheight');
-            
-            if length(width) >= 1 && width(1) > maxPeakWidth
-                widePeak(i,k) = true;
-            end
-        
-            % Count number of peaks
-            numPeaks(i,k) = length(peaks{i,k});
-        end
-    end
-end
 
 [peak2,unprocessedTOF,locs2irow] = labelPeaks('row',row,col,locs,peaks,numPeaks,widePeak,peakThresh);
 [~,~,locs2icol] = labelPeaks('col',row,col,locs,peaks,numPeaks,widePeak,peakThresh);

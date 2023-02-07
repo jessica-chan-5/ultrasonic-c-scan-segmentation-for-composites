@@ -1,4 +1,4 @@
-function edgeIndex = cropEdge(baseTOF,searchi,searchj,cScan,t,cropThresh,searchOrien)
+function edgeIndex = cropEdge(baseTOF,searchi,searchj,cScan,t,cropThresh,searchOrien,minprom,noisethresh,maxwidth)
 
 edgeCandidates = NaN(1,length(searchj));
 ptTOF = NaN(1,length(searchj));
@@ -12,7 +12,7 @@ for j = 1:length(searchj)
             point = cScan(searchj(j),searchi(i),:);
         end
 
-        TOF(i,j) = calcTOF(point,t,1,1);
+        TOF(i,j) = calcTOF(point,t,1,1,minprom,noisethresh,maxwidth);
 
         if abs(baseTOF - TOF(i,j)) >= cropThresh
             edgeCandidates(j) = i;

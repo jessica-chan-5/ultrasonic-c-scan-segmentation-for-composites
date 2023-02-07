@@ -7,14 +7,14 @@ panelType = ["BL","CONT","RPR"];
 impactEnergy = ["10","15","20"];
 n = length(impactEnergy);
 m = length(panelType);
-fileNames = strings([n*m*2,1]);
+filenames = strings([n*m*2,1]);
 count = 0;
 for i = 1:n
     for j = 1:m
         count = count + 1;
-        fileNames(count) = strcat(panelType(j),"-S-",...
+        filenames(count) = strcat(panelType(j),"-S-",...
             impactEnergy(i),"J-2");
-        fileNames(count+n*m) = strcat(panelType(j),"-S-",...
+        filenames(count+n*m) = strcat(panelType(j),"-S-",...
             impactEnergy(i),"J-2-back");
     end
 end
@@ -22,13 +22,13 @@ miscFileNames = ["BL-H-15J-1";
                  "CONT-H-10J-2";"CONT-H-10J-3";
                  "CONT-H-20J-1";"CONT-H-20J-2";"CONT-H-20J-3";
                   "RPR-H-20J-2";"RPR-H-20J-3"];
-fileNames = [miscFileNames; fileNames];
-numFiles = length(fileNames);
+filenames = [miscFileNames; filenames];
+numFiles = length(filenames);
 
 %% Function inputs
 
 % READCSCAN options =======================================================
-runcscan   = true;       % Run readcscan?
+runcscan   = false;      % Run readcscan?
 cscanfiles = 1:numFiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
 delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
@@ -38,32 +38,24 @@ drow       = 1;          % # rows to down sample
 dcol       = 5;          % # col to down sample
 % END READCSCAN____________________________________________________________
 
-% Raw c-scan parameters
-dt           = 1/50;  % Sampling period [us]
-% dt           = 1/100;  % Sampling period [us]
-% scaleVal     = 5;     % equal to #col/"Scanning Length" in header
-scaleVal = 1;
-scaleDir     = 'col'; % Direction to scale along
-dataPtsPerAScan = 205;
-% dataPtsPerAScan = 535;
+% PROCESSASCAN options ====================================================
+runascan   = true;       % Run processascan?
+ascanfiles = 1;%:numFiles; % Indices of files to read
+% PROCESSASCAN inputs -----------------------------------------------------
+dt          = 1/50;    % Sampling period in microseconds
+bounds      = [30 239 30 385];   % Indices of search area for bounding box
+                                 % in format: [startX endX startY endY]
+incr        = [20 20]; % Increment for bounding box search in indices
+baserow     = 50:5:60; % Vector of row indices to calculate baseline TOF
+basecol     = 10:5:20; % Vector of cols indices to calculate baseline TOF
+cropthresh  = 0.2;     % If abs(basetof-tof(i)) > cropthresh, pt is damaged
+pad         = 0.5;     % (1+pad)*incr added to calculated bounding box
+minprom     = 0.03;    % Min prominence for a peak to be identified
+noisethresh = 0.01;    % If average signal lower, then pt is not processed
+maxwidth    = 0.75;    % Max width for a peak to be marked as wide
+% END PROCESSASCAN ________________________________________________________
 
-% C-scan processing parameters
-xStartI      = 125;
-yStartI      = 30;
-xEndI        = 385;
-yEndI        = 1190;
-% xStartI    = 81;
-% xEndI      = 336;
-% yStartI    = 11;
-% yEndI      = 552;
-searchArea   = [xStartI xEndI yStartI yEndI];
-cropIncr     = 20;
-baseRow      = 50:5:60;
-baseCol      = 10:2:14;
-% baseRow      = 470:5:480;
-% baseCol      = 160:5:170;
-cropThresh   = 0.2;   % Crop threshold greater than abs(baseTOF - tof(i))
-padExtra     = 0.5;  % Extra padding on all 4 crop edges
+dataPtsPerAScan = 205;
 
 % Output requests
 saveMat      = true;  % Save TOF mat?
@@ -85,8 +77,8 @@ tic
 fprintf("READCSCAN=====================================\n\n")
 fprintf("Converted C-scans from .csv to .mat files for:\n\n");
 parfor i = cscanfiles
-    readcscan(fileNames(i),delim,infolder,outfolder,drow,dcol);
-    disp(strcat(num2str(i),'.',fileNames(i)));
+    readcscan(filenames(i),delim,infolder,outfolder,drow,dcol);
+    disp(strcat(num2str(i),'.',filenames(i)));
 end
 fprintf("\nFinished converting all C-scan .csv files!\n\n")
 sec = toc;
@@ -94,25 +86,26 @@ disp('Elapsed time is:')
 disp(duration(0,0,sec))
 end
 %% Spline fit A-scans & calculate raw TOF
-%{
+
+if runascan == true
+tic
 fprintf("==============================================\n\n")
-fprintf("Processed C-scans and converted to raw TOF for:\n\n");
-
-cropCoord = cell(1,numFiles);
-rawTOF = cell(1,numFiles);
-fits = cell(1,numFiles);
-
-for i = 1:numFiles
+fprintf("Processed A-scans and converted to raw TOF for:\n\n");
+for i = ascanfiles
     tic;
-    [~,~,cropCoord{i}] = ...
-    aScanProcessing(fileNames{i},outFolder,dt,scaleVal,scaleDir,searchArea,cropIncr, ...
-    baseRow,baseCol,cropThresh,padExtra,saveOutput);
-    disp(fileNames(i));
+    processascan(filenames(i),outfolder,dt,bounds,incr,baserow, ...
+    basecol,cropthresh,pad,minprom,noisethresh,maxwidth)
+    disp(filenames(i));
     toc
 end
-
 fprintf("\nFinished processing all C-scan .mat files.\n\n")
+fprintf("\nFinished converting all C-scan .csv files!\n\n")
+sec = toc;
+disp('Elapsed time is:')
+disp(duration(0,0,sec))
+end
 
+%{
 %% Process TOF
 
 %{

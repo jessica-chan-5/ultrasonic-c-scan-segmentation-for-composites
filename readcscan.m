@@ -54,7 +54,7 @@ end
 cscan = cscan(saverow,savecol,:);
 
 % Save 3D matrix to .mat file
-outpath = strcat(outfolder,'\',filename,'-cscan.mat');
+outpath = strcat(outfolder,'\','cscan',filename,'-cscan.mat');
 save(outpath,'cscan','-mat');
 
 end
