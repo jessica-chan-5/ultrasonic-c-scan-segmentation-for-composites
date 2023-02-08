@@ -1,4 +1,4 @@
-function processascan(filename,outfolder,dt,bounds,incr,baserow, ...
+function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
     basecol,cropthresh,pad,minprom,noisethresh,maxwidth)
 %PROCESSASCAN Process A-scans to calculate TOF info.
 %    PROCESSASCAN(filename,outfolder,dt,bounds,incr,baserow,basecol,
@@ -11,6 +11,7 @@ function processascan(filename,outfolder,dt,bounds,incr,baserow, ...
 % 
 %    FILENAME   : Name of sample, same as readcscan
 %    OUTFOLDER  : Folder path to .mat output files
+%    FIGFOLDER  : Folder path to .fig and .png files
 %    DT         : Sampling period in microseconds
 %    BOUNDS     : Indices of search area for damage bounding box in format:
 %                 [startX endX startY endY]
@@ -39,16 +40,14 @@ startx = bounds(1);
 endx   = bounds(2);
 starty = bounds(3);
 endy   = bounds(4);
-dx     = incr(1);
-dy     = incr(2);
 
 % Calculate horizontal and vertical search indices
 % Note: t=top,b=bottom,l=left,r=right,c=center
-t2b   = starty:dy:endy;      % hor
+t2b   = starty:incr:endy;      % hor
 halfy = floor(length(t2b)/2);
 t2c   = t2b(1:halfy);
 b2c   = t2b(end:-1:halfy+1);
-l2r   = startx:dx:endx;      % ver
+l2r   = startx:incr:endx;      % ver
 halfx = floor(length(l2r)/2);
 l2c   = l2r(1:halfx);
 r2c   = l2r(end:-1:halfx+1);
@@ -113,5 +112,16 @@ for i = 1:length(saveVar)
         saveVar(i),'.mat');
     save(outfile,saveVar(i),'-mat');
 end
+
+% Save png and figure of raw TOF
+width = size(rawtof,1);
+height = size(rawtof,2);
+fig = figure('visible','off');
+imjet = imshow(rawtof,jet,'XData',[0 height],'YData',[width 0]);
+imjet.CDataMapping = "scaled"; title(filename);
+name = strcat(figfolder,"\rawtof\",filename,'-rawtof');
+fig.CreateFcn = 'set(gcf,''visible'',''on'')';
+savefig(fig,strcat(name,'.fig'));
+exportgraphics(gcf,strcat(name,'.png'),'Resolution',300);
 
 end

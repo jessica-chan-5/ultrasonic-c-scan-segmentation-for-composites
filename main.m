@@ -29,7 +29,7 @@ numFiles = length(filenames);
 
 % READCSCAN options =======================================================
 runcscan   = false;      % Run readcscan?
-cscanfiles = 1:numFiles; % Indices of files to read
+cscanfiles = 1;%:numFiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
 delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
 infolder   = "Input";    % Folder location of .csv C-scan input file
@@ -40,12 +40,13 @@ dcol       = 5;          % # col to down sample
 
 % PROCESSASCAN options ====================================================
 runascan   = true;       % Run processascan?
-ascanfiles = 1;%:numFiles; % Indices of files to read
+ascanfiles = 5;%1:numFiles; % Indices of files to read
 % PROCESSASCAN inputs -----------------------------------------------------
+figfolder  = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;    % Sampling period in microseconds
 bounds      = [30 239 30 385];   % Indices of search area for bounding box
                                  % in format: [startX endX startY endY]
-incr        = [20 20]; % Increment for bounding box search in indices
+incr        = 10;      % Increment for bounding box search in indices
 baserow     = 50:5:60; % Vector of row indices to calculate baseline TOF
 basecol     = 10:5:20; % Vector of cols indices to calculate baseline TOF
 cropthresh  = 0.2;     % If abs(basetof-tof(i)) > cropthresh, pt is damaged
@@ -64,11 +65,11 @@ plateThick   = 3.3;   % plate thickness [mm]
 
 if runcscan == true
 tic
-fprintf("READCSCAN=====================================\n\n")
-fprintf("Converted C-scans from .csv to .mat files for:\n\n");
+fprintf("READCSCAN======================================\n\n")
+fprintf("Converting C-scans from .csv to .mat files for:\n\n");
 parfor i = cscanfiles
-    readcscan(filenames(i),delim,infolder,outfolder,drow,dcol);
     disp(strcat(num2str(i),'.',filenames(i)));
+    readcscan(filenames(i),delim,infolder,outfolder,drow,dcol);
 end
 fprintf("\nFinished converting all C-scan .csv files!\n\n")
 sec = toc;
@@ -79,14 +80,12 @@ end
 
 if runascan == true
 tic
-fprintf("==============================================\n\n")
-fprintf("Processed A-scans and converted to raw TOF for:\n\n");
+fprintf("================================================\n\n")
+fprintf("Processing A-scans and converted to raw TOF for:\n\n");
 for i = ascanfiles
-    tic;
-    processascan(filenames(i),outfolder,dt,bounds,incr,baserow, ...
+    disp(strcat(num2str(i),'.',filenames(i)));
+    processascan(filenames(i),outfolder,figfolder,dt,bounds,incr,baserow, ...
     basecol,cropthresh,pad,minprom,noisethresh,maxwidth)
-    disp(filenames(i));
-    toc
 end
 fprintf("\nFinished processing all C-scan .mat files.\n\n")
 fprintf("\nFinished converting all C-scan .csv files!\n\n")

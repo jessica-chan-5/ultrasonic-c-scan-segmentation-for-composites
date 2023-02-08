@@ -47,6 +47,6 @@ for j = 1:length(searchj)
 end
 
 % Pick smallest value from row/col candidates as boundary index
-boundi = searchi(min(boundcandidates));
+boundi = searchi(min(unique(boundcandidates)));
 
 end
