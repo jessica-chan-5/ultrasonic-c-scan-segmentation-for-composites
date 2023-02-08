@@ -40,17 +40,17 @@ dcol       = 5;          % # col to down sample
 
 % PROCESSASCAN options ====================================================
 runascan   = true;       % Run processascan?
-ascanfiles = 5;%1:numFiles; % Indices of files to read
+ascanfiles = 1:numFiles; % Indices of files to read
 % PROCESSASCAN inputs -----------------------------------------------------
 figfolder  = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;    % Sampling period in microseconds
-bounds      = [30 239 30 385];   % Indices of search area for bounding box
+bounds      = [30 217 30 350];   % Indices of search area for bounding box
                                  % in format: [startX endX startY endY]
 incr        = 10;      % Increment for bounding box search in indices
 baserow     = 50:5:60; % Vector of row indices to calculate baseline TOF
 basecol     = 10:5:20; % Vector of cols indices to calculate baseline TOF
 cropthresh  = 0.2;     % If abs(basetof-tof(i)) > cropthresh, pt is damaged
-pad         = 0.5;     % (1+pad)*incr added to calculated bounding box
+pad         = 1;     % (1+pad)*incr added to calculated bounding box
 minprom     = 0.03;    % Min prominence for a peak to be identified
 noisethresh = 0.01;    % If average signal lower, then pt is not processed
 maxwidth    = 0.75;    % Max width for a peak to be marked as wide

@@ -117,8 +117,10 @@ end
 width = size(rawtof,1);
 height = size(rawtof,2);
 fig = figure('visible','off');
-imjet = imshow(rawtof,jet,'XData',[0 height],'YData',[width 0]);
-imjet.CDataMapping = "scaled"; title(filename);
+modetof = mode(rawtof(rawtof~=0),'all');
+imjet = imshow(rawtof,[0 modetof+0.1],'XData',[0 height],'YData',[width 0]);
+imjet.CDataMapping = "scaled";
+colormap(jet);
 name = strcat(figfolder,"\rawtof\",filename,'-rawtof');
 fig.CreateFcn = 'set(gcf,''visible'',''on'')';
 savefig(fig,strcat(name,'.fig'));
