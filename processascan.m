@@ -1,5 +1,5 @@
 function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
-    basecol,cropthresh,pad,minprom,noisethresh,maxwidth)
+    basecol,cropthresh,pad,minprom1,noisethresh,maxwidth)
 %PROCESSASCAN Process A-scans to calculate TOF info.
 %    PROCESSASCAN(filename,outfolder,dt,bounds,incr,baserow,basecol,
 %    cropthresh,pad,minprom,noisethresh,maxwidth) Look for damage bounding
@@ -20,7 +20,7 @@ function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
 %    BASECOL    : Vector of cols indices to calculate baseline TOF
 %    CROPTHRESH : If abs(basetof-tof(i)) > cropthresh, point is damaged
 %    PAD        : (1+pad)*incr added to calculated damage bounding box
-%    MINPROM    : Min prominence in findpeaks for a peak to be identified
+%    MINPROM1   : Min prominence in findpeaks for a peak to be identified
 %    NOISETHRESH: If average signal is lower, then point is not processed
 %    MAXWIDTH   : Max width in findpeaks for a peak to be marked as wide
 
@@ -53,14 +53,14 @@ l2c   = l2r(1:halfx);
 r2c   = l2r(end:-1:halfx+1);
 
 % Calculate baseline TOF
-temptof = calctof(cscan,t,baserow,basecol,minprom,noisethresh,maxwidth);
+temptof = calctof(cscan,t,baserow,basecol,minprom1,noisethresh,maxwidth);
 basetof = mode(temptof,'all');
 
 % Search for start row scanning from top to center row
-startrow = findbound(basetof,t2c,l2r,'row',cropthresh,cscan,t,minprom,...
+startrow = findbound(basetof,t2c,l2r,'row',cropthresh,cscan,t,minprom1,...
     noisethresh,maxwidth);
 % Search for end row scanning from bottom to center row
-endrow   = findbound(basetof,b2c,l2r,'row',cropthresh,cscan,t,minprom,...
+endrow   = findbound(basetof,b2c,l2r,'row',cropthresh,cscan,t,minprom1,...
     noisethresh,maxwidth);
 
 % Set row indices to search
@@ -81,10 +81,10 @@ end
 
 % Search for start col scanning from left to center
 startcol = findbound(basetof,l2c,searchrows,'col',cropthresh,cscan,t,...
-    minprom,noisethresh,maxwidth);
+    minprom1,noisethresh,maxwidth);
 % Search for end col scanning from right to center
 endcol   = findbound(basetof,r2c,searchrows,'col',cropthresh,cscan,t,...
-    minprom,noisethresh,maxwidth);
+    minprom1,noisethresh,maxwidth);
 
 % Add padding in horizontal direction
 startcol = startcol - pad;
@@ -98,7 +98,7 @@ end
 
 % Calculate raw TOF and corresponding peak/location info in crop region
 [croptof,peak,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
-    startcol:endcol,minprom,noisethresh,maxwidth); %#ok<ASGLU> 
+    startcol:endcol,minprom1,noisethresh,maxwidth); %#ok<ASGLU> 
 rawtof = zeros(row,col);
 rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
 
@@ -112,16 +112,9 @@ for i = 1:length(savevar)
 end
 
 % Save png and figure of raw TOF
-width = size(rawtof,1);
-height = size(rawtof,2);
+res = 300;
 fig = figure('visible','off');
-modetof = mode(rawtof(rawtof~=0),'all');
-im = imshow(rawtof,[0 modetof+0.1],'XData',[0 height],'YData',[width 0]);
-im.CDataMapping = "scaled";
-colormap(jet);
-name = strcat(figfolder,"\rawtof\",filename,'-rawtof');
-fig.CreateFcn = 'set(gcf,''visible'',''on'')';
-savefig(fig,strcat(name,'.fig'));
-exportgraphics(gcf,strcat(name,'.png'),'Resolution',300);
+implot(rawtof,jet,row,col,filename,true);
+imsave(figfolder,fig,'rawtof',filename,res);
 
 end

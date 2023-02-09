@@ -39,8 +39,8 @@ dcol       = 5;          % # col to down sample
 % END READCSCAN____________________________________________________________
 
 % PROCESSASCAN options ====================================================
-runascan   = true;       % Run processascan?
-ascanfiles = 1;%:numFiles; % Indices of files to read
+runascan   = false;       % Run processascan?
+ascanfiles = 1:numFiles; % Indices of files to read
 % PROCESSASCAN inputs -----------------------------------------------------
 figfolder  = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;    % Sampling period in microseconds
@@ -58,7 +58,7 @@ maxwidth    = 0.75;    % Max width for a peak to be marked as wide
 
 % PROCESSTOF options ======================================================
 runtof   = true;       % Run processtof?
-toffiles = 1;%:numFiles; % Indices of files to read
+toffiles = 1:numFiles; % Indices of files to read
 % PROCESSTOF inputs -------------------------------------------------------
 minprom2   = 0.013;
 peakthresh = 0.04;
@@ -110,12 +110,14 @@ fprintf("Finished processing all C-scan .mat files!\n\n")
 end
 
 %% Process raw TOF
+% Note: parfor results in file processing to complete out of order
 
 if runtof == true
 tic
 fprintf("PROCESSTOF======================================\n\n")
 fprintf("Processed raw TOF for:\n\n");
-for i = 1:numFiles
+parfor i = 1:numFiles
+    disp(strcat(num2str(i),'.',filenames(i)));
     processtof(filenames(i),outfolder,figfolder,minprom2,peakthresh, ...
         modethresh(i));
 end

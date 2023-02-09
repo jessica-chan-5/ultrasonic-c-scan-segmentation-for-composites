@@ -1,18 +1,22 @@
-function processtof(filename,outfolder,figfolder,minprom2, ...
-    peakthresh,modethresh)
-%PROCESSTOF 
+function processtof(filename,outfolder,figfolder,minprom2,peakthresh, ...
+    modethresh)
+%PROCESSTOF Process raw TOF.
 %
 %   PROCESSTOF(filename,outfolder,figurefolder,minprom2,peakthresh,
-%   modethresh)
+%   modethresh) finds inflection points using unique peak labels and peaks
+%   in the graph of second peak magnitude along rows/cols. Using inflection
+%   point map, cleans up, closes, and labels connected regions with
+%   image processing morphological operations. Sets each labeled region to
+%   mode TOF of region if value of TOF at point is within a threshold.
 %
 %   Inputs:
 %
-%   FILENAME:
-%   OUTFOLDER:
-%   FIGUREFOLDER:
-%   MINPROM2:
-%   PEAKTHRESH:
-%   MODETHRESH:
+%   FILENAME  : Name of sample, same as readcscan
+%   OUTFOLDER : Folder path to .mat output files
+%   FIGFOLDER : Folder path to .fig and .png files
+%   MINPROM2  : Min prominence in findpeaks for a peak to be identified
+%   PEAKTHRESH: Threshold of dt for peak to be labeled as unique
+%   MODETHRESH: Threshold for TOF to be set to mode TOF
 
 % Image resolution setting in dpi
 res = 300;
@@ -59,13 +63,13 @@ inflpt(npeaks < 2) = 1;
 
 % Plot and save figure of inflection points
 fig = figure('visible','off');
-implot(inflpt,gray,row,col,filename);
+implot(fig,inflpt,gray,row,col,filename,false);
 imsave(figfolder,fig,"inflpt",filename,res);
 
 % Create concave hull of damage area
 maskinflpt = inflpt;
 maskinflpt = bwmorph(maskinflpt,'clean',inf); % Remove isolated pixels
-if strcmp(filename,'CSAI-RPR-H-20J-2-waveform-CH1') == true
+if strcmp(filename,'RPR-H-20J-2') == true
     se90 = strel('line',2,90);
     maskinflpt = imclose(maskinflpt,se90);
 end
@@ -74,107 +78,91 @@ maskinflpt = bwmorph(maskinflpt,'spur',inf); % Remove spurs
 % Trace exterior boundary, ignore interior holes
 [concBoundC,~] = bwboundaries(maskinflpt,'noholes');
 % Convert boundaries from cell to binary image
-boundary = zeros(size(maskinflpt));
+concbound = zeros(size(maskinflpt));
 for i = 1:length(concBoundC)
     for k = 1:size(concBoundC{i},1)
-        boundary(concBoundC{i}(k,1),concBoundC{i}(k,2)) = 1;
+        concbound(concBoundC{i}(k,1),concBoundC{i}(k,2)) = 1;
     end
 end
 % Flood-fill boundary
-mask = imfill(boundary,4);
-
-% Plot and save modified inflection points, mask, boundary
-figure('visible','off'); subplot(1,3,1);
-im = imshow(maskinflpt,gray,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Mask Inflpts"); 
-subplot(1,3,2); im = imshow(boundary,gray,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Boundary");
-subplot(1,3,3); im = imshow(mask,gray,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Mask");
-name = strcat(figfolder,"\masks\",filename,'-mask');
-fig.CreateFcn = 'set(gcf,''visible'',''on'')';
-savefig(fig,strcat(name,'.fig'));
-exportgraphics(gcf,strcat(name,'.png'),'Resolution',res);
+mask = imfill(concbound,4);
+mask = bwmorph(mask,'clean',inf); % Remove isolated pixels
 
 % Find perimeter using 8 pixel connectivity
-concPerim = bwperim(mask,8);
-subplot(1,2,2); im = imshow(concPerim,gray,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Boundary");
-exportgraphics(gcf,strcat('Masks\',filename,'.png'),'Resolution',res);
+boundary = bwperim(mask,8);
+
+% Plot and save figure of modified inflection points, mask, boundary
+fig = figure('visible','off');
+subp = subplot(1,3,1); implot(subp,inflpt,gray,row,col,"Infl Pts",false);
+subp = subplot(1,3,2); implot(subp,mask,gray,row,col,"Mask",false);
+subp = subplot(1,3,3); implot(subp,boundary,gray,row,col,"Boundary",false);
+imsave(figfolder,fig,'masks',filename,res);
 
 % Apply mask to inflection points map before morphological operations
 J = inflpt & mask;
 
 % Close gaps in inflection points using morphological operations
-
-J = bwmorph(J,'clean',inf);
-J = bwmorph(J,'bridge',inf); % Remove isolated pixels
-
-if strcmp(filename,'CSAI-RPR-S-20J-2-backside-CH1') == true
+J = bwmorph(J,'clean',inf);  % Remove isolated pixels
+J = bwmorph(J,'bridge',inf); % Bridge pixels
+if strcmp(filename,'RPR-S-20J-2-back') == true
     se45 = strel('line',6,-45);
     J = imclose(J,se45);
 end
-if strcmp(filename,'CSAI-RPR-S-15J-2-backside-CH1') == true
+if strcmp(filename,'RPR-S-15J-2-back') == true
     se45 = strel('line',6,45);
     J = imclose(J,se45);
 end
 
 % Remove excess pixels outside concave hull and add outline where missing
-J = J | concPerim;
+J = J | boundary;
 
 % Clean up w/ a few operations
-J = bwmorph(J,'fill'); % Fill in isolated pixels
-J = bwmorph(J,'spur',2); % Remove spurs
+J = bwmorph(J,'fill');      % Fill in isolated pixels
+J = bwmorph(J,'spur',2);    % Remove spurs
 J = bwmorph(J,'clean',inf); % Remove isolated pixels
 
 % Add any missing zero TOF values
-J(nPeaks < 2) = 1;
-figure('visible','off');
-subplot(1,4,1); im = imshow(inflpt,gray,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Original");
-subplot(1,4,2); im = imshow(J,gray,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Processed");
+J(npeaks < 2) = 1;
 
 % Label separate layer regions of C-scan
 [L,n] = bwlabel(uint8(~J),4);
-subplot(1,4,3); im = imshow(L,colorcube,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Labeled");
 
-TOF = unprocessedTOF;
-
+% Apply mode TOF to each labeled region of the C-scan
+tof = rawtof;
 for i = 1:n
     [areaI, areaJ] = find(L==i);
     areaInd = sub2ind(size(L),areaI,areaJ);
-    areaMode = mode(round(unprocessedTOF(areaInd),2),'all');
+    areaMode = mode(round(rawtof(areaInd),2),'all');
     for k = 1:length(areaI)
-        if abs(TOF(areaI(k),areaJ(k)) - areaMode) < modethresh
-            TOF(areaI(k),areaJ(k)) = areaMode;
+        if abs(tof(areaI(k),areaJ(k)) - areaMode) < modethresh
+            tof(areaI(k),areaJ(k)) = areaMode;
         end
     end
 end
 
 % Set numPeaks < 2 and widePeak to be zero TOF
-TOF(nPeaks < 2) = 0;
+tof(npeaks < 2) = 0;
 
-subplot(1,4,4); im = imshow(TOF,jet,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Mode");
-exportgraphics(gcf,strcat('Processed\',filename,'.png'),'Resolution',res);
+% Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
+fig = figure('visible','off');
+subp = subplot(1,4,1); implot(subp,inflpt,gray,row,col,"Original",false);
+subp = subplot(1,4,2); implot(subp,J,gray,row,col,"Processed",false);
+subp = subplot(1,4,3); implot(subp,L,colorcube,row,col,"Labeled",false);
+subp = subplot(1,4,4); implot(subp,tof,jet,row,col,"Mode",true);
+imsave(figfolder,fig,'process',filename,res);
 
-% Save TOF and inflection points to .mat file
-outFileTOF = strcat(outfolder,"\",filename,'-TOF.mat');
-outFileInflectionPts = strcat(outfolder,'\',filename,'-InflectionPts.mat');
-save(outFileTOF,'TOF','-mat');
-save(outFileInflectionPts,'inflpt','-mat');
+% Plot and save figure of raw and processed TOF
+fig = figure('visible','off');
+subp = subplot(1,2,1); implot(subp,rawtof,jet,row,col,"Unprocessed",true);
+subp = subplot(1,2,2); implot(subp,tof,jet,row,col,"Processed",true);
+imsave(figfolder,fig,'compare',filename,res);
 
-figure('Visible','off');
-subplot(1,2,1); im = imshow(unprocessedTOF,jet,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Unprocessed");
-exportgraphics(gcf,strcat('NewFigures\',filename,'.png'),'Resolution',res);
-subplot(1,2,2); im = imshow(TOF,jet,'XData',[0 col],'YData',[row 0]);
-im.CDataMapping = "scaled"; title("Processed");
-sgtitle(filename);
-exportgraphics(gcf,strcat('Comparison\',filename,'.png'),'Resolution',res);
+% Save TOF, inflection points, and masks to .mat file
+savevar = ["tof","inflpt","mask"];
+for i = 1:length(savevar)
+    outfile = strcat(outfolder,"\",savevar(i),"\",filename,'-',...
+        savevar(i),'.mat');
+    save(outfile,savevar(i),'-mat');
+end
 
-% Save
-% mask
 end
