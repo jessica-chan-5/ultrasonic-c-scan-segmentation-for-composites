@@ -1,5 +1,5 @@
 function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
-    basecol,cropthresh,pad,minprom1,noisethresh,maxwidth)
+    basecol,cropthresh,pad,minprom1,noisethresh,maxwidth,res)
 %PROCESSASCAN Process A-scans to calculate TOF info.
 %    PROCESSASCAN(filename,outfolder,dt,bounds,incr,baserow,basecol,
 %    cropthresh,pad,minprom,noisethresh,maxwidth) Look for damage bounding
@@ -23,6 +23,7 @@ function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
 %    MINPROM1   : Min prominence in findpeaks for a peak to be identified
 %    NOISETHRESH: If average signal is lower, then point is not processed
 %    MAXWIDTH   : Max width in findpeaks for a peak to be marked as wide
+%    RES        : Image resolution setting in dpi
 
 % Load C-scan
 infile = strcat(outfolder,"\",'cscan\',filename,'-cscan.mat');
@@ -112,7 +113,6 @@ for i = 1:length(savevar)
 end
 
 % Save png and figure of raw TOF
-res = 300;
 fig = figure('visible','off');
 implot(rawtof,jet,row,col,filename,true);
 imsave(figfolder,fig,'rawtof',filename,res);

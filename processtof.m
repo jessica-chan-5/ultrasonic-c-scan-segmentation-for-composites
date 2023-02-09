@@ -1,5 +1,5 @@
 function processtof(filename,outfolder,figfolder,minprom2,peakthresh, ...
-    modethresh)
+    modethresh,res)
 %PROCESSTOF Process raw TOF.
 %
 %   PROCESSTOF(filename,outfolder,figurefolder,minprom2,peakthresh,
@@ -17,9 +17,7 @@ function processtof(filename,outfolder,figfolder,minprom2,peakthresh, ...
 %   MINPROM2  : Min prominence in findpeaks for a peak to be identified
 %   PEAKTHRESH: Threshold of dt for peak to be labeled as unique
 %   MODETHRESH: Threshold for TOF to be set to mode TOF
-
-% Image resolution setting in dpi
-res = 300;
+%   RES       : Image resolution setting in dpi
 
 % Load raw TOF and associated info
 loadvar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
@@ -29,12 +27,16 @@ for i = 1:length(loadvar)
     load(infile,loadvar(i))
 end
 
+% Save full size of raw TOF
+rowf = size(rawtof,1); %#ok<NODEF> 
+colf = size(rawtof,2);
+
 % Work with damage bounding box area of raw TOF only
 startrow = cropcoord(1);
 endrow = cropcoord(2);
 startcol = cropcoord(3);
 endcol = cropcoord(4);
-rawtof = rawtof(startrow:endrow,startcol:endcol); %#ok<NODEF> 
+rawtof = rawtof(startrow:endrow,startcol:endcol);
 
 % Calculate size of raw TOF
 row = size(rawtof,1);
@@ -89,13 +91,13 @@ mask = imfill(concbound,4);
 mask = bwmorph(mask,'clean',inf); % Remove isolated pixels
 
 % Find perimeter using 8 pixel connectivity
-boundary = bwperim(mask,8);
+bound = bwperim(mask,8);
 
 % Plot and save figure of modified inflection points, mask, boundary
 fig = figure('visible','off');
 subp = subplot(1,3,1); implot(subp,inflpt,gray,row,col,"Infl Pts",false);
 subp = subplot(1,3,2); implot(subp,mask,gray,row,col,"Mask",false);
-subp = subplot(1,3,3); implot(subp,boundary,gray,row,col,"Boundary",false);
+subp = subplot(1,3,3); implot(subp,bound,gray,row,col,"Boundary",false);
 imsave(figfolder,fig,'masks',filename,res);
 
 % Apply mask to inflection points map before morphological operations
@@ -114,7 +116,7 @@ if strcmp(filename,'RPR-S-15J-2-back') == true
 end
 
 % Remove excess pixels outside concave hull and add outline where missing
-J = J | boundary;
+J = J | bound;
 
 % Clean up w/ a few operations
 J = bwmorph(J,'fill');      % Fill in isolated pixels
@@ -131,11 +133,11 @@ J(npeaks < 2) = 1;
 tof = rawtof;
 for i = 1:n
     [areaI, areaJ] = find(L==i);
-    areaInd = sub2ind(size(L),areaI,areaJ);
-    areaMode = mode(round(rawtof(areaInd),2),'all');
+    areaind = sub2ind(size(L),areaI,areaJ);
+    areamode = mode(round(rawtof(areaind),2),'all');
     for k = 1:length(areaI)
-        if abs(tof(areaI(k),areaJ(k)) - areaMode) < modethresh
-            tof(areaI(k),areaJ(k)) = areaMode;
+        if abs(tof(areaI(k),areaJ(k)) - areamode) < modethresh
+            tof(areaI(k),areaJ(k)) = areamode;
         end
     end
 end
@@ -157,8 +159,16 @@ subp = subplot(1,2,1); implot(subp,rawtof,jet,row,col,"Unprocessed",true);
 subp = subplot(1,2,2); implot(subp,tof,jet,row,col,"Processed",true);
 imsave(figfolder,fig,'compare',filename,res);
 
+% Plot and save figure of processed TOF
+fig = figure('visible','off');
+implot(fig,tof,jet,row,col,filename,true);
+imsave(figfolder,fig,'tof',filename,res);
+
 % Save TOF, inflection points, and masks to .mat file
-savevar = ["tof","inflpt","mask"];
+savevar = ["tof","inflpt","mask","bound"];
+temptof = zeros(rowf,colf);
+temptof(startrow:endrow,startcol:endcol) = tof;
+tof = temptof; %#ok<NASGU> 
 for i = 1:length(savevar)
     outfile = strcat(outfolder,"\",savevar(i),"\",filename,'-',...
         savevar(i),'.mat');

@@ -51,10 +51,11 @@ else
     savecol = [1,dcol:dcol:col];
 end
 
-cscan = cscan(saverow,savecol,:);
+cscan = cscan(saverow,savecol,:); %#ok<NASGU> 
 
 % Save 3D matrix to .mat file
-outpath = strcat(outfolder,'\','cscan',filename,'-cscan.mat');
-save(outpath,'cscan','-mat');
+name = "cscan";
+outpath = strcat(outfolder,'\',name,'\',filename,'-',name,'.mat');
+save(outpath,name,'-mat');
 
 end

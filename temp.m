@@ -1,1 +1,0 @@
-[cropTOF,inflectionpts,peak2] = processtof(fits);
