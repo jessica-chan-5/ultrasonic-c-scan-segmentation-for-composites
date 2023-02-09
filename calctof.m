@@ -1,11 +1,11 @@
-function [rawtof,peaks,locs,wide,npeaks] = calctof(cscan,t,row,col, ...
+function [rawtof,peak,locs,wide,npeaks] = calctof(cscan,t,row,col, ...
     minprom,noisethresh,maxwidth)
 %CALCTOF Calculate time-of-flight.
 %    rawtof = CALCTOF(cscan,t,row,col,minprom,noisethresh,maxwidth)
 %    calculates time-of-flight without any post-processing using findpeaks
 %    and a smoothing spline fit.
 %
-%    [rawtof,peaks,locs,wide,npeaks] = CALCTOF(cscan,t,row,col,minprom,...
+%    [rawtof,peak,locs,wide,npeaks] = CALCTOF(cscan,t,row,col,minprom,...
 %    noisethresh,maxwidth) calculates time-of-flight and returns additional
 %    info about the found peaks including the height, location, width, and
 %    number of peaks at each point.
@@ -22,7 +22,7 @@ function [rawtof,peaks,locs,wide,npeaks] = calctof(cscan,t,row,col, ...
 
 % Initialize variables
 rawtof = zeros(length(row),length(col));
-peaks = cell(length(row),length(col));
+peak = cell(length(row),length(col));
 locs = cell(length(row),length(col));
 wide = zeros(length(row),length(col));
 npeaks = zeros(length(row),length(col));
@@ -50,19 +50,19 @@ for i = 1:length(row) % Loop through each row
             pfit = feval(fits,t);
 
             % Find and save locations of peaks
-            [peaks{i,j}, locs{i,j}, width] = findpeaks(pfit,t,...
-                'MinPeakProminence',minprom);
+            [peak{i,j}, locs{i,j}, width] = findpeaks(pfit,t, ...
+                'MinPeakProminence',minprom,'WidthReference','halfheight');
             
             if length(width) >= 1 && width(1) > maxwidth
                 wide(i,j) = true; % Mark wide peaks
             end
 
             % Count number of peaks
-            npeaks(i,j) = length(peaks{i,j});
+            npeaks(i,j) = length(peak{i,j});
     
             % Calculate raw time-of-flight
             if npeaks(i,j) > 1
-                [~, loc2i] = max(peaks{i,j}(2:end));
+                [~, loc2i] = max(peak{i,j}(2:end));
                 rawtof(i,j) = locs{i,j}(loc2i+1)-locs{i,j}(1);
             end
         end

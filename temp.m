@@ -1,1 +1,1 @@
-[cropTOF,inflectionpts,peak2] = aScanLayers(fits);
+[cropTOF,inflectionpts,peak2] = processtof(fits);

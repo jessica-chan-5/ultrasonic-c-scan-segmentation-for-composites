@@ -97,20 +97,18 @@ if endcol > col
 end
 
 % Calculate raw TOF and corresponding peak/location info in crop region
-[croptof,peaks,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
+[croptof,peak,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
     startcol:endcol,minprom,noisethresh,maxwidth); %#ok<ASGLU> 
 rawtof = zeros(row,col);
-rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end); %#ok<NASGU> 
-
-% Save damage bounding box row/col info
-cropcoord = [startrow startcol; endrow, endcol]; %#ok<NASGU> 
+rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
 
 % Save raw TOF and corresponding peaks/location info
-saveVar = ["rawtof";"peaks";"locs";"wide";"npeaks";"cropcoord"];
-for i = 1:length(saveVar)
-    outfile = strcat(outfolder,"\",saveVar(i),"\",filename,'-',...
-        saveVar(i),'.mat');
-    save(outfile,saveVar(i),'-mat');
+cropcoord = [startrow endrow startcol endcol]; %#ok<NASGU> 
+savevar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
+for i = 1:length(savevar)
+    outfile = strcat(outfolder,"\",savevar(i),"\",filename,'-',...
+        savevar(i),'.mat');
+    save(outfile,savevar(i),'-mat');
 end
 
 % Save png and figure of raw TOF
@@ -118,8 +116,8 @@ width = size(rawtof,1);
 height = size(rawtof,2);
 fig = figure('visible','off');
 modetof = mode(rawtof(rawtof~=0),'all');
-imjet = imshow(rawtof,[0 modetof+0.1],'XData',[0 height],'YData',[width 0]);
-imjet.CDataMapping = "scaled";
+im = imshow(rawtof,[0 modetof+0.1],'XData',[0 height],'YData',[width 0]);
+im.CDataMapping = "scaled";
 colormap(jet);
 name = strcat(figfolder,"\rawtof\",filename,'-rawtof');
 fig.CreateFcn = 'set(gcf,''visible'',''on'')';

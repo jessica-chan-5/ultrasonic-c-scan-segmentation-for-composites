@@ -29,7 +29,7 @@ numFiles = length(filenames);
 
 % READCSCAN options =======================================================
 runcscan   = false;      % Run readcscan?
-cscanfiles = 1;%:numFiles; % Indices of files to read
+cscanfiles = 1:numFiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
 delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
 infolder   = "Input";    % Folder location of .csv C-scan input file
@@ -40,7 +40,7 @@ dcol       = 5;          % # col to down sample
 
 % PROCESSASCAN options ====================================================
 runascan   = true;       % Run processascan?
-ascanfiles = 1:numFiles; % Indices of files to read
+ascanfiles = 1;%:numFiles; % Indices of files to read
 % PROCESSASCAN inputs -----------------------------------------------------
 figfolder  = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;    % Sampling period in microseconds
@@ -51,10 +51,26 @@ baserow     = 50:5:60; % Vector of row indices to calculate baseline TOF
 basecol     = 10:5:20; % Vector of cols indices to calculate baseline TOF
 cropthresh  = 0.2;     % If abs(basetof-tof(i)) > cropthresh, pt is damaged
 pad         = 1;     % (1+pad)*incr added to calculated bounding box
-minprom     = 0.03;    % Min prominence for a peak to be identified
+minprom1    = 0.03;    % Min prominence for a peak to be identified
 noisethresh = 0.01;    % If average signal lower, then pt is not processed
 maxwidth    = 0.75;    % Max width for a peak to be marked as wide
 % END PROCESSASCAN ________________________________________________________
+
+% PROCESSTOF options ======================================================
+runtof   = true;       % Run processtof?
+toffiles = 1;%:numFiles; % Indices of files to read
+% PROCESSTOF inputs -------------------------------------------------------
+minprom2   = 0.013;
+peakthresh = 0.04;
+hi = 0.25;
+md = 0.14;
+lo = 0.06;
+modethresh = [hi; hi; hi; hi; hi;      %  1- 5
+              md; hi; hi; md; hi;      %  6-10
+              hi; md; lo; lo; lo;      % 11-15
+              md; md; hi; hi; hi;      % 16-20
+              hi; hi; hi; md; md; hi]; % 21-26
+% END PROCESSTOF __________________________________________________________
 
 % Plate properties
 numLayers    = 25;    % # of layers in plate
@@ -71,77 +87,43 @@ parfor i = cscanfiles
     disp(strcat(num2str(i),'.',filenames(i)));
     readcscan(filenames(i),delim,infolder,outfolder,drow,dcol);
 end
-fprintf("\nFinished converting all C-scan .csv files!\n\n")
 sec = toc;
-disp('Elapsed time is:')
+fprintf('\nElapsed time is:')
 disp(duration(0,0,sec))
+fprintf("Finished converting all C-scan .csv files!\n\n")
 end
 %% Spline fit A-scans & calculate raw TOF
 
 if runascan == true
 tic
-fprintf("================================================\n\n")
+fprintf("PROCESSASCAN====================================\n\n")
 fprintf("Processing A-scans and converted to raw TOF for:\n\n");
 for i = ascanfiles
     disp(strcat(num2str(i),'.',filenames(i)));
-    processascan(filenames(i),outfolder,figfolder,dt,bounds,incr,baserow, ...
-    basecol,cropthresh,pad,minprom,noisethresh,maxwidth)
+    processascan(filenames(i),outfolder,figfolder,dt,bounds,incr, ...
+        baserow,basecol,cropthresh,pad,minprom1,noisethresh,maxwidth)
 end
-fprintf("\nFinished processing all C-scan .mat files.\n\n")
-fprintf("\nFinished converting all C-scan .csv files!\n\n")
 sec = toc;
-disp('Elapsed time is:')
+fprintf('\nElapsed time is:')
 disp(duration(0,0,sec))
+fprintf("Finished processing all C-scan .mat files!\n\n")
 end
 
-%{
-%% Process TOF
+%% Process raw TOF
 
-%{
-fprintf("==============================================\n\n")
-fprintf("Processed TOF for:\n\n");
-
-% TOF = cell(numFiles,1);
-inflectionpts = cell(numFiles,1);
-hi = 0.25;
-md = 0.14;
-lo = 0.06;
-modeThresh = [hi % 1
-              hi % 2
-              hi % 3
-              hi % 4 
-              hi % 5
-              md % 6
-              hi % 7
-              hi % 8
-              md % 9
-              hi % 10
-              hi % 11
-              md % 12
-              lo % 13
-              lo % 14
-              lo % 15
-              md % 16
-              md % 17
-              hi % 18
-              hi % 19
-              hi % 20
-              hi % 21
-              hi % 22
-              hi % 23
-              md % 24
-              md % 25
-              hi]; % 26
-% for i = 1:numFiles
-for i = [4, 8]
-    tic;
-    [~,inflectionpts{i}] = aScanLayers(fileNames(i),outfolder,dataPtsPerAScan,saveTOF,saveInflectionPts,modeThresh(i));
-    disp(fileNames(i));
-    toc
+if runtof == true
+tic
+fprintf("PROCESSTOF======================================\n\n")
+fprintf("Processed raw TOF for:\n\n");
+for i = 1:numFiles
+    processtof(filenames(i),outfolder,figfolder,minprom2,peakthresh, ...
+        modethresh(i));
 end
-
-fprintf("\nFinished processing all C-scan .mat files.\n\n")
-%}
+sec = toc;
+fprintf('\nElapsed time is:')
+disp(duration(0,0,sec))
+fprintf("Finished processing all raw TOF.mat files!\n\n")
+end
 
 %% Segment TOF
 
@@ -164,4 +146,3 @@ fprintf("==============================================\n\n")
 %% Combine front and back to create hybrid C-scans
 
 %% Plot 3D and layer by layer
-%}
