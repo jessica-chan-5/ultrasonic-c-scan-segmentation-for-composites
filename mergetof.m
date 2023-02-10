@@ -65,15 +65,18 @@ im.CDataMapping = "scaled"; axis on; title('Initial Check');
 % Adjust x and y offset for front TOF
 if dx > 0     % right
     boundc{1} = [zeros(rowf(1),dx) boundc{1}(:,1:colf(1)-dx)];
+    segtofc{1} = [zeros(rowf(1),dx) segtofc{1}(:,1:colf(1)-dx)];
 elseif dx < 0 % left
     dx = abs(dx);
-    boundc{1} = [boundc{1}(:,1+dx:colf(1)) zeros(rowf(1),dx)];
+    segtofc{1} = [segtofc{1}(:,1+dx:colf(1)) zeros(rowf(1),dx)];
 end 
 if dy > 0     % up
     boundc{1} = [boundc{1}(1+dy:rowf(1),:); zeros(dy,colf(1))];
+    segtofc{1} = [segtofc{1}(1+dy:rowf(1),:); zeros(dy,colf(1))];
 elseif dy < 0 % down
     dy = abs(dy);
     boundc{1} = [zeros(dy,colf(1)); boundc{1}(1:rowf(1)-dy,:)];
+    segtofc{1} = [zeros(dy,colf(1)); segtofc{1}(1:rowf(1)-dy,:)];
 end
 
 % Replot to check if correct
@@ -82,5 +85,30 @@ boundf = boundf(startrowf:endrowf,startcolf:endcolf);
 subplot(1,2,2); im = imshow(boundf,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
 imsave(figfolder,fig,"mergecheck",filename,res);
+
+% Flip layers top to bottom for back TOF
+segtofc{2} = abs(segtofc{2}-max(segtofc{2})-1);
+
+% Merge TOF
+% Write code that checks if one or the other is equal to zero, otherwise
+% don't add, just pick one
+mergetof = mergetof(startrowf:endrowf,startcolf:endcolf);
+row = size(mergetof,1);
+col = size(mergetof,2);
+
+% 3D plot merged TOF
+mergetofvec = reshape(mergetof,row*col,1);
+mergetofvec(1,1) = max(mergetofvec);
+mergetofvec(mergetofvec==max(mergetofvec)) = NaN;
+
+xvec = repmat((1:row)',col,1);
+yvec = repelem(1:col,row)';
+
+fig = figure('Visible','off');
+scatter3(xvec,yvec,mergetofvec,20,mergetofvec,'filled'); colormap(gca,'jet');
+xlabel('Row #'); ylabel('Col #'); zlabel('TOF (us)');
+savefigure(figfolder,fig,"3Dplot",filename);
+
+% Save merged TOF
 
 end

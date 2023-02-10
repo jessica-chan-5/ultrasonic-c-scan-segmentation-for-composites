@@ -23,13 +23,13 @@ miscFileNames = ["BL-H-15J-1";
                  "CONT-H-20J-1";"CONT-H-20J-2";"CONT-H-20J-3";
                   "RPR-H-20J-2";"RPR-H-20J-3"];
 filenames = [miscFileNames; filenames];
-numFiles = length(filenames);
+numfiles = length(filenames);
 
 %% Function inputs
 
 % READCSCAN options =======================================================
 runcscan   = false;      % Run readcscan?
-cscanfiles = 1:numFiles; % Indices of files to read
+cscanfiles = 1:numfiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
 delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
 infolder   = "Input";    % Folder location of .csv C-scan input file
@@ -41,7 +41,7 @@ dcol       = 5;          % # col to down sample
 
 % PROCESSASCAN options ====================================================
 runascan   = false;       % Run processascan?
-ascanfiles = 1:numFiles; % Indices of files to read
+ascanfiles = 1:numfiles; % Indices of files to read
 % PROCESSASCAN inputs -----------------------------------------------------
 figfolder  = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;    % Sampling period in microseconds
@@ -61,7 +61,7 @@ res         = 300;     % Image resolution setting in dpi
 
 % PROCESSTOF options ======================================================
 runtof   = false;       % Run processtof?
-toffiles = 1:numFiles; % Indices of files to read
+toffiles = 1:numfiles; % Indices of files to read
 % PROCESSTOF inputs -------------------------------------------------------
 minprom2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakthresh = 0.04; %Threshold of dt for peak to be labeled as unique
@@ -79,7 +79,7 @@ modethresh = [hi; hi; hi; hi; hi;      %  1- 5
 
 % PLOTTOF options =========================================================
 runplot   = false;         % Run plottof?
-plotfiles = 1:numFiles; % Indices of files to read
+plotfiles = 1:numfiles; % Indices of files to read
 % PLOTTOF inputs ----------------------------------------------------------
 platet  = 3.3;% Plate thickness in millimeters
 nlayers = 25; % Number of layers in plate
@@ -87,8 +87,8 @@ nlayers = 25; % Number of layers in plate
 % #########################################################################
 
 % MERGETOF options ========================================================
-runmerge   = true; % Run mergetof?
-mergefiles = 9:17; % Indices of files to read
+runmerge   = false; % Run mergetof?
+mergefiles = 9;%:17; % Indices of files to read
 % MERGETOF inputs ---------------------------------------------------------
 di = 8;            % File index offset if necessary
 dx = [ 8;-2;            % 9-10
@@ -99,6 +99,24 @@ dy = [ 2; 0;            % 9-10
        1; 0];           % 16-17
 test = false;
 % END MERGETOF ____________________________________________________________
+% #########################################################################
+
+% PLOTCUSTOM options ======================================================
+runcustom   = true; % Run customplot?
+customfiles = 1:numfiles; % Indices of files to read
+% PLOTCUSTOM inputs -------------------------------------------------------
+startrowut = 22;
+endrowut = 617;
+startcolut = 98;
+endcolut = 477;
+utwincrop = [startrowut endrowut startcolut endcolut];
+dy = [26; 12; -5; 70; 73;      %  1- 5 
+      25; 25; 72;-18; -5;      %  6-10
+      10; -5; 28; 58; 40;      % 11-15
+      -2; -2; -5; -2; 10;      % 16-20
+      -7; -5; 55; 43; -5; 10]; % 21-26
+test = false;
+% END PLOTCUSTOM __________________________________________________________
 % #########################################################################
 
 %% Read C-scans from .csv file(s)
@@ -175,7 +193,7 @@ if runmerge == true
 tic
 fprintf("MERGETOF======================================\n\n")
 fprintf("Merging TOF for:\n\n");
-parfor i = mergefiles
+for i = mergefiles
     disp(strcat(num2str(i),'.',filenames(i)));
     mergetof(filenames(i),outfolder,figfolder,dx(i-di),dy(i-di),test,res);
 end
@@ -183,4 +201,21 @@ sec = toc;
 fprintf('\nElapsed time is:')
 disp(duration(0,0,sec))
 fprintf("Finished merging!\n\n")
+end
+
+%% Make custom plots
+
+if runcustom == true
+tic
+fprintf("PLOTCUSTOM======================================\n\n")
+fprintf("Plotting custom plots for:\n\n");
+parfor i = customfiles
+    disp(strcat(num2str(i),'.',filenames(i)));
+    plotcustom(filenames(i),infolder,outfolder,figfolder,utwincrop, ...
+        dy(i),res,test);
+end
+sec = toc;
+fprintf('\nElapsed time is:')
+disp(duration(0,0,sec))
+fprintf("Finished plotting!\n\n")
 end
