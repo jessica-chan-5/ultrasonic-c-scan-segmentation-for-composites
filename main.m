@@ -87,22 +87,22 @@ nlayers = 25; % Number of layers in plate
 % #########################################################################
 
 % MERGETOF options ========================================================
-runmerge   = false; % Run mergetof?
+runmerge   = true; % Run mergetof?
 mergefiles = 9;%:17; % Indices of files to read
 % MERGETOF inputs ---------------------------------------------------------
 di = 8;            % File index offset if necessary
 dx = [ 8;-2;            % 9-10
       -4; 7; 4;-27;-45; % 11-15
        6; 9];           % 16-17
-dy = [ 2; 0;            % 9-10
+dy1 = [2; 0;            % 9-10
        2;-1;-5; -2;  0; % 11-15
        1; 0];           % 16-17
-test = false;
+test1 = false;
 % END MERGETOF ____________________________________________________________
 % #########################################################################
 
 % PLOTCUSTOM options ======================================================
-runcustom   = true; % Run customplot?
+runcustom   = false; % Run customplot?
 customfiles = 1:numfiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
 startrowut = 22;
@@ -110,12 +110,12 @@ endrowut = 617;
 startcolut = 98;
 endcolut = 477;
 utwincrop = [startrowut endrowut startcolut endcolut];
-dy = [26; 12; -5; 70; 73;      %  1- 5 
+dy2 = [26; 12; -5; 70; 73;      %  1- 5 
       25; 25; 72;-18; -5;      %  6-10
       10; -5; 28; 58; 40;      % 11-15
       -2; -2; -5; -2; 10;      % 16-20
       -7; -5; 55; 43; -5; 10]; % 21-26
-test = false;
+test2 = false;
 % END PLOTCUSTOM __________________________________________________________
 % #########################################################################
 
@@ -195,7 +195,8 @@ fprintf("MERGETOF======================================\n\n")
 fprintf("Merging TOF for:\n\n");
 for i = mergefiles
     disp(strcat(num2str(i),'.',filenames(i)));
-    mergetof(filenames(i),outfolder,figfolder,dx(i-di),dy(i-di),test,res);
+    mergetof(filenames(i),outfolder,figfolder,dx(i-di),dy1(i-di),test1, ...
+        res);
 end
 sec = toc;
 fprintf('\nElapsed time is:')
@@ -212,7 +213,7 @@ fprintf("Plotting custom plots for:\n\n");
 parfor i = customfiles
     disp(strcat(num2str(i),'.',filenames(i)));
     plotcustom(filenames(i),infolder,outfolder,figfolder,utwincrop, ...
-        dy(i),res,test);
+        dy2(i),res,test2);
 end
 sec = toc;
 fprintf('\nElapsed time is:')
