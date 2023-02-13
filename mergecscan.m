@@ -12,14 +12,14 @@ name = "mask";
 inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
 load(inFileF,name);
 
-name = "segtof";
+name = "damLayers";
 segTOFC = cell(1,2);
 inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
 inFileB = strcat(outfolder,"\",name,"\",filename,'-back-',name,'.mat');
 segTOFC{1} = load(inFileF,name); segTOFC{1} = segTOFC{1}.segtof;
 segTOFC{2} = load(inFileB,name); segTOFC{2} = fliplr(segTOFC{2}.segtof);
 
-name = "cropcoord";
+name = "cropCoord";
 cropCoordC = cell(1,2);
 inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
 inFileB = strcat(outfolder,"\",name,"\",filename,'-back-',name,'.mat');
@@ -53,7 +53,7 @@ tempBoundB(startRow(2):endRowF(2),startCol(2):endCol(2)) = boundC{2};
 boundC{2} = tempBoundB;
 
 tempMask = zeros(row,col);
-tempMask(startRow(1):endRowF(1),startCol(1):endCol(1)) = mask;
+tempMask(startRow(1):endRowF(1),startCol(1):endCol(1)) = mask; %#ok<NODEF> 
 mask = tempMask;
 
 % Max boundary
@@ -66,7 +66,7 @@ endColF = max([cropCoordC{1}(4) cropCoordC{2}(4)]);
 % Grayer is front, whiter is back
 fig = figure('Visible',figVis);
 boundF = boundC{1}+boundC{2}.*2;
-boundF = boundF(startRowF:endRowf,startColF:endColF);
+boundF = boundF(startRowF:endRowF,startColF:endColF);
 subplot(1,2,1); im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Initial Check');
 
@@ -93,7 +93,7 @@ boundF = boundC{1}+boundC{2}.*2;
 boundF = boundF(startRowF:endRowf,startColF:endColF);
 subplot(1,2,2); im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
-imsave(figfolder,fig,"mergecheck",filename,res);
+imsave(figfolder,fig,"mergeCheck",filename,res);
 
 % Remove points if outside boundary
 segTOFC{1}(mask==0) = NaN;
@@ -125,7 +125,7 @@ fig = figure('Visible','off'); hold on;
 scatter3(xVec,yVec,segTOFVec{1},20,segTOFVec{1},'filled'); colormap(gca,'jet');
 scatter3(xVec,yVec,segTOFVec{2},20,segTOFVec{2},'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('TOF (us)'); grid on;
-savefigure(figfolder,fig,"hybridcscan",filename);
+savefigure(figfolder,fig,"hybridCscan",filename);
 
 % Save merged TOF
 

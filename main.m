@@ -26,7 +26,7 @@ numFiles = length(fileNames);
 %% Function inputs
 
 % READCSCAN options =======================================================
-runReadCscan   = false;      % Run readcscan?
+runReadCscan   = true;      % Run readcscan?
 filesReadCscan = 1:numFiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
 delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
@@ -76,11 +76,11 @@ modeThresh = [hig; hig; hig; hig; hig;       %  1- 5
 % #########################################################################
 
 % PLOTFIG options =========================================================
-runPlotFig   = true;      % Run plottof?
+runPlotFig   = false;      % Run plottof?
 filesPlotFig = 1:numFiles; % Indices of files to read
 % PLOTFIG inputs ----------------------------------------------------------
-plateThick  = 3.3;% Plate thickness in millimeters
-nLayers = 25;     % Number of layers in plate
+plateThick  = 3.3;% Thickness of scanned plate in millimeters
+nLayers = 25;     % Number of layers in scanned plate
 % END PLOTFIG _____________________________________________________________
 % #########################################################################
 
@@ -103,17 +103,20 @@ testMergeCscan = false;
 runPlotCustom   = false;      % Run customplot?
 filesPlotCustom = 1:numFiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
+% UTWINCROP: Indices to crop UTWin screenshot in format:
+%               [startRow endRow startCol endCol]
 startRowUT = 22;
 endRowUT = 617;
 startColUT = 98;
 endColUT = 477;
 utwinCrop = [startRowUT endRowUT startColUT endColUT];
+% DY       : Amount to adjust UTWin screenshots (+) = up, (-) = down
 dyPlotCustom = [26; 12; -5; 70; 73;      %  1- 5 
                 25; 25; 72;-18; -5;      %  6-10
                 10; -5; 28; 58; 40;      % 11-15
                 -2; -2; -5; -2; 10;      % 16-20
                 -7; -5; 55; 43; -5; 10]; % 21-26
-testPlotCustom = false;
+testPlotCustom = false; % If test is true, shows figures
 % END PLOTCUSTOM __________________________________________________________
 % #########################################################################
 

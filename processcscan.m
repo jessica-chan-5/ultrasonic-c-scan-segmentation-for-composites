@@ -100,12 +100,12 @@ end
 % Calculate raw TOF and corresponding peak/location info in crop region
 [croptof,peak,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
     startcol:endcol,minProm1,noiseThresh,maxWidth); %#ok<ASGLU> 
-rawtof = zeros(row,col);
-rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
+rawTOF = zeros(row,col);
+rawTOF(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
 
 % Save raw TOF and corresponding peaks/location info
-cropcoord = [startrow endrow startcol endcol]; %#ok<NASGU> 
-savevar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
+cropCoord = [startrow endrow startcol endcol]; %#ok<NASGU> 
+savevar = ["rawTOF";"peak";"locs";"wide";"nPeaks";"cropCoord"];
 for i = 1:length(savevar)
     outfile = strcat(outFolder,"\",savevar(i),"\",fileName,'-',...
         savevar(i),'.mat');
@@ -114,7 +114,7 @@ end
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
-implot(rawtof,jet,row,col,fileName,true);
-imsave(figFolder,fig,'rawtof',fileName,res);
+implot(rawTOF,jet,row,col,fileName,true);
+imsave(figFolder,fig,'rawTOF',fileName,res);
 
 end

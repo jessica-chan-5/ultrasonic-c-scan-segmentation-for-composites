@@ -20,7 +20,7 @@ function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
 %   RES       : Image resolution setting in dpi
 
 % Load raw TOF and associated info
-loadVar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
+loadVar = ["rawTOF";"peak";"locs";"wide";"nPeaks";"cropCoord"];
 for i = 1:length(loadVar)
     inFile = strcat(outFolder,"\",loadVar(i),"\",fileName,'-',...
         loadVar(i),'.mat');
