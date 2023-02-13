@@ -1,5 +1,5 @@
-function [peak2, inflpt] = labelpeaks(dir,row,col,locs,peak,npeaks, ...
-    wide,peakthresh)
+function [peak2, inflpt] = labelpeaks(dir,row,col,locs,peak,nPeaks, ...
+    wide,peakThresh)
 
 if strcmp(dir,'row')
     dir1 = row;
@@ -9,7 +9,7 @@ elseif strcmp(dir,'col')
     dir2 = row;
     locs = locs';
     peak = peak';
-    npeaks = npeaks';
+    nPeaks = nPeaks';
     wide = wide';
 end
 
@@ -36,7 +36,7 @@ for i = 1:dir1
                 for k = 1:length(prevLocs)
                     minDiff = min(abs(prevLocs(k)-currLocs));
                     % Old peak disappeared
-                    if minDiff > peakthresh
+                    if minDiff > peakThresh
                         labelList = sort([peakLabels{i,j-1}(k), labelList]);
                     end
                 end
@@ -44,7 +44,7 @@ for i = 1:dir1
                 for k = 1:length(currLocs)
                     [minDiff, minI] = min(abs(currLocs(k)-prevLocs));
                     % Current peak didn't change
-                    if minDiff < peakthresh
+                    if minDiff < peakThresh
                         currLocs(minI) = NaN;
                         peakLabels{i,j} = [peakLabels{i,j}, peakLabels{i,j-1}(minI)];
                     % New peak appeared
@@ -55,7 +55,7 @@ for i = 1:dir1
                 end
             end
             
-            if npeaks(i,j) >= 2
+            if nPeaks(i,j) >= 2
                 if wide(i,j) == false
                     [peak2(i,j), loc2i(i,j)] = max(peak{i,j}(2:end));
                 else
@@ -72,29 +72,29 @@ inflpt = zeros(row,col);
 
 if strcmp(dir,'row') == true
     for i = 1:row
-        labellocs = [];
+        labelLocs = [];
         for j = 2:col
-            if npeaks(i,j) >= 2
+            if nPeaks(i,j) >= 2
                 if locs2i(i,j) ~= locs2i(i,j-1)
-                    labellocs = [labellocs, j]; %#ok<AGROW>
+                    labelLocs = [labelLocs, j]; %#ok<AGROW>
                 end
             end
         end
-        inflpt(i,labellocs) = 1;
+        inflpt(i,labelLocs) = 1;
     end
 elseif strcmp(dir,'col') == true
-    npeaks = npeaks';
+    nPeaks = nPeaks';
     locs2i = locs2i';
     for j = 1:col
-        labellocs = [];
+        labelLocs = [];
         for i = 2:row
-            if npeaks(i,j) >= 2
+            if nPeaks(i,j) >= 2
                 if locs2i(i,j) ~= locs2i(i-1,j)
-                    labellocs = [labellocs, i]; %#ok<AGROW>
+                    labelLocs = [labelLocs, i]; %#ok<AGROW>
                 end
             end
         end
-        inflpt(labellocs',j) = 1;
+        inflpt(labelLocs',j) = 1;
     end
 end
 

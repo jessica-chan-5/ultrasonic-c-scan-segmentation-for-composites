@@ -1,5 +1,5 @@
-function savefigure(figfolder,fig,name,filename)
-    path = strcat(figfolder,"\",name,"\",filename,'-',name);
+function savefigure(figFolder,fig,name,fileName)
+    path = strcat(figFolder,"\",name,"\",fileName,'-',name);
     fig.CreateFcn = 'set(gcf,''visible'',''on'')';
     savefig(fig,strcat(path,'.fig'));
 end

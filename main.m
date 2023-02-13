@@ -84,19 +84,19 @@ nLayers = 25;     % Number of layers in plate
 % END PLOTFIG _____________________________________________________________
 % #########################################################################
 
-% MERGETOF options ========================================================
-runMergeTOF   = true;   % Run mergetof?
-filesMergeTOF = 9;%:17; % Indices of files to read
-% MERGETOF inputs ---------------------------------------------------------
+% MERGECSCAN options ======================================================
+runMergeCscan   = true;   % Run mergetof?
+filesMergeCscan = 9;%:17; % Indices of files to read
+% MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary
 dx = [ 8;-2;            % 9-10
       -4; 7; 4;-27;-45; % 11-15
        6; 9];           % 16-17
-dyMergeTOF = [2; 0;            % 9-10
+dyMergeCscan = [2; 0;            % 9-10
        2;-1;-5; -2;  0; % 11-15
        1; 0];           % 16-17
-testMergeTOF = false;
-% END MERGETOF ____________________________________________________________
+testMergeCscan = false;
+% END MERGECSCAN __________________________________________________________
 % #########################################################################
 
 % PLOTCUSTOM options ======================================================
@@ -187,14 +187,14 @@ end
 
 %% Merge for hybrid C-scan
 
-if runMergeTOF == true
+if runMergeCscan == true
 tic
 fprintf("MERGETOF======================================\n\n")
 fprintf("Merging TOF for:\n\n");
-for i = filesMergeTOF
+for i = filesMergeCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
-    mergetof(fileNames(i),outFolder,figFolder,dx(i-di),dyMergeTOF(i-di),testMergeTOF, ...
-        res);
+    mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
+        dyMergeCscan(i-di),testMergeCscan,res);
 end
 sec = toc;
 fprintf('\nElapsed time is:')

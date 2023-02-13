@@ -1,5 +1,5 @@
-function [rawtof,peak,locs,wide,npeaks] = calctof(cscan,t,row,col, ...
-    minprom,noisethresh,maxwidth)
+function [rawTOF,peak,locs,wide,nPeaks] = calctof(cscan,t,row,col, ...
+    minProm,noiseThresh,maxWidth)
 %CALCTOF Calculate time-of-flight.
 %    rawtof = CALCTOF(cscan,t,row,col,minprom,noisethresh,maxwidth)
 %    calculates time-of-flight without any post-processing using findpeaks
@@ -21,20 +21,20 @@ function [rawtof,peak,locs,wide,npeaks] = calctof(cscan,t,row,col, ...
 %    MAXWIDTH:    Max width in findpeaks for a peak to be marked as wide
 
 % Initialize variables
-rawtof = zeros(length(row),length(col));
+rawTOF = zeros(length(row),length(col));
 peak = cell(length(row),length(col));
 locs = cell(length(row),length(col));
 wide = zeros(length(row),length(col));
-npeaks = zeros(length(row),length(col));
+nPeaks = zeros(length(row),length(col));
 
 for i = 1:length(row) % Loop through each row
     
-    cscanslice = cscan(row(i),:,:); % Get row-wise slice of C-scan
+    cscanSlice = cscan(row(i),:,:); % Get row-wise slice of C-scan
 
     parfor j = 1:length(col) % Loop through each point in the row
         % Check that signal at point is not just noise
-        if mean(cscanslice(:,col(j),:)) > noisethresh %#ok<PFBNS> 
-            point = squeeze(cscanslice(:,col(j),:))'; % Get A-scan at point
+        if mean(cscanSlice(:,col(j),:)) > noiseThresh %#ok<PFBNS> 
+            point = squeeze(cscanSlice(:,col(j),:))'; % Get A-scan at point
     
             % Find and save peaks/locations in signal
             [p, l] = findpeaks(point,t);
@@ -47,23 +47,23 @@ for i = 1:length(row) % Loop through each row
             fits = fit(l',p','smoothingspline');
 
             % Evaluate smoothing spline for t
-            pfit = feval(fits,t);
+            pFit = feval(fits,t);
 
             % Find and save locations of peaks
-            [peak{i,j}, locs{i,j}, width] = findpeaks(pfit,t, ...
-                'MinPeakProminence',minprom,'WidthReference','halfheight');
+            [peak{i,j}, locs{i,j}, width] = findpeaks(pFit,t, ...
+                'MinPeakProminence',minProm,'WidthReference','halfheight');
             
-            if length(width) >= 1 && width(1) > maxwidth
+            if length(width) >= 1 && width(1) > maxWidth
                 wide(i,j) = true; % Mark wide peaks
             end
 
             % Count number of peaks
-            npeaks(i,j) = length(peak{i,j});
+            nPeaks(i,j) = length(peak{i,j});
     
             % Calculate raw time-of-flight
-            if npeaks(i,j) > 1
+            if nPeaks(i,j) > 1
                 [~, loc2i] = max(peak{i,j}(2:end));
-                rawtof(i,j) = locs{i,j}(loc2i+1)-locs{i,j}(1);
+                rawTOF(i,j) = locs{i,j}(loc2i+1)-locs{i,j}(1);
             end
         end
     end
