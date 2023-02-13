@@ -92,7 +92,7 @@ end
 tabulate(TOFvec)
 tabulate(TOFbackvec)
 %% Test aScanLayers
-[cropTOF,inflectionpts] = processtof(fits,205);
+[cropTOF,inflectionpts] = segcscan(fits,205);
 %% Plot TOF
 figure; imjet = imshow(TOF,jet,'XData',[0 size(TOF,2)],'YData',[size(TOF,1) 0]);
 imjet.CDataMapping = "scaled";

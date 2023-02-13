@@ -1,8 +1,8 @@
-function processtof(filename,outfolder,figfolder,minprom2,peakthresh, ...
-    modethresh,res)
-%PROCESSTOF Process raw TOF.
+function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
+    modeThresh,res)
+%SEGCSCAN Process raw TOF.
 %
-%   PROCESSTOF(filename,outfolder,figurefolder,minprom2,peakthresh,
+%   SEGCSCAN(filename,outfolder,figurefolder,minprom2,peakthresh,
 %   modethresh) finds inflection points using unique peak labels and peaks
 %   in the graph of second peak magnitude along rows/cols. Using inflection
 %   point map, cleans up, closes, and labels connected regions with
@@ -20,39 +20,39 @@ function processtof(filename,outfolder,figfolder,minprom2,peakthresh, ...
 %   RES       : Image resolution setting in dpi
 
 % Load raw TOF and associated info
-loadvar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
-for i = 1:length(loadvar)
-    infile = strcat(outfolder,"\",loadvar(i),"\",filename,'-',...
-        loadvar(i),'.mat');
-    load(infile,loadvar(i))
+loadVar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
+for i = 1:length(loadVar)
+    inFile = strcat(outFolder,"\",loadVar(i),"\",fileName,'-',...
+        loadVar(i),'.mat');
+    load(inFile,loadVar(i))
 end
 
 % Save full size of raw TOF
-rowf = size(rawtof,1); %#ok<NODEF> 
-colf = size(rawtof,2);
+rowF = size(rawTOF,1); %#ok<NODEF> 
+colF = size(rawTOF,2);
 
 % Work with damage bounding box area of raw TOF only
-startrow = cropcoord(1);
-endrow = cropcoord(2);
-startcol = cropcoord(3);
-endcol = cropcoord(4);
-rawtof = rawtof(startrow:endrow,startcol:endcol);
+startRow = cropcoord(1);
+endRow = cropcoord(2);
+startCol = cropcoord(3);
+endCol = cropcoord(4);
+rawTOF = rawTOF(startRow:endRow,startCol:endCol);
 
 % Calculate size of raw TOF
-row = size(rawtof,1);
-col = size(rawtof,2);
+row = size(rawTOF,1);
+col = size(rawTOF,2);
 
 % Find locations of 2nd peak and peak changes using label technique
-[peak2,inflptlabrow] = labelpeaks('row',row,col,locs,peak,npeaks,wide, ...
-    peakthresh);
-[  ~  ,inflptlabcol] = labelpeaks('col',row,col,locs,peak,npeaks,wide, ...
-    peakthresh);
+[peak2,inflptLabRow] = labelpeaks('row',row,col,locs,peak,npeaks,wide, ...
+    peakThresh);
+[  ~  ,inflptLabCol] = labelpeaks('col',row,col,locs,peak,npeaks,wide, ...
+    peakThresh);
 
 % Find peak changes using 2nd peak magnitude technique
-inflptmagrow = magpeaks('row',row,col,peak2,minprom2);
-inflptmagcol = magpeaks('col',row,col,peak2,minprom2);
+inflptMagRow = magpeaks('row',row,col,peak2,minProm2);
+inflptMagCol = magpeaks('col',row,col,peak2,minProm2);
 
-inflpt = inflptlabrow | inflptlabcol | inflptmagrow | inflptmagcol;
+inflpt = inflptLabRow | inflptLabCol | inflptMagRow | inflptMagCol;
 
 % Set 1 pixel border equal to zero to prevent 
 inflpt(1,:) = 0;
@@ -65,29 +65,29 @@ inflpt(npeaks < 2) = 1;
 
 % Plot and save figure of inflection points
 fig = figure('visible','off');
-implot(fig,inflpt,gray,row,col,filename,false);
-imsave(figfolder,fig,"inflpt",filename,res);
+implot(fig,inflpt,gray,row,col,fileName,false);
+imsave(figFolder,fig,"inflpt",fileName,res);
 
 % Create concave hull of damage area
-maskinflpt = inflpt;
-maskinflpt = bwmorph(maskinflpt,'clean',inf); % Remove isolated pixels
-if strcmp(filename,'RPR-H-20J-2') == true
+maskInflpt = inflpt;
+maskInflpt = bwmorph(maskInflpt,'clean',inf); % Remove isolated pixels
+if strcmp(fileName,'RPR-H-20J-2') == true
     se90 = strel('line',2,90);
-    maskinflpt = imclose(maskinflpt,se90);
+    maskInflpt = imclose(maskInflpt,se90);
 end
-maskinflpt = bwmorph(maskinflpt,'spur',inf); % Remove spurs
+maskInflpt = bwmorph(maskInflpt,'spur',inf); % Remove spurs
 
 % Trace exterior boundary, ignore interior holes
-[concBoundC,~] = bwboundaries(maskinflpt,'noholes');
+[concBoundC,~] = bwboundaries(maskInflpt,'noholes');
 % Convert boundaries from cell to binary image
-concbound = zeros(size(maskinflpt));
+concBound = zeros(size(maskInflpt));
 for i = 1:length(concBoundC)
     for k = 1:size(concBoundC{i},1)
-        concbound(concBoundC{i}(k,1),concBoundC{i}(k,2)) = 1;
+        concBound(concBoundC{i}(k,1),concBoundC{i}(k,2)) = 1;
     end
 end
 % Flood-fill boundary
-mask = imfill(concbound,4);
+mask = imfill(concBound,4);
 mask = bwmorph(mask,'clean',inf); % Remove isolated pixels
 
 % Find perimeter using 8 pixel connectivity
@@ -98,7 +98,7 @@ fig = figure('visible','off');
 subp = subplot(1,3,1); implot(subp,inflpt,gray,row,col,"Infl Pts",false);
 subp = subplot(1,3,2); implot(subp,mask,gray,row,col,"Mask",false);
 subp = subplot(1,3,3); implot(subp,bound,gray,row,col,"Boundary",false);
-imsave(figfolder,fig,'masks',filename,res);
+imsave(figFolder,fig,'masks',fileName,res);
 
 % Apply mask to inflection points map before morphological operations
 J = inflpt & mask;
@@ -106,11 +106,11 @@ J = inflpt & mask;
 % Close gaps in inflection points using morphological operations
 J = bwmorph(J,'clean',inf);  % Remove isolated pixels
 J = bwmorph(J,'bridge',inf); % Bridge pixels
-if strcmp(filename,'RPR-S-20J-2-back') == true
+if strcmp(fileName,'RPR-S-20J-2-back') == true
     se45 = strel('line',6,-45);
     J = imclose(J,se45);
 end
-if strcmp(filename,'RPR-S-15J-2-back') == true
+if strcmp(fileName,'RPR-S-15J-2-back') == true
     se45 = strel('line',6,45);
     J = imclose(J,se45);
 end
@@ -130,13 +130,13 @@ J(npeaks < 2) = 1;
 [L,n] = bwlabel(uint8(~J),4);
 
 % Apply mode TOF to each labeled region of the C-scan
-tof = rawtof;
+tof = rawTOF;
 for i = 1:n
     [areaI, areaJ] = find(L==i);
     areaind = sub2ind(size(L),areaI,areaJ);
-    areamode = mode(round(rawtof(areaind),2),'all');
+    areamode = mode(round(rawTOF(areaind),2),'all');
     for k = 1:length(areaI)
-        if abs(tof(areaI(k),areaJ(k)) - areamode) < modethresh
+        if abs(tof(areaI(k),areaJ(k)) - areamode) < modeThresh
             tof(areaI(k),areaJ(k)) = areamode;
         end
     end
@@ -151,26 +151,26 @@ subp = subplot(1,4,1); implot(subp,inflpt,gray,row,col,"Original",false);
 subp = subplot(1,4,2); implot(subp,J,gray,row,col,"Processed",false);
 subp = subplot(1,4,3); implot(subp,L,colorcube,row,col,"Labeled",false);
 subp = subplot(1,4,4); implot(subp,tof,jet,row,col,"Mode",true);
-imsave(figfolder,fig,'process',filename,res);
+imsave(figFolder,fig,'process',fileName,res);
 
 % Plot and save figure of raw and processed TOF
 fig = figure('visible','off');
-subp = subplot(1,2,1); implot(subp,rawtof,jet,row,col,"Unprocessed",true);
+subp = subplot(1,2,1); implot(subp,rawTOF,jet,row,col,"Unprocessed",true);
 subp = subplot(1,2,2); implot(subp,tof,jet,row,col,"Processed",true);
-imsave(figfolder,fig,'compare',filename,res);
+imsave(figFolder,fig,'compare',fileName,res);
 
 % Plot and save figure of processed TOF
 fig = figure('visible','off');
-implot(fig,tof,jet,row,col,filename,true);
-imsave(figfolder,fig,'tof',filename,res);
+implot(fig,tof,jet,row,col,fileName,true);
+imsave(figFolder,fig,'tof',fileName,res);
 
 % Save TOF, inflection points, and masks to .mat file
 savevar = ["tof","inflpt","mask","bound"];
-temptof = zeros(rowf,colf);
-temptof(startrow:endrow,startcol:endcol) = tof;
+temptof = zeros(rowF,colF);
+temptof(startRow:endRow,startCol:endCol) = tof;
 tof = temptof; %#ok<NASGU> 
 for i = 1:length(savevar)
-    outfile = strcat(outfolder,"\",savevar(i),"\",filename,'-',...
+    outfile = strcat(outFolder,"\",savevar(i),"\",fileName,'-',...
         savevar(i),'.mat');
     save(outfile,savevar(i),'-mat');
 end

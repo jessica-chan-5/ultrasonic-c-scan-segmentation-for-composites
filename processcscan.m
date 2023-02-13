@@ -1,11 +1,11 @@
-function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
-    basecol,cropthresh,pad,minprom1,noisethresh,maxwidth,res)
-%PROCESSASCAN Process A-scans to calculate TOF info.
-%    PROCESSASCAN(filename,outfolder,dt,bounds,incr,baserow,basecol,
-%    cropthresh,pad,minprom,noisethresh,maxwidth) Look for damage bounding
-%    box within search area defined by bounds using a baseline TOF from an
-%    area designated by baserow and basecol. Calculate and saves raw TOF 
-%    and associated peak/location info for segmentcscan.
+function processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
+    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res)
+%PROCESSCSCAN Process A-scans to calculate TOF info.
+%    PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
+%    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res) Look for
+%    damage bounding box within search area defined by bounds using a
+%    baseline TOF from an area designated by baserow and basecol. Calculate
+%    and saves raw TOF and associated peak/location info for segmentcscan.
 % 
 %    Inputs:
 % 
@@ -26,7 +26,7 @@ function processascan(filename,outfolder,figfolder,dt,bounds,incr,baserow, ...
 %    RES        : Image resolution setting in dpi
 
 % Load C-scan
-infile = strcat(outfolder,"\",'cscan\',filename,'-cscan.mat');
+infile = strcat(outFolder,"\",'cscan\',fileName,'-cscan.mat');
 load(infile,'cscan');
 
 % Find # rows, col, & data points/A-scan
@@ -54,15 +54,15 @@ l2c   = l2r(1:halfx);
 r2c   = l2r(end:-1:halfx+1);
 
 % Calculate baseline TOF
-temptof = calctof(cscan,t,baserow,basecol,minprom1,noisethresh,maxwidth);
+temptof = calctof(cscan,t,baseRow,baseCol,minProm1,noiseThresh,maxWidth);
 basetof = mode(temptof,'all');
 
 % Search for start row scanning from top to center row
-startrow = findbound(basetof,t2c,l2r,'row',cropthresh,cscan,t,minprom1,...
-    noisethresh,maxwidth);
+startrow = findbound(basetof,t2c,l2r,'row',cropThresh,cscan,t,minProm1,...
+    noiseThresh,maxWidth);
 % Search for end row scanning from bottom to center row
-endrow   = findbound(basetof,b2c,l2r,'row',cropthresh,cscan,t,minprom1,...
-    noisethresh,maxwidth);
+endrow   = findbound(basetof,b2c,l2r,'row',cropThresh,cscan,t,minProm1,...
+    noiseThresh,maxWidth);
 
 % Set row indices to search
 startrowi  = find(t2b == startrow);
@@ -81,11 +81,11 @@ if endrow > row
 end
 
 % Search for start col scanning from left to center
-startcol = findbound(basetof,l2c,searchrows,'col',cropthresh,cscan,t,...
-    minprom1,noisethresh,maxwidth);
+startcol = findbound(basetof,l2c,searchrows,'col',cropThresh,cscan,t,...
+    minProm1,noiseThresh,maxWidth);
 % Search for end col scanning from right to center
-endcol   = findbound(basetof,r2c,searchrows,'col',cropthresh,cscan,t,...
-    minprom1,noisethresh,maxwidth);
+endcol   = findbound(basetof,r2c,searchrows,'col',cropThresh,cscan,t,...
+    minProm1,noiseThresh,maxWidth);
 
 % Add padding in horizontal direction
 startcol = startcol - pad;
@@ -99,7 +99,7 @@ end
 
 % Calculate raw TOF and corresponding peak/location info in crop region
 [croptof,peak,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
-    startcol:endcol,minprom1,noisethresh,maxwidth); %#ok<ASGLU> 
+    startcol:endcol,minProm1,noiseThresh,maxWidth); %#ok<ASGLU> 
 rawtof = zeros(row,col);
 rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
 
@@ -107,14 +107,14 @@ rawtof(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
 cropcoord = [startrow endrow startcol endcol]; %#ok<NASGU> 
 savevar = ["rawtof";"peak";"locs";"wide";"npeaks";"cropcoord"];
 for i = 1:length(savevar)
-    outfile = strcat(outfolder,"\",savevar(i),"\",filename,'-',...
+    outfile = strcat(outFolder,"\",savevar(i),"\",fileName,'-',...
         savevar(i),'.mat');
     save(outfile,savevar(i),'-mat');
 end
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
-implot(rawtof,jet,row,col,filename,true);
-imsave(figfolder,fig,'rawtof',filename,res);
+implot(rawtof,jet,row,col,fileName,true);
+imsave(figFolder,fig,'rawtof',fileName,res);
 
 end
