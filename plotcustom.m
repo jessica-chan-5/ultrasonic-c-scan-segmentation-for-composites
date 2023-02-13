@@ -1,5 +1,22 @@
 function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
     res,test)
+%PLOTCUSTOM Plot and save custom figures
+%    PLOTCUSTOM(filename,infolder,outfolder,figfolder,utwincrop,dy,res,...
+%    test) Plots custom figures comparing UTWin screenshots to unsegmented
+%    and segmented TOF plots from this code. Allows for adjustments in the
+%    y direction to align UTWin screenshots with figures from this code.
+% 
+%    Inputs:
+% 
+%    FILENAME : Name of sample, same as readcscan
+%    INFOLDER : Folder location of UTWin screenshots
+%    OUTFOLDER: Folder path to .mat output files
+%    FIGFOLDER: Folder path to .fig and .png files
+%    UTWINCROP: Indices to crop UTWin screenshot in format:
+%               [startRow endRow startCol endCol]
+%    DY       : Amount to adjust UTWin screenshots (+) = up, (-) = down
+%    RES      : Image resolution setting in dpi
+%    TEST     : If test is true, shows figures - figure('visible','on')
 
 % Load raw TOF and associated info
 loadVar = ["rawtof";"tof";"cropcoord"];

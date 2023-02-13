@@ -76,7 +76,7 @@ modeThresh = [hig; hig; hig; hig; hig;       %  1- 5
 % #########################################################################
 
 % PLOTFIG options =========================================================
-runPlotFig   = false;      % Run plottof?
+runPlotFig   = true;      % Run plottof?
 filesPlotFig = 1:numFiles; % Indices of files to read
 % PLOTFIG inputs ----------------------------------------------------------
 plateThick  = 3.3;% Plate thickness in millimeters
@@ -85,7 +85,7 @@ nLayers = 25;     % Number of layers in plate
 % #########################################################################
 
 % MERGECSCAN options ======================================================
-runMergeCscan   = true;   % Run mergetof?
+runMergeCscan   = false;   % Run mergetof?
 filesMergeCscan = 9;%:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary

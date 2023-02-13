@@ -1,9 +1,22 @@
 function inflpt = magpeaks(dir,row,col,peak2,minProm2)
+%MAGPEAKS Use 2nd peak magnitude to find inflection points
+%    inflpt = MAGPEAKS(dir,row,col,peak2,minProm2) searches along row or
+%    col depending on given dir to search for inflection points using 
+%    negative values of 2nd peak magnitude. Returns inflection points.
+%
+%    Inputs:
+%
+%    DIR:      'row' or 'col' - searches along given direction
+%    ROW:      Number of points along row
+%    COL:      Number of points along col
+%    PEAK2:    2nd peak magnitude values
+%    MINPROM2: Min prom for peak to be identified
 
 inflpt = zeros(row,col);
 
 if strcmp(dir,'row') == true
     for i = 1:row
+        % Take negative value to find peaks instead of valleys
         invertPeak2 = -peak2(i,:);
         [~,magLoc] = findpeaks(invertPeak2,'MinPeakProminence',minProm2);
         inflpt(i,magLoc) = 1;
