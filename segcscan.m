@@ -72,8 +72,13 @@ imsave(figFolder,fig,"inflpt",fileName,res);
 maskInflpt = inflpt;
 maskInflpt = bwmorph(maskInflpt,'clean',inf); % Remove isolated pixels
 if strcmp(fileName,'RPR-H-20J-2') == true
-    se90 = strel('line',2,90);
+    se90 = strel('line',4,90);
     maskInflpt = imclose(maskInflpt,se90);
+elseif strcmp(fileName,'RPR-S-15J-2-back') == true
+    maskInflpt = bwmorph(maskInflpt,'spur',inf); % Remove spurs
+    maskInflpt = bwmorph(maskInflpt,'clean',inf); % Remove isolated pixels
+    se0 = strel('line',6,0);
+    maskInflpt = imclose(maskInflpt,se0);
 end
 maskInflpt = bwmorph(maskInflpt,'spur',inf); % Remove spurs
 
