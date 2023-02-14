@@ -1,4 +1,21 @@
-function mergecscan(filename,outfolder,figfolder,dx,dy,test,res)
+function mergecscan(fileName,outFolder,figFolder,dx,dy,test,res)
+%MERGECSCAN Merge hybrid C-scan
+%
+%   MERGECSCAN(fileName,outFolder,figFolder,dx,dy,test,res) user can adjust
+%   dx and dy of front side C-scan relative to back side C-scan using the
+%   boundary of damage calculated in segcscan. removes points outside of 
+%   the mask calculated in segcsan. Merges front and back side C-scans, 
+%   then plots and saves as matrix, png, and fig.
+%
+%   Inputs:
+%
+%   FILENAME : Name of sample, same as readcscan
+%   OUTFOLDER: Folder path to .mat output files
+%   FIGFOLDER: Folder path to .fig and .png files
+%   DX       : Amount to adjust front side scan (+) = right, (-) = left
+%   DY       : Amount to adjust front side scan (+) = up, (-) = down
+%   TEST     : If test is true, shows figures
+%   RES      : Image resolution setting in dpi
 
 if test == true
     figVis = 'on';
@@ -9,52 +26,65 @@ end
 % Load segmented TOF and associated info for corresponding front and back
 
 name = "mask";
-inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
-load(inFileF,name);
+maskC = cell(1,2);
+inFileF = strcat(outFolder,"\",name,"\",fileName,'-',name,'.mat');
+inFileB = strcat(outFolder,"\",name,"\",fileName,'-back-',name,'.mat');
+maskC{1} = load(inFileF,name);
+maskC{1} = maskC{1}.mask;
+maskC{2} = load(inFileB,name);
+maskC{2} = maskC{2}.mask;
 
 name = "damLayers";
-segTOFC = cell(1,2);
-inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
-inFileB = strcat(outfolder,"\",name,"\",filename,'-back-',name,'.mat');
-segTOFC{1} = load(inFileF,name); segTOFC{1} = segTOFC{1}.segtof;
-segTOFC{2} = load(inFileB,name); segTOFC{2} = fliplr(segTOFC{2}.segtof);
+damLayersC = cell(1,2);
+inFileF = strcat(outFolder,"\",name,"\",fileName,'-',name,'.mat');
+inFileB = strcat(outFolder,"\",name,"\",fileName,'-back-',name,'.mat');
+damLayersC{1} = load(inFileF,name);
+damLayersC{1} = damLayersC{1}.damLayers;
+damLayersC{2} = load(inFileB,name);
+damLayersC{2} = fliplr(damLayersC{2}.damLayers);
 
 name = "cropCoord";
 cropCoordC = cell(1,2);
-inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
-inFileB = strcat(outfolder,"\",name,"\",filename,'-back-',name,'.mat');
-cropCoordC{1} = load(inFileF,name); cropCoordC{1} = cropCoordC{1}.cropcoord;
-cropCoordC{2} = load(inFileB,name); cropCoordC{2} = cropCoordC{2}.cropcoord;
+inFileF = strcat(outFolder,"\",name,"\",fileName,'-',name,'.mat');
+inFileB = strcat(outFolder,"\",name,"\",fileName,'-back-',name,'.mat');
+cropCoordC{1} = load(inFileF,name); 
+cropCoordC{1} = cropCoordC{1}.cropCoord;
+cropCoordC{2} = load(inFileB,name); 
+cropCoordC{2} = cropCoordC{2}.cropCoord;
 
 name = "bound";
 boundC = cell(1,2);
-inFileF = strcat(outfolder,"\",name,"\",filename,'-',name,'.mat');
-inFileB = strcat(outfolder,"\",name,"\",filename,'-back-',name,'.mat');
+inFileF = strcat(outFolder,"\",name,"\",fileName,'-',name,'.mat');
+inFileB = strcat(outFolder,"\",name,"\",fileName,'-back-',name,'.mat');
 boundC{1} = load(inFileF,name); boundC{1} = boundC{1}.bound;
-boundC{2} = load(inFileB,name); boundC{2} = fliplr(boundC{2}.bound);
+boundC{2} = load(inFileB,name); boundC{2} = boundC{2}.bound;
 
 % Save full size of segmented TOF
-row = size(segTOFC{1},1);
-col = size(segTOFC{1},2);
+row = size(damLayersC{1},1);
+col = size(damLayersC{1},2);
 
 % Get damage bounding box boundaries
 startRow = [cropCoordC{1}(1) cropCoordC{2}(1)];
-endRowF = [cropCoordC{1}(2) cropCoordC{2}(2)];
+endRow = [cropCoordC{1}(2) cropCoordC{2}(2)];
 startCol = [cropCoordC{1}(3) cropCoordC{2}(3)];
 endCol = [cropCoordC{1}(4) cropCoordC{2}(4)];
 
 % Save boundaries and mask in full size row/col dimensions
 tempBoundF= zeros(row,col);
-tempBoundF(startRow(1):endRowF(1),startCol(1):endCol(1)) = boundC{1};
+tempBoundF(startRow(1):endRow(1),startCol(1):endCol(1)) = boundC{1};
 boundC{1} = tempBoundF;
 
 tempBoundB= zeros(row,col);
-tempBoundB(startRow(2):endRowF(2),startCol(2):endCol(2)) = boundC{2};
-boundC{2} = tempBoundB;
+tempBoundB(startRow(2):endRow(2),startCol(2):endCol(2)) = boundC{2};
+boundC{2} = fliplr(tempBoundB);
 
-tempMask = zeros(row,col);
-tempMask(startRow(1):endRowF(1),startCol(1):endCol(1)) = mask; %#ok<NODEF> 
-mask = tempMask;
+tempMaskF = zeros(row,col);
+tempMaskF(startRow(1):endRow(1),startCol(1):endCol(1)) = maskC{1};
+maskC{1} = tempMaskF;
+
+tempMaskB = zeros(row,col);
+tempMaskB(startRow(2):endRow(2),startCol(2):endCol(2)) = maskC{2};
+maskC{2} = fliplr(tempMaskB);
 
 % Max boundary
 startRowF = min([cropCoordC{1}(1) cropCoordC{2}(1)]);
@@ -73,58 +103,68 @@ im.CDataMapping = "scaled"; axis on; title('Initial Check');
 % Adjust x and y offset for front TOF
 if dx > 0     % right
     boundC{1} = [zeros(row,dx) boundC{1}(:,1:col-dx)];
-    segTOFC{1} = [ones(row,dx) segTOFC{1}(:,1:col-dx)];
+    damLayersC{1} = [nan(row,dx) damLayersC{1}(:,1:col-dx)];
+    maskC{1} = [zeros(row,dx) maskC{1}(:,1:col-dx)];
 elseif dx < 0 % left
     dx = abs(dx);
     boundC{1} = [boundC{1}(:,1+dx:col) zeros(row,dx)];
-    segTOFC{1} = [segTOFC{1}(:,1+dx:col) ones(row,dx)];
+    damLayersC{1} = [damLayersC{1}(:,1+dx:col) nan(row,dx)];
+    maskC{1} = [maskC{1}(:,1+dx:col) zeros(row,dx)];
 end 
 if dy > 0     % up
     boundC{1} = [boundC{1}(1+dy:row,:); zeros(dy,col)];
-    segTOFC{1} = [segTOFC{1}(1+dy:row,:); ones(dy,col)];
+    damLayersC{1} = [damLayersC{1}(1+dy:row,:); nan(dy,col)];
+    maskC{1} = [maskC{1}(1+dy:row,:); zeros(dy,col)];
 elseif dy < 0 % down
     dy = abs(dy);
     boundC{1} = [zeros(dy,col); boundC{1}(1:row-dy,:)];
-    segTOFC{1} = [ones(dy,col); segTOFC{1}(1:row-dy,:)];
+    damLayersC{1} = [nan(dy,col); damLayersC{1}(1:row-dy,:)];
+    maskC{1} = [zeros(dy,col); maskC{1}(1:row-dy,:)];
 end
 
 % Replot to check if correct
 boundF = boundC{1}+boundC{2}.*2;
-boundF = boundF(startRowF:endRowf,startColF:endColF);
+boundF = boundF(startRowF:endRowF,startColF:endColF);
 subplot(1,2,2); im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
-imsave(figfolder,fig,"mergeCheck",filename,res);
+imsave(figFolder,fig,"mergeCheck",fileName,res);
 
 % Remove points if outside boundary
-segTOFC{1}(mask==0) = NaN;
-segTOFC{2}(mask==0) = NaN;
-
-% Flip layers top to bottom for back TOF
-segTOFC{2} = abs(segTOFC{2}-max(segTOFC{2})-1);
+damLayersC{1}(maskC{1}==0) = NaN;
+damLayersC{2}(maskC{2}==0) = NaN;
 
 % Save seg TOF inside of max boundary
-segTOFC{1} = segTOFC{1}(startRowF:endRowf,startColF:endColF);
-segTOFC{2} = segTOFC{2}(startRowF:endRowf,startColF:endColF);
-rowC = size(segTOFC{1},1);
-colC = size(segTOFC{1},2);
+damLayersC{1} = damLayersC{1}(startRowF:endRowF,startColF:endColF);
+damLayersC{2} = damLayersC{2}(startRowF:endRowF,startColF:endColF);
+
+rowF = size(damLayersC{1},1);
+colF = size(damLayersC{1},2);
 
 % 3D plot TOF front
-segTOFVec = cell(1,2);
-segTOFVec{1} = reshape(segTOFC{1},rowC*colC,1);
-segTOFVec{1}(1,1) = max(segTOFVec{1});
+damLayersVec = cell(1,2);
+damLayersVec{1} = reshape(damLayersC{1},rowF*colF,1);
+damLayersVec{2} = reshape(damLayersC{2},rowF*colF,1);
+xVec = repmat((1:rowF)',colF,1);
+yVec = repelem(1:colF,rowF)';
 
-segTOFVec{2} = reshape(segTOFC{2},rowC*colC,1);
-segTOFVec{2}(1,1) = max(segTOFVec{2});
+% Flip layers top to bottom for back TOF
+damLayersVec{2} = abs(damLayersVec{2}-max(damLayersVec{2})-1);
 
-xVec = repmat((1:rowC)',colC,1);
-yVec = repelem(1:colC,rowC)';
+hybridCscan = sortrows([[xVec; xVec],[yVec; yVec], ...
+    [damLayersVec{1};damLayersVec{2}]]);
+hybridCscan(isnan(hybridCscan(:,3)),:) = [];
 
 fig = figure('Visible','off'); hold on;
-scatter3(xVec,yVec,segTOFVec{1},20,segTOFVec{1},'filled'); colormap(gca,'jet');
-scatter3(xVec,yVec,segTOFVec{2},20,segTOFVec{2},'filled'); colormap(gca,'jet');
+scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
+    20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('TOF (us)'); grid on;
-savefigure(figfolder,fig,"hybridCscan",filename);
+view(3);
+imsave(figFolder,fig,"hybridCscan",fileName,res);
 
-% Save merged TOF
+% Save merged damage layers
+name = "hybridCscan";
+outfile = strcat(outFolder,"\",name,"\",fileName,'-',...
+    name,'.mat');
+save(outfile,name,'-mat');
 
 end

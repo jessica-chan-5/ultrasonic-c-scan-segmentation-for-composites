@@ -40,7 +40,7 @@ col = size(tof,2);
 baseTOF = mode((nonzeros(tof)),'all'); % Calculate baseline TOF
 matVel = 2*plateThick/baseTOF;         % Calculate material velocity
 plyt = plateThick/nLayers;             % Calculate ply thickness
-dtTOF = plyt/matVel*2;                 % Calculate TOF for each layer
+dtTOF = plyt/matVel;                 % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers and group into 
 % (nLayers+1) damage layers

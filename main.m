@@ -38,7 +38,7 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = false;      % Run processascan?
+runProcessCscan   = false;      % Run processcscan?
 filesProcessCscan = 1:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
@@ -58,7 +58,7 @@ res         = 300;     % Image resolution setting in dpi
 % #########################################################################
 
 % SEGCSCAN options ========================================================
-runSegCscan   = false;      % Run processtof?
+runSegCscan   = false;      % Run segcsan?
 filesSegCscan = 1:numFiles; % Indices of files to read
 % PROCESSTOF inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
@@ -76,7 +76,7 @@ modeThresh = [hig; hig; hig; hig; hig;       %  1- 5
 % #########################################################################
 
 % PLOTFIG options =========================================================
-runPlotFig   = false;      % Run plottof?
+runPlotFig   = false;      % Run plotfig?
 filesPlotFig = 1:numFiles; % Indices of files to read
 % PLOTFIG inputs ----------------------------------------------------------
 plateThick  = 3.3;% Thickness of scanned plate in millimeters
@@ -85,22 +85,24 @@ nLayers = 25;     % Number of layers in scanned plate
 % #########################################################################
 
 % MERGECSCAN options ======================================================
-runMergeCscan   = false;   % Run mergetof?
-filesMergeCscan = 9;%:17; % Indices of files to read
+runMergeCscan   = true;   % Run mergecscan?
+filesMergeCscan = 9:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary
-dx = [ 8;-2;            % 9-10
-      -4; 7; 4;-27;-45; % 11-15
+% DX: Amount to adjust front side scan (+) = right, (-) = left
+dx = [-3; 8;            % 9-10
+      -4; 7;14; 4; 5;   % 11-15
        6; 9];           % 16-17
-dyMergeCscan = [2; 0;            % 9-10
+% DY: Amount to adjust front side scan (+) = up, (-) = down
+dyMergeCscan =  [2; 0;  % 9-10
        2;-1;-5; -2;  0; % 11-15
-       1; 0];           % 16-17
-testMergeCscan = false;
+       1; 1];           % 16-17
+testMergeCscan = false; % If test is true, shows figures
 % END MERGECSCAN __________________________________________________________
 % #########################################################################
 
 % PLOTCUSTOM options ======================================================
-runPlotCustom   = true;      % Run customplot?
+runPlotCustom   = false;      % Run customplot?
 filesPlotCustom = 1:numFiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
 % UTWINCROP: Indices to crop UTWin screenshot in format:
@@ -192,9 +194,9 @@ end
 
 if runMergeCscan == true
 tic
-fprintf("MERGETOF======================================\n\n")
-fprintf("Merging TOF for:\n\n");
-for i = filesMergeCscan
+fprintf("MERGECSCAN======================================\n\n")
+fprintf("Merging C-scan for:\n\n");
+parfor i = filesMergeCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
         dyMergeCscan(i-di),testMergeCscan,res);
