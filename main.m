@@ -58,7 +58,7 @@ res         = 300;     % Image resolution setting in dpi
 % #########################################################################
 
 % SEGCSCAN options ========================================================
-runSegCscan   = true;      % Run processtof?
+runSegCscan   = false;      % Run processtof?
 filesSegCscan = 1:numFiles; % Indices of files to read
 % PROCESSTOF inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
@@ -100,7 +100,7 @@ testMergeCscan = false;
 % #########################################################################
 
 % PLOTCUSTOM options ======================================================
-runPlotCustom   = false;      % Run customplot?
+runPlotCustom   = true;      % Run customplot?
 filesPlotCustom = 1:numFiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
 % UTWINCROP: Indices to crop UTWin screenshot in format:

@@ -114,9 +114,11 @@ J = bwmorph(J,'bridge',inf); % Bridge pixels
 if strcmp(fileName,'RPR-S-20J-2-back') == true
     se45 = strel('line',6,-45);
     J = imclose(J,se45);
-end
-if strcmp(fileName,'RPR-S-15J-2-back') == true
+elseif strcmp(fileName,'RPR-S-15J-2-back') == true
     se45 = strel('line',6,45);
+    J = imclose(J,se45);
+elseif strcmp(fileName,'CONT-S-20J-2') == true
+    se45 = strel('line',3,-45);
     J = imclose(J,se45);
 end
 

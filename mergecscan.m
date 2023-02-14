@@ -102,8 +102,6 @@ segTOFC{2}(mask==0) = NaN;
 % Flip layers top to bottom for back TOF
 segTOFC{2} = abs(segTOFC{2}-max(segTOFC{2})-1);
 
-% Use mask to remove exterior points
-
 % Save seg TOF inside of max boundary
 segTOFC{1} = segTOFC{1}(startRowF:endRowf,startColF:endColF);
 segTOFC{2} = segTOFC{2}(startRowF:endRowf,startColF:endColF);

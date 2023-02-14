@@ -14,7 +14,7 @@ function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,res)
 %    RES       : Image resolution setting in dpi
 
 % Load raw TOF and associated info
-loadVar = ["tof";"cropCoord"];
+loadVar = ["tof";"cropCoord";"mask"];
 for i = 1:length(loadVar)
     inFile = strcat(outFolder,"\",loadVar(i),"\",fileName,'-',...
         loadVar(i),'.mat');
@@ -26,10 +26,10 @@ rowF = size(tof,1); %#ok<NODEF>
 colF = size(tof,2);
 
 % Work with damage bounding box area of raw TOF only
-startRow = cropcoord(1);
-endRow = cropcoord(2);
-startCol = cropcoord(3);
-endCol = cropcoord(4);
+startRow = cropCoord(1);
+endRow = cropCoord(2);
+startCol = cropCoord(3);
+endCol = cropCoord(4);
 tof = tof(startRow:endRow,startCol:endCol); 
 
 % Calculate size of raw TOF
@@ -47,6 +47,7 @@ dtTOF = plyt/matVel*2;                 % Calculate TOF for each layer
 layersTOF = 0:dtTOF:baseTOF+dtTOF;
 layersTOF(end) = baseTOF+2*dtTOF;
 damLayers = discretize(tof,layersTOF);
+damLayers(mask==0) = NaN;
 
 % Plot and save damage layers
 fig = figure('visible','off');

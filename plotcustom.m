@@ -19,7 +19,7 @@ function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
 %    TEST     : If test is true, shows figures - figure('visible','on')
 
 % Load raw TOF and associated info
-loadVar = ["rawtof";"tof";"cropcoord"];
+loadVar = ["rawTOF";"tof";"cropCoord"];
 for i = 1:length(loadVar)
     inFile = strcat(outfolder,"\",loadVar(i),"\",filename,'-',...
         loadVar(i),'.mat');
@@ -31,10 +31,10 @@ rowF = size(tof,1); %#ok<NODEF>
 colF = size(tof,2);
 
 % Work with damage bounding box area only
-startRow = cropcoord(1);
-endRow = cropcoord(2);
-startCol = cropcoord(3);
-endCol = cropcoord(4);
+startRow = cropCoord(1);
+endRow = cropCoord(2);
+startCol = cropCoord(3);
+endCol = cropCoord(4);
 rawTOF = rawTOF(startRow:endRow,startCol:endCol); %#ok<NODEF> 
 tof = tof(startRow:endRow,startCol:endCol); 
 row = size(tof,1);
