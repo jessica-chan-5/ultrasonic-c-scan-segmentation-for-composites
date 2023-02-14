@@ -26,7 +26,7 @@ numFiles = length(fileNames);
 %% Function inputs
 
 % READCSCAN options =======================================================
-runReadCscan   = true;      % Run readcscan?
+runReadCscan   = false;      % Run readcscan?
 filesReadCscan = 1:numFiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
 delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
@@ -58,7 +58,7 @@ res         = 300;     % Image resolution setting in dpi
 % #########################################################################
 
 % SEGCSCAN options ========================================================
-runSegCscan   = false;      % Run processtof?
+runSegCscan   = true;      % Run processtof?
 filesSegCscan = 1:numFiles; % Indices of files to read
 % PROCESSTOF inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified

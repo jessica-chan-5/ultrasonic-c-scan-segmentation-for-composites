@@ -25,6 +25,6 @@ end
 im.CDataMapping = "scaled";
 colormap(fig,map);
 title(figTitle);
-colorbar;
+
 end
 

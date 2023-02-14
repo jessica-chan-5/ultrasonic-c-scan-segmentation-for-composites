@@ -32,10 +32,10 @@ rowF = size(rawTOF,1); %#ok<NODEF>
 colF = size(rawTOF,2);
 
 % Work with damage bounding box area of raw TOF only
-startRow = cropcoord(1);
-endRow = cropcoord(2);
-startCol = cropcoord(3);
-endCol = cropcoord(4);
+startRow = cropCoord(1);
+endRow = cropCoord(2);
+startCol = cropCoord(3);
+endCol = cropCoord(4);
 rawTOF = rawTOF(startRow:endRow,startCol:endCol);
 
 % Calculate size of raw TOF
@@ -43,9 +43,9 @@ row = size(rawTOF,1);
 col = size(rawTOF,2);
 
 % Find locations of 2nd peak and peak changes using label technique
-[peak2,inflptLabRow] = labelpeaks('row',row,col,locs,peak,npeaks,wide, ...
+[peak2,inflptLabRow] = labelpeaks('row',row,col,locs,peak,nPeaks,wide, ...
     peakThresh);
-[  ~  ,inflptLabCol] = labelpeaks('col',row,col,locs,peak,npeaks,wide, ...
+[  ~  ,inflptLabCol] = labelpeaks('col',row,col,locs,peak,nPeaks,wide, ...
     peakThresh);
 
 % Find peak changes using 2nd peak magnitude technique
@@ -61,7 +61,7 @@ inflpt(end,:) = 0;
 inflpt(:,end) = 0;
 
 % Set numPeaks < 2 to be inflection points
-inflpt(npeaks < 2) = 1;
+inflpt(nPeaks < 2) = 1;
 
 % Plot and save figure of inflection points
 fig = figure('visible','off');
@@ -124,7 +124,7 @@ J = bwmorph(J,'spur',2);    % Remove spurs
 J = bwmorph(J,'clean',inf); % Remove isolated pixels
 
 % Add any missing zero TOF values
-J(npeaks < 2) = 1;
+J(nPeaks < 2) = 1;
 
 % Label separate layer regions of C-scan
 [L,n] = bwlabel(uint8(~J),4);
@@ -143,7 +143,7 @@ for i = 1:n
 end
 
 % Set numPeaks < 2 and widePeak to be zero TOF
-tof(npeaks < 2) = 0;
+tof(nPeaks < 2) = 0;
 
 % Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
 fig = figure('visible','off');

@@ -98,7 +98,7 @@ if endcol > col
 end
 
 % Calculate raw TOF and corresponding peak/location info in crop region
-[croptof,peak,locs,wide,npeaks] = calctof(cscan,t,startrow:endrow, ...
+[croptof,peak,locs,wide,nPeaks] = calctof(cscan,t,startrow:endrow, ...
     startcol:endcol,minProm1,noiseThresh,maxWidth); %#ok<ASGLU> 
 rawTOF = zeros(row,col);
 rawTOF(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
@@ -114,7 +114,7 @@ end
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
-implot(rawTOF,jet,row,col,fileName,true);
+implot(fig,rawTOF,jet,row,col,fileName,true);
 imsave(figFolder,fig,'rawTOF',fileName,res);
 
 end
