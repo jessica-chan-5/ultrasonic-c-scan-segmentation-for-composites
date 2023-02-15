@@ -107,9 +107,12 @@ rawTOF = zeros(row,col);
 rawTOF(startrow:endrow,startcol:endcol) = cropTOF(1:end,1:end);
 
 if test == true
-
+    figVis = 'on';
+else
+    figVis = 'off';
+end
 % Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
-figure;
+fig = figure('visible','on','WindowState','maximized');
 modeData = mode(rawTOF(rawTOF~=0),'all');
 im = imshow(rawTOF,[0 modeData+0.1]);
 im.CDataMapping = "scaled";
@@ -162,9 +165,11 @@ plot([startcol endcol],[endrow endrow],padLS,'LineWidth',padLW);
 legend([p1 p2 p3 p4 p5], ...
     {'bounds','incr','baseRow/baseCol','Damage bound box','pad'}, ...
     'Location','bestoutside')
+imsave(figFolder,fig,'damBoundBox',fileName,res);
+close(fig);
 
 % Plot TOF
-figure;
+fig = figure('visible',figVis);
 modeData = mode(cropTOF(cropTOF~=0),'all');
 im = imshow(cropTOF,[0 modeData+0.1]);
 im.CDataMapping = "scaled"; axis on;
@@ -178,13 +183,12 @@ Rows = repelem(1:c,r)';
 cropTab = table(Columns,Rows,vecCrop);
 scatter(cropTab,'Rows','Columns','filled','ColorVariable','vecCrop');
 colormap(gca,'jet');
-
-end
+savefigure(figFolder,fig,'cscan',fileName);
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
 implot(fig,rawTOF,jet,row,col,fileName,true);
-% imsave(figFolder,fig,'rawTOF',fileName,res);
+imsave(figFolder,fig,'rawTOF',fileName,res);
 
 % Save raw TOF and corresponding peaks/location info
 cropCoord = [startrow endrow startcol endcol]; %#ok<NASGU> 

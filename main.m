@@ -53,7 +53,7 @@ pad         = 1;       % (1+pad)*incr added to calculated bounding box
 minProm1    = 0.03;    % Min prominence for a peak to be identified
 noiseThresh = 0.01;    % If average signal lower, then pt is not processed
 maxWidth    = 0.75;    % Max width for a peak to be marked as wide
-testProcess = true;    % If true, shows figures
+testProcess = false;    % If true, shows figures
 res         = 300;     % Image resolution setting in dpi
 % END PROCESSCSCAN ________________________________________________________
 % #########################################################################
@@ -61,7 +61,7 @@ res         = 300;     % Image resolution setting in dpi
 % SEGCSCAN options ========================================================
 runSegCscan   = false;      % Run segcsan?
 filesSegCscan = 1:numFiles; % Indices of files to read
-% PROCESSTOF inputs -------------------------------------------------------
+% SEGCSCAN inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; %Threshold of dt for peak to be labeled as unique
 % MODETHRESH:       Threshold for TOF to be set to mode TOF
@@ -148,7 +148,8 @@ fprintf("Processing C-scans for:\n\n");
 for i = filesProcessCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     processcscan(fileNames(i),outFolder,figFolder,dt,bounds,incr, ...
-        baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res)
+        baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
+        testProcess,res)
 end
 sec = toc;
 fprintf('\nElapsed time is:')

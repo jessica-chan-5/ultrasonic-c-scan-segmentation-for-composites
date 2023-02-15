@@ -16,7 +16,7 @@ function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
 %               [startRow endRow startCol endCol]
 %    DY       : Amount to adjust UTWin screenshots (+) = up, (-) = down
 %    RES      : Image resolution setting in dpi
-%    TEST     : If test is true, shows figures - figure('visible','on')
+%    TEST     : If test is true, shows figures
 
 % Load raw TOF and associated info
 loadVar = ["rawTOF";"tof";"cropCoord"];
