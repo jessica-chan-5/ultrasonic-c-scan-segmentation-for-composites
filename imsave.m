@@ -1,4 +1,4 @@
-function imsave(figFolder,fig,name,fileName,res,barOn)
+function imsave(figFolder,fig,name,fileName,res)
 %IMSAVE Save figure as png and fig.
 %    IMSAVE(figFolder,fig,name,fileName,res) saves figure in designated
 %    figure folder, using given title, and with specified resolution as png

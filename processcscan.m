@@ -101,20 +101,19 @@ if endcol > col
 end
 
 % Calculate raw TOF and corresponding peak/location info in crop region
-[croptof,peak,locs,wide,nPeaks] = calctof(cscan,t,startrow:endrow, ...
+[cropTOF,peak,locs,wide,nPeaks] = calctof(cscan,t,startrow:endrow, ...
     startcol:endcol,minProm1,noiseThresh,maxWidth); %#ok<ASGLU> 
 rawTOF = zeros(row,col);
-rawTOF(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
+rawTOF(startrow:endrow,startcol:endcol) = cropTOF(1:end,1:end);
 
-% Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
 if test == true
 
+% Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
 figure;
 modeData = mode(rawTOF(rawTOF~=0),'all');
 im = imshow(rawTOF,[0 modeData+0.1]);
 im.CDataMapping = "scaled";
 colormap(jet); hold on;
-
 % Plot bounds
 boundLW = 2;
 boundLS = '-r';
@@ -122,20 +121,18 @@ p1 = plot([startx endx],[starty starty],boundLS,'LineWidth',boundLW);
 plot([startx endx],[endy endy],boundLS,'LineWidth',boundLW);
 plot([startx startx],[starty endy],boundLS,'LineWidth',boundLW);
 plot([endx endx],[starty endy],boundLS,'LineWidth',boundLW);
-
 % Plot incr
 incrLW = 0.25;
 incrLS = '-y';
 for i = 1:length(t2b)
     if i == 1
-        p2 = plot([l2r(1) l2r(end)],[t2b(i) t2b(i)],incrLS,'LineWidth',incrLW);
+    p2 = plot([l2r(1) l2r(end)],[t2b(i) t2b(i)],incrLS,'LineWidth',incrLW);
     end
     plot([l2r(1) l2r(end)],[t2b(i) t2b(i)],incrLS,'LineWidth',incrLW);
 end
 for i = 1:length(l2r)
     plot([l2r(i) l2r(i)],[t2b(1) t2b(end)],incrLS,'LineWidth',incrLW);
 end
-
 % Plot baseRow/baseCol
 baseMSt = '.g';
 baseMSi = 10;
@@ -147,7 +144,6 @@ for i = 1:length(baseRow)
         plot(baseRow(i),baseCol(j),baseMSt,'MarkerSize',baseMSi);
     end
 end
-
 % Plot start/end row/col (no pad)
 damBoxLW = 2;
 damBoxLS = '-m';
@@ -155,23 +151,40 @@ p4 = plot([startc startc],[startr endr],damBoxLS,'LineWidth',damBoxLW);
 plot([endc endc],[startr endr],damBoxLS,'LineWidth',damBoxLW);
 plot([startc endc],[startr startr],damBoxLS,'LineWidth',damBoxLW);
 plot([startc endc],[endr endr],damBoxLS,'LineWidth',damBoxLW);
-
 % Plot start/end row/col (pad)
-padBoxLW = 2;
-padBoxLS = '-c';
-p5 = plot([startcol startcol],[startrow endrow],padBoxLS,'LineWidth',padBoxLW);
-plot([endcol endcol],[startrow endrow],padBoxLS,'LineWidth',padBoxLW);
-plot([startcol endcol],[startrow startrow],padBoxLS,'LineWidth',padBoxLW);
-plot([startcol endcol],[endrow endrow],padBoxLS,'LineWidth',padBoxLW);
+padLW = 2;
+padLS = '-c';
+p5 = plot([startcol startcol],[startrow endrow],padLS,'LineWidth',padLW);
+plot([endcol endcol],[startrow endrow],padLS,'LineWidth',padLW);
+plot([startcol endcol],[startrow startrow],padLS,'LineWidth',padLW);
+plot([startcol endcol],[endrow endrow],padLS,'LineWidth',padLW);
+% Add legend
+legend([p1 p2 p3 p4 p5], ...
+    {'bounds','incr','baseRow/baseCol','Damage bound box','pad'}, ...
+    'Location','bestoutside')
 
-legend([p1 p2 p3 p4 p5],{'bounds','incr','baseRow/baseCol','Damage bound box','pad'},'Location','bestoutside')
+% Plot TOF
+figure;
+modeData = mode(cropTOF(cropTOF~=0),'all');
+im = imshow(cropTOF,[0 modeData+0.1]);
+im.CDataMapping = "scaled"; axis on;
+colormap(jet); hold on;
+% Plot TOF as scatter
+r = size(cropTOF,1);
+c = size(cropTOF,2);
+vecCrop = reshape(cropTOF,r*c,1);
+Columns = repmat((1:r)',c,1);
+Rows = repelem(1:c,r)';
+cropTab = table(Columns,Rows,vecCrop);
+scatter(cropTab,'Rows','Columns','filled','ColorVariable','vecCrop');
+colormap(gca,'jet');
 
 end
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
 implot(fig,rawTOF,jet,row,col,fileName,true);
-imsave(figFolder,fig,'rawTOF',fileName,res);
+% imsave(figFolder,fig,'rawTOF',fileName,res);
 
 % Save raw TOF and corresponding peaks/location info
 cropCoord = [startrow endrow startcol endcol]; %#ok<NASGU> 
