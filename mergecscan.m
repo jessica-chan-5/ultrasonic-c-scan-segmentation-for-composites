@@ -127,7 +127,7 @@ boundF = boundC{1}+boundC{2}.*2;
 boundF = boundF(startRowF:endRowF,startColF:endColF);
 subplot(1,2,2); im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
-imsave(figFolder,fig,"mergeCheck",fileName,res);
+imsave(figFolder,fig,"mergeCheck",fileName,true,res);
 
 % Remove points if outside boundary
 damLayersC{1}(maskC{1}==0) = NaN;
@@ -159,7 +159,7 @@ scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
     20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('TOF (us)'); grid on;
 view(3);
-imsave(figFolder,fig,"hybridCscan",fileName,res);
+imsave(figFolder,fig,"hybridCscan",fileName,false,res);
 
 % Save merged damage layers
 name = "hybridCscan";

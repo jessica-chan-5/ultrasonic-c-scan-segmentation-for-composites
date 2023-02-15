@@ -27,8 +27,9 @@ function processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
 %    RES        : Image resolution setting in dpi
 
 % Load C-scan
-infile = strcat(outFolder,"\",'cscan\',fileName,'-cscan.mat');
-load(infile,'cscan');
+name = 'cscan';
+infile = strcat(outFolder,"\",name,'\',fileName,'-',name,'.mat');
+load(infile,name);
 
 % Find # rows, col, & data points/A-scan
 [row, col, pts] = size(cscan);
@@ -111,8 +112,10 @@ if test == true
 else
     figVis = 'off';
 end
+
 % Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
-fig = figure('visible','on','WindowState','maximized');
+fig = figure('visible','off');
+implot(fig,rawTOF,jet,row,col,fileName,true)
 modeData = mode(rawTOF(rawTOF~=0),'all');
 im = imshow(rawTOF,[0 modeData+0.1]);
 im.CDataMapping = "scaled";
@@ -165,8 +168,7 @@ plot([startcol endcol],[endrow endrow],padLS,'LineWidth',padLW);
 legend([p1 p2 p3 p4 p5], ...
     {'bounds','incr','baseRow/baseCol','Damage bound box','pad'}, ...
     'Location','bestoutside')
-imsave(figFolder,fig,'damBoundBox',fileName,res);
-close(fig);
+imsave(figFolder,fig,'damBoundBox',fileName,true,res);
 
 % Plot TOF
 fig = figure('visible',figVis);
@@ -188,7 +190,7 @@ savefigure(figFolder,fig,'cscan',fileName);
 % Save png and figure of raw TOF
 fig = figure('visible','off');
 implot(fig,rawTOF,jet,row,col,fileName,true);
-imsave(figFolder,fig,'rawTOF',fileName,res);
+imsave(figFolder,fig,'rawTOF',fileName,true,res);
 
 % Save raw TOF and corresponding peaks/location info
 cropCoord = [startrow endrow startcol endcol]; %#ok<NASGU> 

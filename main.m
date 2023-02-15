@@ -38,8 +38,8 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = true;      % Run processcscan?
-filesProcessCscan = 1;%:numFiles; % Indices of files to read
+runProcessCscan   = false;      % Run processcscan?
+filesProcessCscan = 1:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;     % Sampling period in microseconds
@@ -59,8 +59,8 @@ res         = 300;     % Image resolution setting in dpi
 % #########################################################################
 
 % SEGCSCAN options ========================================================
-runSegCscan   = false;      % Run segcsan?
-filesSegCscan = 1:numFiles; % Indices of files to read
+runSegCscan   = true;      % Run segcsan?
+filesSegCscan = 1;%:numFiles; % Indices of files to read
 % SEGCSCAN inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; %Threshold of dt for peak to be labeled as unique
@@ -73,6 +73,7 @@ modeThresh = [hig; hig; hig; hig; hig;       %  1- 5
               hig; med; low; low; low;       % 11-15
               med; med; hig; hig; hig;       % 16-20
               hig; hig; hig; med; med; hig]; % 21-26
+testSeg = true;    % If true, shows figures
 % END SEGCSCAN ____________________________________________________________
 % #########################################################################
 
@@ -164,10 +165,10 @@ if runSegCscan == true
 tic
 fprintf("SEGCSCAN======================================\n\n")
 fprintf("Segmented C-scan for:\n\n");
-parfor i = filesSegCscan
+for i = filesSegCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
-        modeThresh(i),res);
+        modeThresh(i),testSeg,res);
 end
 sec = toc;
 fprintf('\nElapsed time is:')
