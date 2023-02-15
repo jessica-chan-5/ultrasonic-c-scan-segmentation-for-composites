@@ -38,8 +38,8 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = false;      % Run processcscan?
-filesProcessCscan = 1:numFiles; % Indices of files to read
+runProcessCscan   = true;      % Run processcscan?
+filesProcessCscan = 1;%:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;     % Sampling period in microseconds
@@ -53,6 +53,7 @@ pad         = 1;       % (1+pad)*incr added to calculated bounding box
 minProm1    = 0.03;    % Min prominence for a peak to be identified
 noiseThresh = 0.01;    % If average signal lower, then pt is not processed
 maxWidth    = 0.75;    % Max width for a peak to be marked as wide
+testProcess = true;    % If true, shows figures
 res         = 300;     % Image resolution setting in dpi
 % END PROCESSCSCAN ________________________________________________________
 % #########################################################################
@@ -85,7 +86,7 @@ nLayers = 25;     % Number of layers in scanned plate
 % #########################################################################
 
 % MERGECSCAN options ======================================================
-runMergeCscan   = true;   % Run mergecscan?
+runMergeCscan   = false;   % Run mergecscan?
 filesMergeCscan = 9:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary
@@ -97,7 +98,7 @@ dx = [-3; 8;            % 9-10
 dyMergeCscan =  [2; 0;  % 9-10
        2;-1;-5; -2;  0; % 11-15
        1; 1];           % 16-17
-testMergeCscan = false; % If test is true, shows figures
+testMerge = false; % If true, shows figures
 % END MERGECSCAN __________________________________________________________
 % #########################################################################
 
@@ -118,7 +119,7 @@ dyPlotCustom = [26; 12; -5; 70; 73;      %  1- 5
                 10; -5; 28; 58; 40;      % 11-15
                 -2; -2; -5; -2; 10;      % 16-20
                 -7; -5; 55; 43; -5; 10]; % 21-26
-testPlotCustom = false; % If test is true, shows figures
+testPlot = false; % If true, shows figures
 % END PLOTCUSTOM __________________________________________________________
 % #########################################################################
 
@@ -191,15 +192,16 @@ fprintf("Finished plotting!\n\n")
 end
 
 %% Merge for hybrid C-scan
+% Note: parfor results in file processing to complete out of order
 
 if runMergeCscan == true
 tic
 fprintf("MERGECSCAN======================================\n\n")
-fprintf("Merging C-scan for:\n\n");
+fprintf("Merging C-scans for:\n\n");
 parfor i = filesMergeCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
-        dyMergeCscan(i-di),testMergeCscan,res);
+        dyMergeCscan(i-di),testMerge,res);
 end
 sec = toc;
 fprintf('\nElapsed time is:')
@@ -216,7 +218,7 @@ fprintf("Plotting custom plots for:\n\n");
 parfor i = filesPlotCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
-        dyPlotCustom(i),res,testPlotCustom);
+        dyPlotCustom(i),res,testPlot);
 end
 sec = toc;
 fprintf('\nElapsed time is:')

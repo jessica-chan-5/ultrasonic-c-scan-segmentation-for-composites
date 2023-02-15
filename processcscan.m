@@ -1,5 +1,5 @@
 function processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
-    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res)
+    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,test,res)
 %PROCESSCSCAN Process A-scans to calculate TOF info.
 %    PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
 %    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res) Look for
@@ -23,6 +23,7 @@ function processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
 %    MINPROM1   : Min prominence in findpeaks for a peak to be identified
 %    NOISETHRESH: If average signal is lower, then point is not processed
 %    MAXWIDTH   : Max width in findpeaks for a peak to be marked as wide
+%    TEST       : If true, shows figures
 %    RES        : Image resolution setting in dpi
 
 % Load C-scan
@@ -71,8 +72,9 @@ searchrows = t2b(startrowi:endrowi);
 
 % Add padding in vertical direction
 pad = floor((1+pad)*incr);
+startr = startrow; endr = endrow;
 startrow = startrow - pad;
-if startrow <=0
+if startrow <= 0
     startrow = 1;
 end
 endrow = endrow + pad;
@@ -88,6 +90,7 @@ endcol   = findbound(basetof,r2c,searchrows,'col',cropThresh,cscan,t,...
     minProm1,noiseThresh,maxWidth);
 
 % Add padding in horizontal direction
+startc = startcol; endc = endcol;
 startcol = startcol - pad;
 if startcol <= 0
     startcol = 1;
@@ -103,6 +106,73 @@ end
 rawTOF = zeros(row,col);
 rawTOF(startrow:endrow,startcol:endcol) = croptof(1:end,1:end);
 
+% Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
+if test == true
+
+figure;
+modeData = mode(rawTOF(rawTOF~=0),'all');
+im = imshow(rawTOF,[0 modeData+0.1]);
+im.CDataMapping = "scaled";
+colormap(jet); hold on;
+
+% Plot bounds
+boundLW = 2;
+boundLS = '-r';
+p1 = plot([startx endx],[starty starty],boundLS,'LineWidth',boundLW);
+plot([startx endx],[endy endy],boundLS,'LineWidth',boundLW);
+plot([startx startx],[starty endy],boundLS,'LineWidth',boundLW);
+plot([endx endx],[starty endy],boundLS,'LineWidth',boundLW);
+
+% Plot incr
+incrLW = 0.25;
+incrLS = '-y';
+for i = 1:length(t2b)
+    if i == 1
+        p2 = plot([l2r(1) l2r(end)],[t2b(i) t2b(i)],incrLS,'LineWidth',incrLW);
+    end
+    plot([l2r(1) l2r(end)],[t2b(i) t2b(i)],incrLS,'LineWidth',incrLW);
+end
+for i = 1:length(l2r)
+    plot([l2r(i) l2r(i)],[t2b(1) t2b(end)],incrLS,'LineWidth',incrLW);
+end
+
+% Plot baseRow/baseCol
+baseMSt = '.g';
+baseMSi = 10;
+for i = 1:length(baseRow)
+    for j = 1:length(baseCol)
+        if i == 1 && j == 1
+            p3 = plot(baseRow(i),baseCol(j),baseMSt,'MarkerSize',baseMSi);
+        end
+        plot(baseRow(i),baseCol(j),baseMSt,'MarkerSize',baseMSi);
+    end
+end
+
+% Plot start/end row/col (no pad)
+damBoxLW = 2;
+damBoxLS = '-m';
+p4 = plot([startc startc],[startr endr],damBoxLS,'LineWidth',damBoxLW);
+plot([endc endc],[startr endr],damBoxLS,'LineWidth',damBoxLW);
+plot([startc endc],[startr startr],damBoxLS,'LineWidth',damBoxLW);
+plot([startc endc],[endr endr],damBoxLS,'LineWidth',damBoxLW);
+
+% Plot start/end row/col (pad)
+padBoxLW = 2;
+padBoxLS = '-c';
+p5 = plot([startcol startcol],[startrow endrow],padBoxLS,'LineWidth',padBoxLW);
+plot([endcol endcol],[startrow endrow],padBoxLS,'LineWidth',padBoxLW);
+plot([startcol endcol],[startrow startrow],padBoxLS,'LineWidth',padBoxLW);
+plot([startcol endcol],[endrow endrow],padBoxLS,'LineWidth',padBoxLW);
+
+legend([p1 p2 p3 p4 p5],{'bounds','incr','baseRow/baseCol','Damage bound box','pad'},'Location','bestoutside')
+
+end
+
+% Save png and figure of raw TOF
+fig = figure('visible','off');
+implot(fig,rawTOF,jet,row,col,fileName,true);
+imsave(figFolder,fig,'rawTOF',fileName,res);
+
 % Save raw TOF and corresponding peaks/location info
 cropCoord = [startrow endrow startcol endcol]; %#ok<NASGU> 
 savevar = ["rawTOF";"peak";"locs";"wide";"nPeaks";"cropCoord"];
@@ -111,10 +181,5 @@ for i = 1:length(savevar)
         savevar(i),'.mat');
     save(outfile,savevar(i),'-mat');
 end
-
-% Save png and figure of raw TOF
-fig = figure('visible','off');
-implot(fig,rawTOF,jet,row,col,fileName,true);
-imsave(figFolder,fig,'rawTOF',fileName,res);
 
 end
