@@ -1,5 +1,5 @@
 function processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
-    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,test,res)
+    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,test,calcT1,res)
 %PROCESSCSCAN Process A-scans to calculate TOF info.
 %    PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
 %    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res) Look for
@@ -113,9 +113,37 @@ else
     figVis = 'off';
 end
 
-% Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
+if calcT1 == true
+
+[fullTOF,~,fullLocs,~,~] = calctof(cscan,t,1:row,1:col,minProm1, ...
+    noiseThresh,maxWidth);
+
+% Plot time of first peak
 fig = figure('visible','off');
-implot(fig,rawTOF,jet,row,col,fileName,true)
+sub1 = subplot(1,2,1);
+t1 = zeros(row,col);
+for i = 1:row
+    for j = 1:col
+        if ~isempty(fullLocs{i,j})
+            t1(i,j) = fullLocs{i,j}(1);
+        end
+    end
+end
+implot(sub1,t1,jet,row,col,'t1 (microseconds)',false);
+sub2 = subplot(1,2,2);
+implot(sub2,fullTOF,jet,row,col,'Raw TOF (microseconds)',false);
+sgtitle(fileName);
+imsave(figFolder,fig,'t1',fileName,true,res);
+
+savevar = 't1';
+outfile = strcat(outFolder,"\",savevar,"\",fileName,'-',...
+    savevar,'.mat');
+save(outfile,savevar,'-mat');
+
+end
+
+% Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
+fig = figure('visible',figVis);
 modeData = mode(rawTOF(rawTOF~=0),'all');
 im = imshow(rawTOF,[0 modeData+0.1]);
 im.CDataMapping = "scaled";

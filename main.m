@@ -53,7 +53,8 @@ pad         = 1;       % (1+pad)*incr added to calculated bounding box
 minProm1    = 0.03;    % Min prominence for a peak to be identified
 noiseThresh = 0.01;    % If average signal lower, then pt is not processed
 maxWidth    = 0.75;    % Max width for a peak to be marked as wide
-testProcess = false;    % If true, shows figures
+testProcess = false;   % If true, shows figures
+calcT1      = false;    % if true, calculates, plots, and saves t1 
 res         = 300;     % Image resolution setting in dpi
 % END PROCESSCSCAN ________________________________________________________
 % #########################################################################
@@ -161,7 +162,7 @@ for i = filesProcessCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     processcscan(fileNames(i),outFolder,figFolder,dt,bounds,incr, ...
         baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
-        testProcess,res)
+        testProcess,calcT1,res)
 end
 sec = toc;
 fprintf('\nElapsed time is:')
