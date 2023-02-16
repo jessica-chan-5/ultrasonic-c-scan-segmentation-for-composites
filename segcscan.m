@@ -178,7 +178,7 @@ implot(fig,tof,jet,row,col,fileName,true);
 imsave(figFolder,fig,'tof',fileName,true,res);
 
 % Save TOF, inflection points, and masks to .mat file
-savevar = ["tof","inflpt","mask","bound"];
+savevar = ["tof","inflpt","mask","bound","peak2"];
 temptof = zeros(rowF,colF);
 temptof(startRow:endRow,startCol:endCol) = tof;
 tof = temptof; %#ok<NASGU> 
