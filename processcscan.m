@@ -170,23 +170,6 @@ legend([p1 p2 p3 p4 p5], ...
     'Location','bestoutside')
 imsave(figFolder,fig,'damBoundBox',fileName,true,res);
 
-% Plot TOF
-r = size(rawTOF,1);
-c = size(rawTOF,2);
-fig = figure('visible',figVis);
-modeData = mode(rawTOF(rawTOF~=0),'all');
-im = imshow(rawTOF,[0 modeData+0.1]);
-im.CDataMapping = "scaled"; axis on;
-colormap(jet); hold on;
-% Plot TOF as scatter
-TOF = reshape(rawTOF,r*c,1);
-y = repmat((1:r)',c,1);
-x = repelem(1:c,r)';
-rawTab = table(x,y,TOF);
-scatter(rawTab,'x','y','filled','ColorVariable','TOF');
-colormap(gca,'jet');
-savefigure(figFolder,fig,'cscan',fileName);
-
 % Save png and figure of raw TOF
 fig = figure('visible','off');
 implot(fig,rawTOF,jet,row,col,fileName,true);

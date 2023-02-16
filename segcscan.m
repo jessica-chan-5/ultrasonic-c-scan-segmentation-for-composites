@@ -71,7 +71,7 @@ else
 end
 
 fig = figure('visible',figVis);
-implot(fig,inflpt,gray,row,col,fileName,false); axis on;
+implot(fig,inflpt,gray,row,col,fileName,false);
 imsave(figFolder,fig,"inflpt",fileName,true,res);
 
 % Create concave hull of damage area

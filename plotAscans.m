@@ -1,4 +1,17 @@
-function plotAscans(rowRange,colRange,cscan,t,fileName,minProm1,noiseThresh)
+function [row, col] = plotAscans(rowRange,colRange,outFolder,fileName,dt,minProm1, ...
+    noiseThresh)
+
+loadVar = "cscan";
+inFile = strcat(outFolder,"\",loadVar,"\",fileName,'-',...
+    loadVar,'.mat');
+load(inFile,loadVar);
+
+% Find # data points/A-scan
+[row, col, pts] = size(cscan); %#ok<USENS> 
+
+% Create time vector
+tend = (pts-1)*dt;
+t = 0:dt:tend;
 
 nCol = length(colRange);
 nRow = length(rowRange);

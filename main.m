@@ -38,8 +38,8 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = true;      % Run processcscan?
-filesProcessCscan = 1;%:numFiles; % Indices of files to read
+runProcessCscan   = false;      % Run processcscan?
+filesProcessCscan = 1:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;     % Sampling period in microseconds
@@ -60,7 +60,7 @@ res         = 300;     % Image resolution setting in dpi
 
 % SEGCSCAN options ========================================================
 runSegCscan   = false;      % Run segcsan?
-filesSegCscan = 1;%:numFiles; % Indices of files to read
+filesSegCscan = 1:numFiles; % Indices of files to read
 % SEGCSCAN inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; %Threshold of dt for peak to be labeled as unique
@@ -104,7 +104,7 @@ testMerge = false; % If true, shows figures
 % #########################################################################
 
 % PLOTCUSTOM options ======================================================
-runPlotCustom   = false;      % Run customplot?
+runPlotCustom   = true;      % Run customplot?
 filesPlotCustom = 1:numFiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
 % UTWINCROP: Indices to crop UTWin screenshot in format:
@@ -165,7 +165,7 @@ if runSegCscan == true
 tic
 fprintf("SEGCSCAN======================================\n\n")
 fprintf("Segmented C-scan for:\n\n");
-for i = filesSegCscan
+parfor i = filesSegCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),testSeg,res);
@@ -212,6 +212,7 @@ fprintf("Finished merging!\n\n")
 end
 
 %% Make custom plots
+% Note: parfor results in file processing to complete out of order
 
 if runPlotCustom == true
 tic
