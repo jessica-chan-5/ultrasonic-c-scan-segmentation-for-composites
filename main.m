@@ -77,6 +77,17 @@ testSeg = false;    % If true, shows figures
 % END SEGCSCAN ____________________________________________________________
 % #########################################################################
 
+% ADJUSTPARAM options =====================================================
+runAdjustParam  = false;      % Run adjustparam?
+filesAdjustParam = 1;%:numFiles;   % Indices of files to read
+% ADJUSTPARAM inputs ------------------------------------------------------
+rowRange = 171:172; % y
+colRange = 129:130; % x
+dir = 'row';
+num = 171;
+% END ADJUSTPARAM _________________________________________________________
+% #########################################################################
+
 % PLOTFIG options =========================================================
 runPlotFig   = false;      % Run plotfig?
 filesPlotFig = 1:numFiles; % Indices of files to read
@@ -87,7 +98,7 @@ nLayers = 25;     % Number of layers in scanned plate
 % #########################################################################
 
 % MERGECSCAN options ======================================================
-runMergeCscan   = false;   % Run mergecscan?
+runMergeCscan   = true;   % Run mergecscan?
 filesMergeCscan = 9:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary
@@ -104,7 +115,7 @@ testMerge = false; % If true, shows figures
 % #########################################################################
 
 % PLOTCUSTOM options ======================================================
-runPlotCustom   = true;      % Run customplot?
+runPlotCustom   = false;      % Run customplot?
 filesPlotCustom = 1:numFiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
 % UTWINCROP: Indices to crop UTWin screenshot in format:
@@ -165,7 +176,7 @@ if runSegCscan == true
 tic
 fprintf("SEGCSCAN======================================\n\n")
 fprintf("Segmented C-scan for:\n\n");
-parfor i = filesSegCscan
+for i = filesSegCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),testSeg,res);
@@ -174,6 +185,21 @@ sec = toc;
 fprintf('\nElapsed time is:')
 disp(duration(0,0,sec))
 fprintf("Finished segmenting all C-scans!\n\n")
+end
+
+%% Adjust parameters
+
+if runAdjustParam == true
+fprintf("ADJUSTPARAM======================================\n\n")
+fprintf("Plotting adjust param figures for:\n\n");
+for i = filesAdjustParam
+fileName = fileNames(i);
+plottof(outFolder,figFolder,fileName);
+[row, col] = plotAscans(rowRange,colRange,outFolder,fileName,dt, ...
+    minProm1,noiseThresh);
+plotPeak2(dir,num,row,col,outFolder,fileName,minProm2)
+end
+fprintf("Finished plotting!\n\n")
 end
 
 %% Plot figures

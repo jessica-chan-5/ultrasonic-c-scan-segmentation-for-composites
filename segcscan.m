@@ -65,12 +65,13 @@ inflpt(nPeaks < 2) = 1;
 
 % Plot and save figures of inflection points
 if test == true
-    figVis = 'on';
+    plotinflpt(inflpt,rowF,colF,cropCoord);
+    visFig = 'on';
 else
-    figVis = 'off';
+    visFig = 'off';
 end
 
-fig = figure('visible',figVis);
+fig = figure('visible','off');
 implot(fig,inflpt,gray,row,col,fileName,false);
 imsave(figFolder,fig,"inflpt",fileName,true,res);
 
@@ -167,7 +168,7 @@ subp = subplot(1,4,4); implot(subp,tof,jet,row,col,"Mode",true);
 imsave(figFolder,fig,'process',fileName,true,res);
 
 % Plot and save figure of raw and processed TOF
-fig = figure('visible','off');
+fig = figure('visible',visFig);
 subp = subplot(1,2,1); implot(subp,rawTOF,jet,row,col,"Unprocessed",true);
 subp = subplot(1,2,2); implot(subp,tof,jet,row,col,"Processed",true);
 imsave(figFolder,fig,'compare',fileName,true,res);

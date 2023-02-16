@@ -167,7 +167,7 @@ plot([startcol endcol],[endrow endrow],padLS,'LineWidth',padLW);
 % Add legend
 legend([p1 p2 p3 p4 p5], ...
     {'bounds','incr','baseRow/baseCol','Damage bound box','pad'}, ...
-    'Location','bestoutside')
+    'Location','bestoutside'); axis on;
 imsave(figFolder,fig,'damBoundBox',fileName,true,res);
 
 % Save png and figure of raw TOF

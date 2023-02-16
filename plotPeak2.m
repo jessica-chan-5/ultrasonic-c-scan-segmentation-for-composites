@@ -1,4 +1,4 @@
-function plotPeak2(peak2,dir,num,row,col,outFolder,fileName,minProm2)
+function plotPeak2(dir,num,row,col,outFolder,fileName,minProm2)
 
 loadVar = "peak2";
 inFile = strcat(outFolder,"\",loadVar,"\",fileName,'-',...
@@ -44,6 +44,8 @@ end
 grid minor;
 title(strcat(dir," ",num2str(num)));
 xlim([1 endx]);
+xlabel(dir);
+ylabel('2nd Peak Magnitude')
 legend(titleStr);
 
 end

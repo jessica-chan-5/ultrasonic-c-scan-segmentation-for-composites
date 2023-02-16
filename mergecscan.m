@@ -154,12 +154,32 @@ hybridCscan = sortrows([[xVec; xVec],[yVec; yVec], ...
     [damLayersVec{1};damLayersVec{2}]]);
 hybridCscan(isnan(hybridCscan(:,3)),:) = [];
 
+% Plot hybrid C-scan
 fig = figure('Visible','off'); hold on;
 scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
     20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
-xlabel('Row #'); ylabel('Col #'); zlabel('TOF (us)'); grid on;
+xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
 view(3);
 imsave(figFolder,fig,"hybridCscan",fileName,false,res);
+
+% Plot front, back, hybrid C-scan
+fig = figure('Visible','off'); hold on;
+subplot(1,3,1);
+scatter3(xVec,yVec,damLayersVec{1}, ...
+    20,damLayersVec{1},'filled'); colormap(gca,'jet');
+xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
+view(3);
+subplot(1,3,2);
+scatter3(xVec,yVec,damLayersVec{2}, ...
+    20,damLayersVec{2},'filled'); colormap(gca,'jet');
+xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
+view(3);
+subplot(1,3,3);
+scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
+    20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
+xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
+view(3);
+imsave(figFolder,fig,"frontBackHybrid",fileName,true,res);
 
 % Save merged damage layers
 name = "hybridCscan";
