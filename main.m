@@ -38,8 +38,8 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = false;      % Run processcscan?
-filesProcessCscan = 1:numFiles; % Indices of files to read
+runProcessCscan   = true;      % Run processcscan?
+filesProcessCscan = 1;%:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
 dt          = 1/50;     % Sampling period in microseconds
@@ -98,7 +98,7 @@ nLayers = 25;     % Number of layers in scanned plate
 % #########################################################################
 
 % MERGECSCAN options ======================================================
-runMergeCscan   = true;   % Run mergecscan?
+runMergeCscan   = false;   % Run mergecscan?
 filesMergeCscan = 9:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary

@@ -168,17 +168,18 @@ subplot(1,3,1);
 scatter3(xVec,yVec,damLayersVec{1}, ...
     20,damLayersVec{1},'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3);
+view(3); title('Front');
 subplot(1,3,2);
 scatter3(xVec,yVec,damLayersVec{2}, ...
     20,damLayersVec{2},'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3);
+view(3); title('Back');
 subplot(1,3,3);
 scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
     20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3);
+view(3); title('Hybrid')
+sgtitle(fileName);
 imsave(figFolder,fig,"frontBackHybrid",fileName,true,res);
 
 % Save merged damage layers
