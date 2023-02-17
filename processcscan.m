@@ -198,6 +198,20 @@ legend([p1 p2 p3 p4 p5], ...
     'Location','bestoutside'); axis on;
 imsave(figFolder,fig,'damBoundBox',fileName,true,res);
 
+% Plot rawTOF as scatter + imshow
+fig = figure('visible',figVis);
+modeData = mode(rawTOF(rawTOF~=0),'all');
+im = imshow(rawTOF,[0 modeData+0.1]);
+im.CDataMapping = "scaled";
+colormap(jet); hold on;
+rawVec = reshape(rawTOF,row*col,1);
+y = repmat((1:row)',col,1);
+x = repelem(1:col,row)';
+rawTab = table(x,y,rawVec);
+scatter(rawTab,'x','y','filled','ColorVariable','rawVec');
+colormap(gca,'jet');
+imsave(figFolder,fig,'rawTOFquery',fileName,true,res);
+
 % Save png and figure of raw TOF
 fig = figure('visible','off');
 implot(fig,rawTOF,jet,row,col,fileName,true);

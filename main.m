@@ -38,7 +38,7 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = true;      % Run processcscan?
+runProcessCscan   = false;      % Run processcscan?
 filesProcessCscan = 1;%:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
@@ -90,7 +90,7 @@ num = 171;
 % #########################################################################
 
 % PLOTFIG options =========================================================
-runPlotFig   = false;      % Run plotfig?
+runPlotFig   = true;      % Run plotfig?
 filesPlotFig = 1:numFiles; % Indices of files to read
 % PLOTFIG inputs ----------------------------------------------------------
 plateThick  = 3.3;% Thickness of scanned plate in millimeters
@@ -100,7 +100,7 @@ nLayers = 25;     % Number of layers in scanned plate
 
 % MERGECSCAN options ======================================================
 runMergeCscan   = false;   % Run mergecscan?
-filesMergeCscan = 9:17; % Indices of files to read
+filesMergeCscan = 9;%:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
 di = 8;                 % File index offset if necessary
 % DX: Amount to adjust front side scan (+) = right, (-) = left
