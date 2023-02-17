@@ -116,8 +116,6 @@ imsave(figFolder,fig,'masks',fileName,true,res);
 J = inflpt & mask;
 
 % Close gaps in inflection points using morphological operations
-J = bwmorph(J,'clean',inf);  % Remove isolated pixels
-J = bwmorph(J,'bridge',inf); % Bridge pixels
 if strcmp(fileName,'RPR-S-20J-2-back') == true
     se45 = strel('line',6,-45);
     J = imclose(J,se45);
@@ -127,7 +125,15 @@ elseif strcmp(fileName,'RPR-S-15J-2-back') == true
 elseif strcmp(fileName,'CONT-S-20J-2') == true
     se45 = strel('line',3,-45);
     J = imclose(J,se45);
+elseif strcmp(fileName,'LV-162-back') == true
+    se45 = strel('line',4,-45);
+    J1 = imclose(J,se45);
+    se45 = strel('line',4,45);
+    J2 = imclose(J,se45);
+    J = J1 | J2;
 end
+J = bwmorph(J,'clean',inf);  % Remove isolated pixels
+J = bwmorph(J,'bridge',inf); % Bridge pixels
 
 % Remove excess pixels outside concave hull and add outline where missing
 J = J | bound;
