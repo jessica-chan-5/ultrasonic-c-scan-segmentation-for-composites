@@ -1,4 +1,4 @@
-function plotPeak2(dir,num,row,col,outFolder,fileName,minProm2)
+function plotpeak2(dir,num,row,col,outFolder,fileName,minProm2)
 
 loadVar = "peak2";
 inFile = strcat(outFolder,"\",loadVar,"\",fileName,'-',...

@@ -38,7 +38,7 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = false;      % Run processcscan?
+runProcessCscan   = true;      % Run processcscan?
 filesProcessCscan = 1;%:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
@@ -90,7 +90,7 @@ num = 171;
 % #########################################################################
 
 % PLOTFIG options =========================================================
-runPlotFig   = true;      % Run plotfig?
+runPlotFig   = false;      % Run plotfig?
 filesPlotFig = 1:numFiles; % Indices of files to read
 % PLOTFIG inputs ----------------------------------------------------------
 plateThick  = 3.3;% Thickness of scanned plate in millimeters
@@ -196,9 +196,9 @@ fprintf("Plotting adjust param figures for:\n\n");
 for i = filesAdjustParam
 fileName = fileNames(i);
 plottof(outFolder,figFolder,fileName);
-[row, col] = plotAscans(rowRange,colRange,outFolder,fileName,dt, ...
+[row, col] = plotascans(rowRange,colRange,outFolder,fileName,dt, ...
     minProm1,noiseThresh);
-plotPeak2(dir,num,row,col,outFolder,fileName,minProm2)
+plotpeak2(dir,num,row,col,outFolder,fileName,minProm2)
 end
 fprintf("Finished plotting!\n\n")
 end
