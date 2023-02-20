@@ -38,7 +38,7 @@ dCol       = 5;          % # col to down sample
 % #########################################################################
 
 % PROCESSCSCAN options ====================================================
-runProcessCscan   = true;      % Run processcscan?
+runProcessCscan   = false;      % Run processcscan?
 filesProcessCscan = 1;%:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
 figFolder   = "Figures";% Folder path to .fig and .png files
@@ -54,14 +54,14 @@ minProm1    = 0.03;    % Min prominence for a peak to be identified
 noiseThresh = 0.01;    % If average signal lower, then pt is not processed
 maxWidth    = 0.75;    % Max width for a peak to be marked as wide
 testProcess = false;   % If true, shows figures
-calcT1      = true;    % if true, calculates, plots, and saves t1 
+calcT1      = false;   % if true, calculates, plots, and saves t1 
 res         = 300;     % Image resolution setting in dpi
 % END PROCESSCSCAN ________________________________________________________
 % #########################################################################
 
 % SEGCSCAN options ========================================================
-runSegCscan   = false;      % Run segcsan?
-filesSegCscan = 1:numFiles; % Indices of files to read
+runSegCscan   = true;      % Run segcsan?
+filesSegCscan = 1;%:numFiles; % Indices of files to read
 % SEGCSCAN inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; %Threshold of dt for peak to be labeled as unique
@@ -74,7 +74,7 @@ modeThresh = [hig; hig; hig; hig; hig;       %  1- 5
               hig; med; low; low; low;       % 11-15
               med; med; hig; hig; hig;       % 16-20
               hig; hig; hig; med; med; hig]; % 21-26
-testSeg = false;    % If true, shows figures
+testSeg = true;    % If true, shows figures
 % END SEGCSCAN ____________________________________________________________
 % #########################################################################
 

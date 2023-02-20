@@ -1,7 +1,7 @@
-function imscatter(figVis,figFolder,fileName,data,map)
+function imscatter(visFig,figFolder,fileName,name,data,map)
 %IMSCATTER Plot rawTOF as scatter + imshow
 
-fig = figure('visible',figVis);
+fig = figure('visible',visFig);
 
 % Use imshow
 modeData = mode(data(data~=0),'all');
@@ -21,6 +21,8 @@ colormap(gca,map);
 title(fileName);
 
 % Save figure
-savefigure(figFolder,fig,'rawTOFquery',fileName)
+if strcmp(name,' ') == false
+    savefigure(figFolder,fig,name,fileName)
+end
 
 end

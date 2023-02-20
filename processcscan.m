@@ -119,13 +119,13 @@ if calcT1 == true
 end
 
 % Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
-damBound = [startrow endrow startcol endcol]; 
-cropCoord = [startr endr startc endc];
+cropCoord = [startrow endrow startcol endcol]; 
+damBound = [startr endr startc endc];
 plotbounds(figVis,figFolder,fileName,rawTOF,bounds,damBound,cropCoord, ...
     l2r,t2b,baseRow,baseCol,res);
 
 % Plot rawTOF as scatter + imshow
-imscatter(figVis,figFolder,fileName,rawTOF,'jet');
+imscatter(figVis,figFolder,fileName,'rawTOFquery',rawTOF,'jet');
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');

@@ -65,14 +65,17 @@ inflpt(nPeaks < 2) = 1;
 
 % Plot and save figures of inflection points
 if test == true
-    plotinflpt(inflpt,rowF,colF,cropCoord);
+    % Save inflpt in full size plate
+    tempinflpt = ones(rowF,colF);
+    tempinflpt(startRow:endRow,startCol:endCol) = inflpt;
     visFig = 'on';
+    imscatter(visFig,figFolder,fileName,' ',tempinflpt,'gray');
 else
     visFig = 'off';
 end
 
 fig = figure('visible','off');
-implot(fig,inflpt,gray,row,col,fileName,false);
+implot([],inflpt,gray,row,col,fileName,false);
 imsave(figFolder,fig,"inflpt",fileName,true,res);
 
 % Create concave hull of damage area
@@ -107,9 +110,9 @@ bound = bwperim(mask,8);
 
 % Plot and save figure of modified inflection points, mask, boundary
 fig = figure('visible','off');
-subp = subplot(1,3,1); implot(subp,inflpt,gray,row,col,"Infl Pts",false);
-subp = subplot(1,3,2); implot(subp,mask,gray,row,col,"Mask",false);
-subp = subplot(1,3,3); implot(subp,bound,gray,row,col,"Boundary",false);
+subplot(1,3,1); implot([],inflpt,gray,row,col,"Infl Pts",false);
+subplot(1,3,2); implot([],mask,gray,row,col,"Mask",false);
+subplot(1,3,3); implot([],bound,gray,row,col,"Boundary",false);
 imsave(figFolder,fig,'masks',fileName,true,res);
 
 % Apply mask to inflection points map before morphological operations
@@ -166,10 +169,10 @@ end
 tof(nPeaks < 2) = 0;
 
 % Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
-fig = figure('visible','off');
-subp = subplot(1,4,1); implot(subp,inflpt,gray,row,col,"Original",false);
-subp = subplot(1,4,2); implot(subp,J,gray,row,col,"Processed",false);
-subp = subplot(1,4,3); implot(subp,L,colorcube,row,col,"Labeled",false);
+fig = figure('visible',visFig);
+subplot(1,4,1); implot([],inflpt,gray,row,col,"Original",false);
+subplot(1,4,2); implot([],J,gray,row,col,"Processed",false);
+subplot(1,4,3); implot([],L,colorcube,row,col,"Labeled",false);
 subp = subplot(1,4,4); implot(subp,tof,jet,row,col,"Mode",true);
 imsave(figFolder,fig,'process',fileName,true,res);
 
