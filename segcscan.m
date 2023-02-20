@@ -1,5 +1,5 @@
 function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
-    modeThresh,test,res)
+    modeThresh,seEl,test,res)
 %SEGCSCAN Process raw TOF.
 %
 %   SEGCSCAN(filename,outfolder,figurefolder,minprom2,peakthresh,
@@ -113,28 +113,37 @@ fig = figure('visible','off');
 subplot(1,3,1); implot([],inflpt,gray,row,col,"Infl Pts",false);
 subplot(1,3,2); implot([],mask,gray,row,col,"Mask",false);
 subplot(1,3,3); implot([],bound,gray,row,col,"Boundary",false);
+sgtitle(fileName);
 imsave(figFolder,fig,'masks',fileName,true,res);
 
 % Apply mask to inflection points map before morphological operations
 J = inflpt & mask;
 
 % Close gaps in inflection points using morphological operations
-if strcmp(fileName,'RPR-S-20J-2-back') == true
-    se45 = strel('line',6,-45);
-    J = imclose(J,se45);
-elseif strcmp(fileName,'RPR-S-15J-2-back') == true
-    se45 = strel('line',6,45);
-    J = imclose(J,se45);
-elseif strcmp(fileName,'CONT-S-20J-2') == true
-    se45 = strel('line',3,-45);
-    J = imclose(J,se45);
-elseif strcmp(fileName,'LV-162-back') == true
-    se45 = strel('line',4,-45);
-    J1 = imclose(J,se45);
-    se45 = strel('line',4,45);
-    J2 = imclose(J,se45);
-    J = J1 | J2;
+if ~(seEl(1) == 0 && seEl(2) == 0 && seEl(3) == 0 && seEl(4) == 0)
+    if seEl(1) ~= 0
+        se45p = strel('line',seEl(1), 45); J45p = imclose(J,se45p);
+    else
+        J45p = J;
+    end
+    if seEl(2) ~= 0
+        se45n = strel('line',seEl(2),-45); J45n = imclose(J,se45n);
+    else
+        J45n = J;
+    end
+    if seEl(3) ~= 0
+        se90  = strel('line',seEl(3), 90); J90 = imclose(J,se90);
+    else
+        J90 = J;
+    end
+    if seEl(4) ~= 0
+        se0   = strel('line',seEl(4),  0); J0 = imclose(J,se0);
+    else
+        J0 = J;
+    end
+    J = J45p | J45n | J90 | J0;
 end
+
 J = bwmorph(J,'clean',inf);  % Remove isolated pixels
 J = bwmorph(J,'bridge',inf); % Bridge pixels
 
@@ -174,12 +183,14 @@ subplot(1,4,1); implot([],inflpt,gray,row,col,"Original",false);
 subplot(1,4,2); implot([],J,gray,row,col,"Processed",false);
 subplot(1,4,3); implot([],L,colorcube,row,col,"Labeled",false);
 subp = subplot(1,4,4); implot(subp,tof,jet,row,col,"Mode",true);
+sgtitle(fileName);
 imsave(figFolder,fig,'process',fileName,true,res);
 
 % Plot and save figure of raw and processed TOF
 fig = figure('visible',visFig);
 subp = subplot(1,2,1); implot(subp,rawTOF,jet,row,col,"Unprocessed",true);
 subp = subplot(1,2,2); implot(subp,tof,jet,row,col,"Processed",true);
+sgtitle(fileName);
 imsave(figFolder,fig,'compare',fileName,true,res);
 
 % Plot and save figure of processed TOF

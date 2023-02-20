@@ -23,9 +23,7 @@ fileNames = ["BL-H-15J-1";
                   "RPR-H-20J-2";"RPR-H-20J-3"; fileNames];
 numFiles = length(fileNames);
 
-%% Function inputs
-
-% READCSCAN options =======================================================
+%% READCSCAN options ======================================================
 runReadCscan   = false;      % Run readcscan?
 filesReadCscan = 1:numFiles; % Indices of files to read
 % READCSCAN inputs --------------------------------------------------------
@@ -34,10 +32,8 @@ inFolder   = "Input";    % Folder location of .csv C-scan input file
 outFolder  = "Output";   % Folder to write .mat C-scan output file
 dRow       = 1;          % # rows to down sample
 dCol       = 5;          % # col to down sample
-% END READCSCAN____________________________________________________________
-% #########################################################################
 
-% PROCESSCSCAN options ====================================================
+%% PROCESSCSCAN options ===================================================
 runProcessCscan   = false;      % Run processcscan?
 filesProcessCscan = 1;%:numFiles; % Indices of files to read
 % PROCESSCSCAN inputs -----------------------------------------------------
@@ -56,12 +52,10 @@ maxWidth    = 0.75;    % Max width for a peak to be marked as wide
 testProcess = false;   % If true, shows figures
 calcT1      = false;   % if true, calculates, plots, and saves t1 
 res         = 300;     % Image resolution setting in dpi
-% END PROCESSCSCAN ________________________________________________________
-% #########################################################################
 
-% SEGCSCAN options ========================================================
+%% SEGCSCAN options =======================================================
 runSegCscan   = true;      % Run segcsan?
-filesSegCscan = 1;%:numFiles; % Indices of files to read
+filesSegCscan = [16,18,23];%1:numFiles; % Indices of files to read
 % SEGCSCAN inputs -------------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; %Threshold of dt for peak to be labeled as unique
@@ -74,11 +68,15 @@ modeThresh = [hig; hig; hig; hig; hig;       %  1- 5
               hig; med; low; low; low;       % 11-15
               med; med; hig; hig; hig;       % 16-20
               hig; hig; hig; med; med; hig]; % 21-26
-testSeg = true;    % If true, shows figures
-% END SEGCSCAN ____________________________________________________________
-% #########################################################################
+% [45, -45, 90, 0]
+seEl = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
+        0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 6-10
+        0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 11-15
+        0 3 0 0; 0 0 0 0; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
+        0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0]; % 21-26
+testSeg = false;    % If true, shows figures
 
-% ADJUSTPARAM options =====================================================
+%% ADJUSTPARAM options ====================================================
 runAdjustParam  = false;      % Run adjustparam?
 filesAdjustParam = 1;%:numFiles;   % Indices of files to read
 % ADJUSTPARAM inputs ------------------------------------------------------
@@ -86,19 +84,15 @@ rowRange = 171:172; % y
 colRange = 129:130; % x
 dir = 'row';
 num = 171;
-% END ADJUSTPARAM _________________________________________________________
-% #########################################################################
 
-% PLOTFIG options =========================================================
+%% PLOTFIG options ========================================================
 runPlotFig   = false;      % Run plotfig?
 filesPlotFig = 1:numFiles; % Indices of files to read
 % PLOTFIG inputs ----------------------------------------------------------
 plateThick  = 3.3;% Thickness of scanned plate in millimeters
 nLayers = 25;     % Number of layers in scanned plate
-% END PLOTFIG _____________________________________________________________
-% #########################################################################
 
-% MERGECSCAN options ======================================================
+%% MERGECSCAN options =====================================================
 runMergeCscan   = false;   % Run mergecscan?
 filesMergeCscan = 9;%:17; % Indices of files to read
 % MERGECSCAN inputs -------------------------------------------------------
@@ -112,10 +106,8 @@ dyMergeCscan =  [2; 0;  % 9-10
        2;-1;-5; -2;  0; % 11-15
        1; 1];           % 16-17
 testMerge = false; % If true, shows figures
-% END MERGECSCAN __________________________________________________________
-% #########################################################################
 
-% PLOTCUSTOM options ======================================================
+%% PLOTCUSTOM options =====================================================
 runPlotCustom   = false;      % Run customplot?
 filesPlotCustom = 1:numFiles; % Indices of files to read
 % PLOTCUSTOM inputs -------------------------------------------------------
@@ -133,8 +125,6 @@ dyPlotCustom = [26; 12; -5; 70; 73;      %  1- 5
                 -2; -2; -5; -2; 10;      % 16-20
                 -7; -5; 55; 43; -5; 10]; % 21-26
 testPlot = false; % If true, shows figures
-% END PLOTCUSTOM __________________________________________________________
-% #########################################################################
 
 %% Read C-scans from .csv file(s)
 % Note: parfor results in file processing to complete out of order
@@ -180,7 +170,7 @@ fprintf("Segmented C-scan for:\n\n");
 for i = filesSegCscan
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
-        modeThresh(i),testSeg,res);
+        modeThresh(i),seEl(i,:),testSeg,res);
 end
 sec = toc;
 fprintf('\nElapsed time is:')
