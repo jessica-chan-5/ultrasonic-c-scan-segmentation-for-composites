@@ -54,7 +54,7 @@ minProm1    = 0.03;    % Min prominence for a peak to be identified
 noiseThresh = 0.01;    % If average signal lower, then pt is not processed
 maxWidth    = 0.75;    % Max width for a peak to be marked as wide
 testProcess = false;   % If true, shows figures
-calcT1      = false;    % if true, calculates, plots, and saves t1 
+calcT1      = true;    % if true, calculates, plots, and saves t1 
 res         = 300;     % Image resolution setting in dpi
 % END PROCESSCSCAN ________________________________________________________
 % #########################################################################

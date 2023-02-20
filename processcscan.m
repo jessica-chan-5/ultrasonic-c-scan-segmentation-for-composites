@@ -114,32 +114,8 @@ else
 end
 
 if calcT1 == true
-
-[fullTOF,~,fullLocs,~,~] = calctof(cscan,t,1:row,1:col,minProm1, ...
-    noiseThresh,maxWidth);
-
-% Plot time of first peak
-fig = figure('visible','off');
-sub1 = subplot(1,2,1);
-t1 = zeros(row,col);
-for i = 1:row
-    for j = 1:col
-        if ~isempty(fullLocs{i,j})
-            t1(i,j) = fullLocs{i,j}(1);
-        end
-    end
-end
-implot(sub1,t1,jet,row,col,'t1 (microseconds)',false);
-sub2 = subplot(1,2,2);
-implot(sub2,fullTOF,jet,row,col,'Raw TOF (microseconds)',false);
-sgtitle(fileName);
-imsave(figFolder,fig,'t1',fileName,true,res);
-
-savevar = 't1';
-outfile = strcat(outFolder,"\",savevar,"\",fileName,'-',...
-    savevar,'.mat');
-save(outfile,savevar,'-mat');
-
+    calct1(figFolder,outFolder,fileName,cscan,t,minProm1,noiseThresh, ...
+        maxWidth,'jet',res)
 end
 
 % Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
