@@ -54,6 +54,21 @@ inflptMagCol = magpeaks('col',row,col,peak2,minProm2);
 
 inflpt = inflptLabRow | inflptLabCol | inflptMagRow | inflptMagCol;
 
+% Plot and save figure of inflection points
+fig = figure('visible','off');
+subplot(2,3,1); implot([],inflptLabRow,gray,row,col,'Label Row',false);
+subplot(2,3,2); implot([],inflptLabCol,gray,row,col,'Label Col',false);
+subplot(2,3,4); implot([],inflptMagRow,gray,row,col,'Magnitude Row',false);
+subplot(2,3,5); implot([],inflptMagCol,gray,row,col,'Magnitude Col',false);
+subplot(2,3,3); implot([],inflpt,gray,row,col,'Inflection Points',false);
+plotInflpt = inflptLabRow+inflptLabCol.*2+inflptMagRow.*2+inflptMagCol.*3;
+subp = subplot(2,3,6); 
+implot([],plotInflpt,gray,row,col,'Inflection Points',false);
+colormap(subp,[[0 0 0];hsv(8)]);
+
+sgtitle(fileName);
+imsave(figFolder,fig,'comboInflpt',fileName,true,res);
+
 % Set 1 pixel border equal to zero to prevent 
 inflpt(1,:) = 0;
 inflpt(:,1) = 0;
