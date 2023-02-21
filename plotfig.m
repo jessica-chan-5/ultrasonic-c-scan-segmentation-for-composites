@@ -1,17 +1,17 @@
 function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,res)
 %PLOTFIG Plot figures
-%    PLOTFIG(fileName,outFolder,figFolder,plateThick,nLayers,res) Plots 
-%    and saves 2D/3D layer damage plots as png and fig files at designated
-%    resolution res and in given folder figFolder
-% 
-%    Inputs:
-% 
-%    FILENAME  : Name of sample, same as readcscan
-%    OUTFOLDER : Folder path to .mat output files
-%    FIGFOLDER : Folder path to .fig and .png files
-%    PLATETHICK: Thickness of scanned plate in millimeters
-%    NLAYERS   : Number of layers in scanned plate
-%    RES       : Image resolution setting in dpi
+%   PLOTFIG(fileName,outFolder,figFolder,plateThick,nLayers,res) Groups TOF
+%   into twice as many damage layer groups as number of layers. Plots and 
+%   saves 2D and 3D layer damage plots. Saves damage layer groups.
+%
+%   Inputs:
+%
+%   FILENAME  : Name of .mat file to read
+%   OUTFOLDER : Folder path to .mat output files
+%   FIGFOLDER : Folder path to .fig and .png files
+%   PLATETHICK: Thickness of scanned plate in millimeters
+%   NLAYERS   : Number of layers in scanned plate
+%   RES       : Image resolution setting in dpi for saving image
 
 % Load raw TOF and associated info
 loadVar = ["tof";"cropCoord";"mask"];
@@ -22,47 +22,46 @@ for i = 1:length(loadVar)
 end
 
 % Save full size of raw TOF
-rowF = size(tof,1); %#ok<NODEF> 
-colF = size(tof,2);
+rowF = size(tof,1); colF = size(tof,2); %#ok<NODEF>
 
-% Work with damage bounding box area of raw TOF only
-startRow = cropCoord(1);
-endRow = cropCoord(2);
-startCol = cropCoord(3);
-endCol = cropCoord(4);
+% Work with damage bounding box area of TOF only
+startRow = cropCoord(1); endRow = cropCoord(2);
+startCol = cropCoord(3); endCol = cropCoord(4);
 tof = tof(startRow:endRow,startCol:endCol); 
 
 % Calculate size of raw TOF
-row = size(tof,1);
-col = size(tof,2);
+rowC = size(tof,1); colC = size(tof,2);
 
 % Calculate plate properties
 baseTOF = mode((nonzeros(tof)),'all'); % Calculate baseline TOF
 matVel = 2*plateThick/baseTOF;         % Calculate material velocity
 plyt = plateThick/nLayers;             % Calculate ply thickness
-dtTOF = plyt/matVel;                 % Calculate TOF for each layer
+dtTOF = plyt/matVel;                   % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers and group into 
 % (nLayers+1) damage layers
 layersTOF = 0:dtTOF:baseTOF+dtTOF;
 layersTOF(end) = baseTOF+2*dtTOF;
 damLayers = discretize(tof,layersTOF);
+
+% Remove points outside of boundary mask
 damLayers(mask==0) = NaN;
 
 % Plot and save damage layers
 fig = figure('visible','off');
-implot(fig,damLayers,jet,row,col,fileName,false);
+implot(fig,damLayers,jet,rowC,colC,fileName,false);
 imsave(figFolder,fig,"damLayers",fileName,true,res);
 
-vecDam = reshape(damLayers,row*col,1);
+vecDam = reshape(damLayers,rowC*colC,1);
 vecDam(1,1) = max(vecDam);
 vecDam(vecDam==max(vecDam)) = NaN;
 
-xVec = repmat((1:row)',col,1);
-yVec = repelem(1:col,row)';
+xVec = repmat((1:rowC)',colC,1);
+yVec = repelem(1:colC,rowC)';
 
 fig = figure('Visible','off');
-scatter3(xVec,yVec,vecDam,20,vecDam,'filled'); colormap(gca,'jet');
+scatter3(xVec,yVec,vecDam,20,vecDam,'filled');
+colormap(gca,'jet'); title(fileName);
 xlabel('Row #'); ylabel('Col #'); zlabel('Layer #');
 imsave(figFolder,fig,"3Dplot",fileName,false,res);
 

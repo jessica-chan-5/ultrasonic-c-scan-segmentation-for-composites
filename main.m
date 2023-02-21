@@ -87,14 +87,16 @@ num = 171;
 plateThick  = 3.3;% Thickness of scanned plate in millimeters
 nLayers = 25;     % Number of layers in scanned plate
 %% MERGECSCAN inputs ------------------------------------------------------
-% DX: Amount to adjust front side scan (+) = right, (-) = left
+% DX: Amount to move front side scan relative to back horizontally
+%     (+) = right, (-) = left
 dx = [-3; 8;            % 9-10
       -4; 7;14; 4; 5;   % 11-15
        6; 9];           % 16-17
-% DY: Amount to adjust front side scan (+) = up, (-) = down
-dyMergeCscan =  [2; 0;  % 9-10
-       2;-1;-5; -2;  0; % 11-15
-       1; 1];           % 16-17
+% DY: Amount to move front side scan relative to back vertically
+%     (+) = up, (-) = down
+dyMergeCscan = [2; 0;  % 9-10
+                2;-1;-5; -2;  0; % 11-15
+                1; 1];           % 16-17
 %% PLOTCUSTOM inputs ------------------------------------------------------
 % UTWINCROP: Indices to crop UTWin screenshot in format:
 %               [startRow endRow startCol endCol]
