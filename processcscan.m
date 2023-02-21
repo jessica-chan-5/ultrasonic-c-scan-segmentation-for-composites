@@ -6,7 +6,7 @@ function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
 %   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcTone,test,res)
 %   Look for damage bounding box within search area defined by bounds and a
 %   search grid with increments defined by incr. Calculate a baseline TOF 
-%   from an gridded area designated by baserow and basecol. If difference
+%   from an gridded area designated by baseRow and baseCol. If difference
 %   between the TOF at search grid point and the baseline TOF is greater
 %   than cropThresh, then the point is identified as part of the damage
 %   bounding box. Extra padding is added to the damage bounding box as a 

@@ -4,9 +4,9 @@ function readcscan(fileName,inFolder,outFolder,delim,dRow,dCol)
 %    from .csv file located in inFolder using readmatrix with designated 
 %    delimiter. Trims non-numeric values and takes absolute value of each 
 %    A-scan signal. Reshapes into 3D matrix with dimensions row by col by 
-%    number of data points per A-scan. Down samples rows and coloumns. For 
+%    number of data points per A-scan. Down samples rows and columns. For 
 %    example, if dRow = 1 and dCol = 5, save every row and every 5th 
-%    column. Saves 3D matrix as as .mat file in outFolder.
+%    column. Saves 3D matrix as .mat file in outFolder.
 %
 %    Inputs:
 %

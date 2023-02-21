@@ -20,7 +20,7 @@ function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
 %   Saves segmented TOF, inflection points, the damage area (mask and 
 %   boundary), and the magnitude of the second peak at each point.
 %
-%   Plots inflection points separately by techinique used and combined, a
+%   Plots inflection points separately by technique used and combined, a
 %   queryable figure of inflection points, the mask and boundary of the
 %   damage area, the process of segmenting TOF, a comparison between
 %   the raw TOF and the segmented TOF, and the segmented TOF.
