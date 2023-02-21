@@ -22,8 +22,8 @@ runRead    = false;    filesRead    = 1:numFiles;
 runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
 % SEGCSCAN
 runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
-% ADJUSTPARAM
-runAdjust  = false;    filesAdjust  = 1:numFiles;
+% PLOTTEST
+runTest  = false;      filesTest    = 1:numFiles;
 % PLOTFIG
 runFig     = false;    filesFig     = 1:numFiles;
 % MERGECSCAN
@@ -78,7 +78,7 @@ seEl       = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
               0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 11-15
               0 3 0 0; 0 0 0 4; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
               0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0];% 21-26
-%% ADJUSTPARAM inputs -----------------------------------------------------
+%% PLOTTEST inputs --------------------------------------------------------
 rowRange = 171:172; % y
 colRange = 129:130; % x
 dir = 'row';
@@ -141,14 +141,14 @@ parfor i = filesSeg
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-%% Adjust parameters
-if runAdjust == true
-tic; fprintf("\nADJUSTPARAM Adjust parameters for:\n")
-for i = filesAdjust
+%% Plot test figures
+if runTest == true
+tic; fprintf("\nPLOTTEST Plot test figures for:\n")
+for i = filesTest
     disp(strcat(num2str(i),'.',fileNames(i)));
-    [row, col] = plotascans(rowRange,colRange,outFolder,fileNames(i),dt,...
+    [row, col] = plotascans(fileNames(i),outFolder,rowRange,colRange,dt,...
         minProm1,noiseThresh);
-    plotpeak2(dir,num,row,col,outFolder,fileNames(i),minProm2)
+    plotpeak2(fileNames(i),outFolder,dir,num,row,col,minProm2);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

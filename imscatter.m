@@ -8,7 +8,7 @@ function imscatter(fileName,figFolder,fig,name,data,map)
 %   FIG:       Figure handle
 %   FIGFOLDER: Folder path to .fig and .png files
 %   FILENAME:  Name of .mat file to read
-%   NAME:      Title and file name for figure
+%   NAME:      Title and file name for figure - if equal to ' ', don't save
 %   DATA:      Data to be plotted in 2D matrix form
 %   MAP:       Colormap to use for figure
 
@@ -31,7 +31,9 @@ title(fileName);
 
 % Save figure
 if strcmp(name,' ') == false
-    savefigure(figFolder,fig,name,fileName)
+    path = strcat(figFolder,"\",name,"\",fileName,'-',name);
+    fig.CreateFcn = 'set(gcf,''visible'',''on'')';
+    savefig(fig,strcat(path,'.fig'));
 end
 
 end
