@@ -1,7 +1,5 @@
-function imscatter(visFig,figFolder,fileName,name,data,map)
+function imscatter(fig,figFolder,fileName,name,data,map)
 %IMSCATTER Plot rawTOF as scatter + imshow
-
-fig = figure('visible',visFig);
 
 % Use imshow
 modeData = mode(data(data~=0),'all');

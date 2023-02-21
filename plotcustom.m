@@ -1,6 +1,6 @@
 function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
     res,test)
-%PLOTCUSTOM Plot and save custom figures
+%PLOTCUSTOM Plot custom figures.
 %    PLOTCUSTOM(filename,infolder,outfolder,figfolder,utwincrop,dy,res,...
 %    test) Plots custom figures comparing UTWin screenshots to unsegmented
 %    and segmented TOF plots from this code. Allows for adjustments in the

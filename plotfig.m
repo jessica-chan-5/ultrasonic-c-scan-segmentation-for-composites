@@ -1,5 +1,5 @@
 function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,res)
-%PLOTFIG Plot and save figures
+%PLOTFIG Plot figures
 %    PLOTFIG(fileName,outFolder,figFolder,plateThick,nLayers,res) Plots 
 %    and saves 2D/3D layer damage plots as png and fig files at designated
 %    resolution res and in given folder figFolder

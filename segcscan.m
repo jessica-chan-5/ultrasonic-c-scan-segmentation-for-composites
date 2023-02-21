@@ -1,23 +1,47 @@
 function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
     modeThresh,seEl,test,res)
-%SEGCSCAN Process raw TOF.
+%SEGCSCAN Segment C-scan.
+%   SEGCSCAN(filename,outfolder,figfolder,minprom2,peakthresh, ...
+%   modethresh,seEl,test,res) Finds inflection points by combining two
+%   techniques: (1) changes in peak labels for first and second peak at
+%   each point along a row or column and (2) peaks in the graph of the 
+%   magnitude of the second peak along a row or column. Using the 
+%   inflection points found, finds the outline of the damage area. Then
+%   in the interior of the damage area, cleans up stray points, closes 
+%   gaps, and labels connected areas using image processing morphological 
+%   operations. Calculates the mode TOF for each labeled connected area. If
+%   difference between TOF at a point and the mode TOF for the area the
+%   point is part of is less than modeThresh, the TOF at that point is set
+%   to the mode TOF. Otherwise, the original TOF is kept.
 %
-%   SEGCSCAN(filename,outfolder,figurefolder,minprom2,peakthresh,
-%   modethresh) finds inflection points using unique peak labels and peaks
-%   in the graph of second peak magnitude along rows/cols. Using inflection
-%   point map, cleans up, closes, and labels connected regions with
-%   image processing morphological operations. Sets each labeled region to
-%   mode TOF of region if value of TOF at point is within a threshold.
+%   There is an option to close gaps using line structuring elements of
+%   varying lengths and angles (45/-45/0/90 degrees) using the seEl param.
+%
+%   Saves segmented TOF, inflection points, the damage area (mask and 
+%   boundary), and the magnitude of the second peak at each point.
+%
+%   Plots inflection points separately by techinique used and combined, a
+%   queryable figure of inflection points, the mask and boundary of the
+%   damage area, the process of segmenting TOF, a comparison between
+%   the raw TOF and the segmented TOF, and the segmented TOF.
 %
 %   Inputs:
 %
-%   FILENAME  : Name of sample, same as readcscan
+%   FILENAME  : Name of .mat file to read
 %   OUTFOLDER : Folder path to .mat output files
 %   FIGFOLDER : Folder path to .fig and .png files
 %   MINPROM2  : Min prominence in findpeaks for a peak to be identified
-%   PEAKTHRESH: Threshold of dt for peak to be labeled as unique
-%   MODETHRESH: Threshold for TOF to be set to mode TOF
-%   RES       : Image resolution setting in dpi
+%   PEAKTHRESH: If the difference between the time a peak appears in the
+%               first point and the time the same peak appears in the
+%               next point is greater than peakThresh, label as new peak
+%   MODETHRESH: If difference between TOF at current point and mode TOF of
+%               the area the current point belongs to is less than
+%               modeThresh, set TOF at current point to mode TOF
+%   SEEL      : Vector in the form: [length45 lengthNeg45 length90 length0]
+%               indicating length of structuring element for morphological
+%               closing of gaps if needed
+%   TEST      : If true, shows figures
+%   RES       : Image resolution setting in dpi for saving image
 
 % Load raw TOF and associated info
 loadVar = ["rawTOF";"peak";"locs";"wide";"nPeaks";"cropCoord"];
@@ -27,75 +51,76 @@ for i = 1:length(loadVar)
     load(inFile,loadVar(i))
 end
 
-% Save full size of raw TOF
-rowF = size(rawTOF,1); %#ok<NODEF> 
-colF = size(rawTOF,2);
+% Calculate full size of raw TOF
+rowF = size(rawTOF,1); colF = size(rawTOF,2); %#ok<NODEF> 
 
 % Work with damage bounding box area of raw TOF only
-startRow = cropCoord(1);
-endRow = cropCoord(2);
-startCol = cropCoord(3);
-endCol = cropCoord(4);
+startRow = cropCoord(1); endRow = cropCoord(2);
+startCol = cropCoord(3); endCol = cropCoord(4);
 rawTOF = rawTOF(startRow:endRow,startCol:endCol);
 
-% Calculate size of raw TOF
-row = size(rawTOF,1);
-col = size(rawTOF,2);
+% Calculate cropped size of raw TOF
+rowC = size(rawTOF,1); colC = size(rawTOF,2);
 
 % Find locations of 2nd peak and peak changes using label technique
-[peak2,inflptLabRow] = labelpeaks('row',row,col,locs,peak,nPeaks,wide, ...
+[peak2,inflptLabR] = labelpeaks('row',rowC,colC,locs,peak,nPeaks,wide,...
     peakThresh);
-[  ~  ,inflptLabCol] = labelpeaks('col',row,col,locs,peak,nPeaks,wide, ...
+[  ~  ,inflptLabC] = labelpeaks('col',rowC,colC,locs,peak,nPeaks,wide,...
     peakThresh);
 
 % Find peak changes using 2nd peak magnitude technique
-inflptMagRow = magpeaks('row',row,col,peak2,minProm2);
-inflptMagCol = magpeaks('col',row,col,peak2,minProm2);
+inflptMagR = magpeaks('row',rowC,colC,peak2,minProm2);
+inflptMagC = magpeaks('col',rowC,colC,peak2,minProm2);
 
-inflpt = inflptLabRow | inflptLabCol | inflptMagRow | inflptMagCol;
+% Combine all methods used to find inflection points
+inflpt = inflptLabR | inflptLabC | inflptMagR | inflptMagC;
 
-% Plot and save figure of inflection points
-fig = figure('visible','off');
-subplot(2,3,1); implot([],inflptLabRow,gray,row,col,'Label Row',false);
-subplot(2,3,2); implot([],inflptLabCol,gray,row,col,'Label Col',false);
-subplot(2,3,4); implot([],inflptMagRow,gray,row,col,'Magnitude Row',false);
-subplot(2,3,5); implot([],inflptMagCol,gray,row,col,'Magnitude Col',false);
-subplot(2,3,3); implot([],inflpt,gray,row,col,'Inflection Points',false);
-plotInflpt = inflptLabRow+inflptLabCol.*2+inflptMagRow.*2+inflptMagCol.*3;
-subp = subplot(2,3,6); 
-implot([],plotInflpt,gray,row,col,'Inflection Points',false);
-colormap(subp,[[0 0 0];hsv(8)]);
-
-sgtitle(fileName);
-imsave(figFolder,fig,'comboInflpt',fileName,true,res);
-
-% Set 1 pixel border equal to zero to prevent 
-inflpt(1,:) = 0;
-inflpt(:,1) = 0;
-inflpt(end,:) = 0;
-inflpt(:,end) = 0;
-
-% Set numPeaks < 2 to be inflection points
-inflpt(nPeaks < 2) = 1;
-
-% Plot and save figures of inflection points
+% If testing, set testing figures to be visible
 if test == true
-    % Save inflpt in full size plate
-    tempinflpt = ones(rowF,colF);
-    tempinflpt(startRow:endRow,startCol:endCol) = inflpt;
     visFig = 'on';
-    imscatter(visFig,figFolder,fileName,' ',tempinflpt,'gray');
 else
     visFig = 'off';
 end
 
+% Plot and save figure of all methods used to find inflection points
+fig = figure('visible',visFig);
+subplot(2,3,1); implot([],inflptLabR,gray,rowC,colC,'Label Row',false);
+subplot(2,3,2); implot([],inflptLabC,gray,rowC,colC,'Label Col',false);
+subplot(2,3,4); implot([],inflptMagR,gray,rowC,colC,'Magnitude Row',false);
+subplot(2,3,5); implot([],inflptMagC,gray,rowC,colC,'Magnitude Col',false);
+subplot(2,3,3); implot([],inflpt,gray,rowC,colC,'Inflection Points',false);
+plotInflpt = inflptLabR+inflptLabC.*2+inflptMagR.*2+inflptMagC.*3;
+subp = subplot(2,3,6); 
+implot([],plotInflpt,gray,rowC,colC,'Inflection Points',false);
+colormap(subp,[[0 0 0];hsv(8)]); sgtitle(fileName);
+imsave(figFolder,fig,'comboInflpt',fileName,true,res);
+
+% Set 1 pixel border equal to zero to prevent morphological operations from
+% connecting stray pixels to border
+inflpt(1,:) = 0; inflpt(end,:) = 0; 
+inflpt(:,1) = 0; inflpt(:,end) = 0;
+
+% Set points with only 1 peak to be inflection points
+inflpt(nPeaks < 2) = 1;
+
+% Plot inflection points as queryable scatter + imshow
+if test == true
+    % Save inflpt in full size plate
+    tempinflpt = ones(rowF,colF);
+    tempinflpt(startRow:endRow,startCol:endCol) = inflpt;
+    fig = figure('visible',visFig);
+    imscatter(fig,figFolder,fileName,'inflptsQuery',tempinflpt,'gray');
+end
+
+% Plot inflection points
 fig = figure('visible','off');
-implot([],inflpt,gray,row,col,fileName,false);
+implot([],inflpt,gray,rowC,colC,fileName,false);
 imsave(figFolder,fig,"inflpt",fileName,true,res);
 
 % Create concave hull of damage area
 maskInflpt = inflpt;
 maskInflpt = bwmorph(maskInflpt,'clean',inf); % Remove isolated pixels
+% Take care of edge cases where outer contour is not fully closed
 if strcmp(fileName,'RPR-H-20J-2') == true
     se90 = strel('line',4,90);
     maskInflpt = imclose(maskInflpt,se90);
@@ -109,7 +134,7 @@ maskInflpt = bwmorph(maskInflpt,'spur',inf); % Remove spurs
 
 % Trace exterior boundary, ignore interior holes
 [concBoundC,~] = bwboundaries(maskInflpt,'noholes');
-% Convert boundaries from cell to binary image
+% Convert boundaries from cell format to binary 2D matrix
 concBound = zeros(size(maskInflpt));
 for i = 1:length(concBoundC)
     for k = 1:size(concBoundC{i},1)
@@ -123,11 +148,11 @@ mask = bwmorph(mask,'clean',inf); % Remove isolated pixels
 % Find perimeter using 8 pixel connectivity
 bound = bwperim(mask,8);
 
-% Plot and save figure of modified inflection points, mask, boundary
+% Plot figure of modified inflection points, mask, boundary
 fig = figure('visible','off');
-subplot(1,3,1); implot([],inflpt,gray,row,col,"Infl Pts",false);
-subplot(1,3,2); implot([],mask,gray,row,col,"Mask",false);
-subplot(1,3,3); implot([],bound,gray,row,col,"Boundary",false);
+subplot(1,3,1); implot([],inflpt,gray,rowC,colC,"Infl Pts",false);
+subplot(1,3,2); implot([],mask,gray,rowC,colC,"Mask",false);
+subplot(1,3,3); implot([],bound,gray,rowC,colC,"Boundary",false);
 sgtitle(fileName);
 imsave(figFolder,fig,'masks',fileName,true,res);
 
@@ -159,10 +184,11 @@ if ~(seEl(1) == 0 && seEl(2) == 0 && seEl(3) == 0 && seEl(4) == 0)
     J = J45p | J45n | J90 | J0;
 end
 
+% Clean up and fill in gaps
 J = bwmorph(J,'clean',inf);  % Remove isolated pixels
 J = bwmorph(J,'bridge',inf); % Bridge pixels
 
-% Remove excess pixels outside concave hull and add outline where missing
+% Add outline where missing
 J = J | bound;
 
 % Clean up w/ a few operations
@@ -194,27 +220,28 @@ tof(nPeaks < 2) = 0;
 
 % Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
 fig = figure('visible',visFig);
-subplot(1,4,1); implot([],inflpt,gray,row,col,"Original",false);
-subplot(1,4,2); implot([],J,gray,row,col,"Processed",false);
-subplot(1,4,3); implot([],L,colorcube,row,col,"Labeled",false);
-subp = subplot(1,4,4); implot(subp,tof,jet,row,col,"Mode",true);
+subplot(1,4,1); implot([],inflpt,gray,rowC,colC,"Original",false);
+subplot(1,4,2); implot([],J,gray,rowC,colC,"Processed",false);
+subplot(1,4,3); implot([],L,colorcube,rowC,colC,"Labeled",false);
+subp = subplot(1,4,4); implot(subp,tof,jet,rowC,colC,"Mode",true);
 sgtitle(fileName);
 imsave(figFolder,fig,'process',fileName,true,res);
 
 % Plot and save figure of raw and processed TOF
 fig = figure('visible',visFig);
-subp = subplot(1,2,1); implot(subp,rawTOF,jet,row,col,"Unprocessed",true);
-subp = subplot(1,2,2); implot(subp,tof,jet,row,col,"Processed",true);
+subp = subplot(1,2,1); implot(subp,rawTOF,jet,rowC,colC,"Unprocessed",true);
+subp = subplot(1,2,2); implot(subp,tof,jet,rowC,colC,"Processed",true);
 sgtitle(fileName);
 imsave(figFolder,fig,'compare',fileName,true,res);
 
 % Plot and save figure of processed TOF
 fig = figure('visible','off');
-implot(fig,tof,jet,row,col,fileName,true);
+implot(fig,tof,jet,rowC,colC,fileName,true);
 imsave(figFolder,fig,'tof',fileName,true,res);
 
 % Save TOF, inflection points, and masks to .mat file
 savevar = ["tof","inflpt","mask","bound","peak2"];
+% Save tof in full size plate
 temptof = zeros(rowF,colF);
 temptof(startRow:endRow,startCol:endCol) = tof;
 tof = temptof; %#ok<NASGU> 

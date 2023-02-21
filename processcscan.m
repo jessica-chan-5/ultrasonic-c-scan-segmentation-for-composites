@@ -1,30 +1,51 @@
-function processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
-    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,test,calcT1,res)
-%PROCESSCSCAN Process A-scans to calculate TOF info.
-%    PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
-%    baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,res) Look for
-%    damage bounding box within search area defined by bounds using a
-%    baseline TOF from an area designated by baserow and basecol. Calculate
-%    and saves raw TOF and associated peak/location info for segmentcscan.
+function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
+    baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,...
+    test,res)
+%PROCESSCSCAN Process C-scans to calculate TOF.
+%   PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
+%   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,test,res)
+%   Look for damage bounding box within search area defined by bounds and a
+%   search grid with increments defined by incr. Calculate a baseline TOF 
+%   from an gridded area designated by baserow and basecol. If difference
+%   between the TOF at search grid point and the baseline TOF is greater
+%   than cropThresh, then the point is identified as part of the damage
+%   bounding box. Extra padding is added to the damage bounding box as a 
+%   pad factor of incr.
+%   
+%   Calculates TOF for points within damage bounding box using a smoothing 
+%   spline fit and findpeaks. Peaks with prominence lower than minProm1 are
+%   ignored. Points with average signal lower than noiseThresh are ignored.
+%   Peaks wider than maxWidth are noted.
 % 
-%    Inputs:
+%   If requested, calculates and plots t1, the time of the first peak.
+%   
+%   Saves raw TOF data along with magnitude, location, wide peak locations,
+%   number of peaks and damage bounding box coordinates.
+%
+%   Plots raw TOF with bounds, incr, baseRow/Col, pad, and damage bounding 
+%   box info overlaid, queryable figure of raw TOF, and image of raw TOF.
 % 
-%    FILENAME   : Name of sample, same as readcscan
-%    OUTFOLDER  : Folder path to .mat output files
-%    FIGFOLDER  : Folder path to .fig and .png files
-%    DT         : Sampling period in microseconds
-%    BOUNDS     : Indices of search area for damage bounding box in format:
-%                 [startX endX startY endY]
-%    INCR       : Increment for damage bounding box search in indices
-%    BASEROW    : Vector of row indices to calculate baseline TOF
-%    BASECOL    : Vector of cols indices to calculate baseline TOF
-%    CROPTHRESH : If abs(basetof-tof(i)) > cropthresh, point is damaged
-%    PAD        : (1+pad)*incr added to calculated damage bounding box
-%    MINPROM1   : Min prominence in findpeaks for a peak to be identified
-%    NOISETHRESH: If average signal is lower, then point is not processed
-%    MAXWIDTH   : Max width in findpeaks for a peak to be marked as wide
-%    TEST       : If true, shows figures
-%    RES        : Image resolution setting in dpi
+%   Inputs:
+% 
+%   FILENAME   : Name of .mat file to read
+%   OUTFOLDER  : Folder path to .mat C-scan output file
+%   FIGFOLDER  : Folder path to .fig and .png files
+%   DT         : Sampling period in microseconds
+%   BOUNDS     : Indices of search area for damage bounding box in format:
+%                [startX endX startY endY]
+%   INCR       : Increment for damage bounding box search in indices
+%   BASEROW    : Row indices across which to calculate baseline TOF
+%   BASECOL    : Column indices across which to calculate baseline TOF
+%   CROPTHRESH : If difference between baseline TOF and TOF at a point is 
+%                greater than cropThresh, then the point is damaged
+%   PAD        : (1+pad)*incr added to all sides of damage bounding box
+%   MINPROM1   : Min prominence in findpeaks for a peak to be identified
+%   NOISETHRESH: If the average signal at a point is lower than 
+%                noiseThresh, then the point is ignored
+%   MAXWIDTH   : If a peak's width is greater, then it is noted as wide
+%   CALCT1     : If true, calculates and plots time of first peak 
+%   TEST       : If true, shows figures
+%   RES        : Image resolution setting in dpi for saving image
 
 % Load C-scan
 name = 'cscan';
@@ -107,12 +128,14 @@ end
 rawTOF = zeros(row,col);
 rawTOF(startrow:endrow,startcol:endcol) = cropTOF(1:end,1:end);
 
+% If testing, set testing figures to be visible
 if test == true
     figVis = 'on';
 else
     figVis = 'off';
 end
 
+% Calculate t1, time of first peak if requested
 if calcT1 == true
     calct1(figFolder,outFolder,fileName,cscan,t,minProm1,noiseThresh, ...
         maxWidth,'jet',res)
@@ -124,8 +147,9 @@ damBound = [startr endr startc endc];
 plotbounds(figVis,figFolder,fileName,rawTOF,bounds,damBound,cropCoord, ...
     l2r,t2b,baseRow,baseCol,res);
 
-% Plot rawTOF as scatter + imshow
-imscatter(figVis,figFolder,fileName,'rawTOFquery',rawTOF,'jet');
+% Plot rawTOF as queryable scatter + imshow
+figure('visible',visFig);
+imscatter(fig,figFolder,fileName,'rawTOFquery',rawTOF,'jet');
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');

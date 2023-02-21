@@ -1,5 +1,5 @@
 function mergecscan(fileName,outFolder,figFolder,dx,dy,test,res)
-%MERGECSCAN Merge hybrid C-scan
+%MERGECSCAN Merge C-scans.
 %
 %   MERGECSCAN(fileName,outFolder,figFolder,dx,dy,test,res) user can adjust
 %   dx and dy of front side C-scan relative to back side C-scan using the

@@ -1,102 +1,92 @@
 %% Clear workspace
 close all; clearvars; format compact;
-
-%% C-scan .csv file names
-panelType = ["BL","CONT","RPR"];
-impactEnergy = ["10","15","20"];
-n = length(impactEnergy);
-m = length(panelType);
-fileNames = strings([n*m*2,1]);
-count = 0;
+%% File names
+panel = ["BL","CONT","RPR"];    m = length(panel);
+impact = ["10","15","20"];      n = length(impact);
+fileNames = strings([n*m*2,1]); count = 0;
 for i = 1:n
     for j = 1:m
         count = count + 1;
-        fileNames(count) = strcat(panelType(j),"-S-",...
-            impactEnergy(i),"J-2");
-        fileNames(count+n*m) = strcat(panelType(j),"-S-",...
-            impactEnergy(i),"J-2-back");
+        fileNames(count) = strcat(panel(j),"-S-",impact(i),"J-2");
+        fileNames(count+n*m) = strcat(panel(j),"-S-",impact(i),"J-2-back");
     end
 end
-fileNames = ["BL-H-15J-1";
-                 "CONT-H-10J-2";"CONT-H-10J-3";
-                 "CONT-H-20J-1";"CONT-H-20J-2";"CONT-H-20J-3";
-                  "RPR-H-20J-2";"RPR-H-20J-3"; fileNames];
+fileNames = ["BL-H-15J-1";"CONT-H-10J-2";"CONT-H-10J-3";"CONT-H-20J-1";
+"CONT-H-20J-2";"CONT-H-20J-3";"RPR-H-20J-2";"RPR-H-20J-3"; fileNames];
 numFiles = length(fileNames);
-
-%% READCSCAN options ======================================================
-runReadCscan   = false;      % Run readcscan?
-filesReadCscan = 1:numFiles; % Indices of files to read
-% READCSCAN inputs --------------------------------------------------------
-delim      = "   ";      % Field delimiter characters (i.e. "," or " ")
-inFolder   = "Input";    % Folder location of .csv C-scan input file
-outFolder  = "Output";   % Folder to write .mat C-scan output file
-dRow       = 1;          % # rows to down sample
-dCol       = 5;          % # col to down sample
-
-%% PROCESSCSCAN options ===================================================
-runProcessCscan   = false;      % Run processcscan?
-filesProcessCscan = 1:numFiles; % Indices of files to read
-% PROCESSCSCAN inputs -----------------------------------------------------
-figFolder   = "Figures";% Folder path to .fig and .png files
-dt          = 1/50;     % Sampling period in microseconds
-bounds      = [30 217 30 350]; % Indices of search area for bounding box
-                               % in format: [startX endX startY endY]
-incr        = 10;      % Increment for bounding box search in indices
-baseRow     = 50:5:60; % Vector of row indices to calculate baseline TOF
-baseCol     = 10:5:20; % Vector of cols indices to calculate baseline TOF
-cropThresh  = 0.2;     % If abs(basetof-tof(i)) > cropthresh, pt is damaged
-pad         = 1;       % (1+pad)*incr added to calculated bounding box
-minProm1    = 0.03;    % Min prominence for a peak to be identified
-noiseThresh = 0.01;    % If average signal lower, then pt is not processed
-maxWidth    = 0.75;    % Max width for a peak to be marked as wide
-testProcess = false;   % If true, shows figures
-calcT1      = false;   % if true, calculates, plots, and saves t1 
-res         = 300;     % Image resolution setting in dpi
-
-%% SEGCSCAN options =======================================================
-runSegCscan   = true;      % Run segcsan?
-filesSegCscan = 26;%1:numFiles; % Indices of files to read
-% SEGCSCAN inputs -------------------------------------------------------
-minProm2   = 0.013; %Min prominence in findpeaks for a peak to be identified
-peakThresh = 0.04; %Threshold of dt for peak to be labeled as unique
-% MODETHRESH:       Threshold for TOF to be set to mode TOF
-hig = 0.25;
-med = 0.14;
-low = 0.06;
+%% Function options
+%   Run function?   |  Indices of files to read?   |  Shows figures if true
+% READCSCAN
+runRead    = false;    filesRead    = 1:numFiles;
+% PROCESSCSCAN
+runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
+% SEGCSCAN
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
+% ADJUSTPARAM
+runAdjust  = false;    filesAdjust  = 1:numFiles;
+% PLOTFIG
+runFig     = false;    filesFig     = 1:numFiles;
+% MERGECSCAN
+runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
+                       di = 8;% File index offset
+% PLOTCUSTOM
+runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
+%% READCSCAN inputs
+inFolder   = "Input";  % Folder location for input files
+outFolder  = "Output"; % Folder location for output files
+delim      = "   ";    % Field delimiter character
+dRow       = 1;        % # rows to down sample
+dCol       = 5;        % # col  to down sample
+%% PROCESSCSCAN inputs ----------------------------------------------------
+figFolder  = "Figures";% Folder path to .fig and .png files
+dt         = 1/50;     % Sampling period in microseconds
+bounds     = [30 217 30 350]; % Indices of search area for bounding box
+                              % in format: [startX endX startY endY]
+incr       = 10;       % Increment for bounding box search in indices
+baseRow    = 50:5:60;  % Row indices across which to calculate baseline TOF
+baseCol    = 10:5:20;  % Col indices across which to calculate baseline TOF
+cropThresh = 0.2;      % If diff between baseline TOF and TOF at a point is 
+                       % greater than cropThresh, then the point is damaged
+pad        = 1;        % (1+pad)*incr added to all sides of bounding box
+minProm1   = 0.03;     % Min prominence for a peak to be identified
+noiseThresh= 0.01;     % If the average signal at a point is lower than 
+                       % noiseThresh, then the point is ignored
+maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
+calcT1     = false;    % If true, calculates and plots time of first peak 
+res        = 300;      % Image resolution setting in dpi for saving image
+%% SEGCSCAN inputs -------------------------------------------------------
+minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
+peakThresh = 0.04; % If the difference between the time a peak appears in 
+                   % the first point and the time the same peak appears in 
+                   % the next point is greater than peakThresh, label as
+                   % new peak
+% MODETHRESH:        If difference between TOF at current point and mode 
+                   % TOF of the area the current point belongs to is less 
+                   % than modeThresh, set TOF at current point to mode TOF
+hig = 0.25; med = 0.14; low = 0.06;
 modeThresh = [hig; hig; hig; med; hig;       %  1- 5 
               low; hig; hig; med; hig;       %  6-10
               hig; med; med; low; low;       % 11-15
               med; med; hig; hig; hig;       % 16-20
               hig; hig; hig; med; med; low]; % 21-26
-% [45, -45, 90, 0]
-seEl = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
-        0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 6-10
-        0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 11-15
-        0 3 0 0; 0 0 0 4; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
-        0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0]; % 21-26
-testSeg = false;    % If true, shows figures
-
-%% ADJUSTPARAM options ====================================================
-runAdjustParam  = false;      % Run adjustparam?
-filesAdjustParam = 1:numFiles;   % Indices of files to read
-% ADJUSTPARAM inputs ------------------------------------------------------
+% SEEL:              Vector in the form: 
+                   % [length45 lengthNeg45 length90 length0]
+                   % indicating length of structuring element for 
+                   % morphological closing of gaps if needed
+seEl       = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
+              0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 6-10
+              0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 11-15
+              0 3 0 0; 0 0 0 4; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
+              0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0];% 21-26
+%% ADJUSTPARAM inputs -----------------------------------------------------
 rowRange = 171:172; % y
 colRange = 129:130; % x
 dir = 'row';
 num = 171;
-
-%% PLOTFIG options ========================================================
-runPlotFig   = false;      % Run plotfig?
-filesPlotFig = 1:numFiles; % Indices of files to read
-% PLOTFIG inputs ----------------------------------------------------------
+%% PLOTFIG inputs ---------------------------------------------------------
 plateThick  = 3.3;% Thickness of scanned plate in millimeters
 nLayers = 25;     % Number of layers in scanned plate
-
-%% MERGECSCAN options =====================================================
-runMergeCscan   = false;   % Run mergecscan?
-filesMergeCscan = 9:17; % Indices of files to read
-% MERGECSCAN inputs -------------------------------------------------------
-di = 8;                 % File index offset if necessary
+%% MERGECSCAN inputs ------------------------------------------------------
 % DX: Amount to adjust front side scan (+) = right, (-) = left
 dx = [-3; 8;            % 9-10
       -4; 7;14; 4; 5;   % 11-15
@@ -105,12 +95,7 @@ dx = [-3; 8;            % 9-10
 dyMergeCscan =  [2; 0;  % 9-10
        2;-1;-5; -2;  0; % 11-15
        1; 1];           % 16-17
-testMerge = false; % If true, shows figures
-
-%% PLOTCUSTOM options =====================================================
-runPlotCustom   = false;      % Run customplot?
-filesPlotCustom = 1:numFiles; % Indices of files to read
-% PLOTCUSTOM inputs -------------------------------------------------------
+%% PLOTCUSTOM inputs ------------------------------------------------------
 % UTWINCROP: Indices to crop UTWin screenshot in format:
 %               [startRow endRow startCol endCol]
 startRowUT = 22;
@@ -124,124 +109,73 @@ dyPlotCustom = [26; 12; -5; 70; 73;      %  1- 5
                 10; -5; 28; 58; 40;      % 11-15
                 -2; -2; -5; -2; 10;      % 16-20
                 -7; -5; 55; 43; -5; 10]; % 21-26
-testPlot = false; % If true, shows figures
-
-%% Read C-scans from .csv file(s)
-% Note: parfor results in file processing to complete out of order
-
-if runReadCscan == true
-tic
-fprintf("READCSCAN======================================\n\n")
-fprintf("Converting C-scans from .csv to .mat files for:\n\n");
-parfor i = filesReadCscan
+%% Convert C-scan from .csv to .mat file
+if runRead == true
+tic; fprintf("READCSCAN Convert C-scan from .csv to .mat file for:\n");
+parfor i = filesRead
     disp(strcat(num2str(i),'.',fileNames(i)));
-    readcscan(fileNames(i),delim,inFolder,outFolder,dRow,dCol);
+    readcscan(fileNames(i),inFolder,outFolder,delim,dRow,dCol);
 end
-sec = toc;
-fprintf('\nElapsed time is:')
-disp(duration(0,0,sec))
-fprintf("Finished converting all C-scan .csv files!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-%% Process C-scans
-
-if runProcessCscan == true
-tic
-fprintf("PROCESSCSCAN====================================\n\n")
-fprintf("Processing C-scans for:\n\n");
-for i = filesProcessCscan
+%% Process C-scans to calculate TOF
+if runProcess == true
+tic; fprintf("\nPROCESSCSCAN Process C-scans to calculate TOF for:\n");
+for i = filesProcess
     disp(strcat(num2str(i),'.',fileNames(i)));
     processcscan(fileNames(i),outFolder,figFolder,dt,bounds,incr, ...
         baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
-        testProcess,calcT1,res)
+        calcT1,testProcess,res);
 end
-sec = toc;
-fprintf('\nElapsed time is:')
-disp(duration(0,0,sec))
-fprintf("Finished processing all C-scan .mat files!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-
 %% Segment C-Scan
-% Note: parfor results in file processing to complete out of order
-
-if runSegCscan == true
-tic
-fprintf("SEGCSCAN======================================\n\n")
-fprintf("Segmented C-scan for:\n\n");
-parfor i = filesSegCscan
+if runSeg == true
+tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
+parfor i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),seEl(i,:),testSeg,res);
 end
-sec = toc;
-fprintf('\nElapsed time is:')
-disp(duration(0,0,sec))
-fprintf("Finished segmenting all C-scans!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-
 %% Adjust parameters
-
-if runAdjustParam == true
-fprintf("ADJUSTPARAM======================================\n\n")
-fprintf("Plotting adjust param figures for:\n\n");
-for i = filesAdjustParam
-fileName = fileNames(i);
-plottof(outFolder,figFolder,fileName);
-[row, col] = plotascans(rowRange,colRange,outFolder,fileName,dt, ...
-    minProm1,noiseThresh);
-plotpeak2(dir,num,row,col,outFolder,fileName,minProm2)
+if runAdjust == true
+tic; fprintf("\nADJUSTPARAM Adjust parameters for:\n")
+for i = filesAdjust
+    disp(strcat(num2str(i),'.',fileNames(i)));
+    [row, col] = plotascans(rowRange,colRange,outFolder,fileNames(i),dt,...
+        minProm1,noiseThresh);
+    plotpeak2(dir,num,row,col,outFolder,fileNames(i),minProm2)
 end
-fprintf("Finished plotting!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-
 %% Plot figures
-% Note: parfor results in file processing to complete out of order
-
-if runPlotFig == true
-tic
-fprintf("PLOTFIG======================================\n\n")
-fprintf("Plotting figures for:\n\n");
-parfor i = filesPlotFig
+if runFig == true
+tic; fprintf("\nPLOTFIG Plot figures for:\n");
+parfor i = filesFig
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,res);
 end
-sec = toc;
-fprintf('\nElapsed time is:')
-disp(duration(0,0,sec))
-fprintf("Finished plotting!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-
-%% Merge for hybrid C-scan
-% Note: parfor results in file processing to complete out of order
-
-if runMergeCscan == true
-tic
-fprintf("MERGECSCAN======================================\n\n")
-fprintf("Merging C-scans for:\n\n");
-parfor i = filesMergeCscan
+%% Merge C-scans
+if runMerge == true
+tic; fprintf("\nMERGECSCAN Merge C-scans for:\n");
+parfor i = filesMerge
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
         dyMergeCscan(i-di),testMerge,res);
 end
-sec = toc;
-fprintf('\nElapsed time is:')
-disp(duration(0,0,sec))
-fprintf("Finished merging!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
-
 %% Make custom plots
-% Note: parfor results in file processing to complete out of order
-
-if runPlotCustom == true
-tic
-fprintf("PLOTCUSTOM======================================\n\n")
-fprintf("Plotting custom plots for:\n\n");
-parfor i = filesPlotCustom
+if runCustom == true
+tic; fprintf("\nPLOTCUSTOM Plot custom figures for:\n");
+parfor i = filesCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
-        dyPlotCustom(i),res,testPlot);
+        dyPlotCustom(i),res,testCustom);
 end
-sec = toc;
-fprintf('\nElapsed time is:')
-disp(duration(0,0,sec))
-fprintf("Finished plotting!\n\n")
+fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
