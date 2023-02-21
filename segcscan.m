@@ -93,7 +93,7 @@ plotInflpt = inflptLabR+inflptLabC.*2+inflptMagR.*2+inflptMagC.*3;
 subp = subplot(2,3,6); 
 implot([],plotInflpt,gray,rowC,colC,'Inflection Points',false);
 colormap(subp,[[0 0 0];hsv(8)]); sgtitle(fileName);
-imsave(figFolder,fig,'comboInflpt',fileName,true,res);
+imsave(fileName,figFolder,fig,'comboInflpt',true,res);
 
 % Set 1 pixel border equal to zero to prevent morphological operations from
 % connecting stray pixels to border
@@ -109,13 +109,13 @@ if test == true
     tempinflpt = ones(rowF,colF);
     tempinflpt(startRow:endRow,startCol:endCol) = inflpt;
     fig = figure('visible',visFig);
-    imscatter(fig,figFolder,fileName,'inflptsQuery',tempinflpt,'gray');
+    imscatter(fileName,figFolder,fig,'inflptsQuery',tempinflpt,'gray');
 end
 
 % Plot inflection points
 fig = figure('visible','off');
 implot([],inflpt,gray,rowC,colC,fileName,false);
-imsave(figFolder,fig,"inflpt",fileName,true,res);
+imsave(fileName,figFolder,fig,"inflpt",true,res);
 
 % Create concave hull of damage area
 maskInflpt = inflpt;
@@ -154,7 +154,7 @@ subplot(1,3,1); implot([],inflpt,gray,rowC,colC,"Infl Pts",false);
 subplot(1,3,2); implot([],mask,gray,rowC,colC,"Mask",false);
 subplot(1,3,3); implot([],bound,gray,rowC,colC,"Boundary",false);
 sgtitle(fileName);
-imsave(figFolder,fig,'masks',fileName,true,res);
+imsave(fileName,figFolder,fig,'masks',true,res);
 
 % Apply mask to inflection points map before morphological operations
 J = inflpt & mask;
@@ -225,19 +225,19 @@ subplot(1,4,2); implot([],J,gray,rowC,colC,"Processed",false);
 subplot(1,4,3); implot([],L,colorcube,rowC,colC,"Labeled",false);
 subp = subplot(1,4,4); implot(subp,tof,jet,rowC,colC,"Mode",true);
 sgtitle(fileName);
-imsave(figFolder,fig,'process',fileName,true,res);
+imsave(fileName,figFolder,fig,'process',true,res);
 
 % Plot and save figure of raw and processed TOF
 fig = figure('visible',visFig);
 subp = subplot(1,2,1); implot(subp,rawTOF,jet,rowC,colC,"Unprocessed",true);
 subp = subplot(1,2,2); implot(subp,tof,jet,rowC,colC,"Processed",true);
 sgtitle(fileName);
-imsave(figFolder,fig,'compare',fileName,true,res);
+imsave(fileName,figFolder,fig,'compare',true,res);
 
 % Plot and save figure of processed TOF
 fig = figure('visible','off');
 implot(fig,tof,jet,rowC,colC,fileName,true);
-imsave(figFolder,fig,'tof',fileName,true,res);
+imsave(fileName,figFolder,fig,'tof',true,res);
 
 % Save TOF, inflection points, and masks to .mat file
 savevar = ["tof","inflpt","mask","bound","peak2"];

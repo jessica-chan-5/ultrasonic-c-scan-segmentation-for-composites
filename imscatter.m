@@ -1,5 +1,16 @@
-function imscatter(fig,figFolder,fileName,name,data,map)
-%IMSCATTER Plot rawTOF as scatter + imshow
+function imscatter(fileName,figFolder,fig,name,data,map)
+%IMSCATTER Plot queryable figure.
+%   IMSCATTER(fileName,figFolder,fig,name,data,map) Plot and save a 
+%   queryable figure using the combination of imshow and scatter.
+%
+%   Inputs:
+%
+%   FIG:       Figure handle
+%   FIGFOLDER: Folder path to .fig and .png files
+%   FILENAME:  Name of .mat file to read
+%   NAME:      Title and file name for figure
+%   DATA:      Data to be plotted in 2D matrix form
+%   MAP:       Colormap to use for figure
 
 % Use imshow
 modeData = mode(data(data~=0),'all');

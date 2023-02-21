@@ -177,7 +177,7 @@ tic; fprintf("\nPLOTCUSTOM Plot custom figures for:\n");
 parfor i = filesCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
-        dyPlotCustom(i),res,testCustom);
+        dyPlotCustom(i),testCustom,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

@@ -1,21 +1,22 @@
-function imsave(figFolder,fig,name,fileName,fullScreen,res)
+function imsave(fileName,figFolder,fig,name,fullScreen,res)
 %IMSAVE Save figure as png and fig.
-%    IMSAVE(figFolder,fig,name,fileName,res) saves figure in designated
-%    figure folder, using given title, and with specified resolution as png
-%    and fig file types
+%   IMSAVE(fileName,figFolder,fig,name,fullScreen,res) Saves figure and
+%   sets to fullscreen size if fullScreen is true.
 %
-%    Inputs:
+%   Inputs:
 %
-%    FIGFOLDER: Figure subfolder to save files
-%    FIG      : Saved figure handle for plot
-%    NAME     : Figure subfolder/name of file to be appended
-%    FILENAME : Sample name to be inlcuded in name of file
-%    RES      : Resolution in dpi to save file
-    
+%   FIGFOLDER: Figure subfolder to save files
+%   FIG      : Figure handle
+%   NAME     : Title and file name for figure
+%   FILENAME : Name of .mat file to read
+%   RES      : Image resolution setting in dpi for saving image
+
+% Set to full screen
 if fullScreen == true
     screensize = get(groot,'Screensize');
     fig.Position = [1 1 screensize(3) floor(screensize(4)*0.86)];
 end
+% Save figure
     path = strcat(figFolder,"\",name,"\",fileName,'-',name);
     fig.CreateFcn = 'set(gcf,''visible'',''on'')';
     savefig(fig,strcat(path,'.fig'));

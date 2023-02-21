@@ -105,7 +105,7 @@ boundF = boundC{1}+boundC{2}.*2;
 boundF = boundF(startRowF:endRowF,startColF:endColF);
 subplot(1,2,2); im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
-imsave(figFolder,fig,"mergeCheck",fileName,true,res);
+imsave(fileName,figFolder,fig,"mergeCheck",true,res);
 
 % Remove points if outside boundary
 damLayersC{1}(maskC{1}==0) = NaN;
@@ -138,7 +138,7 @@ scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
     20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
 view(3);
-imsave(figFolder,fig,"hybridCscan",fileName,false,res);
+imsave(fileName,figFolder,fig,"hybridCscan",false,res);
 
 % Plot front, back, hybrid C-scan
 fig = figure('Visible','off'); hold on;
@@ -158,7 +158,7 @@ scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
 view(3); title('Hybrid')
 sgtitle(fileName);
-imsave(figFolder,fig,"frontBackHybrid",fileName,true,res);
+imsave(fileName,figFolder,fig,"frontBackHybrid",true,res);
 
 % Save merged damage layers
 name = "hybridCscan";

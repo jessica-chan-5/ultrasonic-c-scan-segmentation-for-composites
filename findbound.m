@@ -1,5 +1,5 @@
 function boundI = findbound(baseTOF,searchI,searchJ,searchOrien, ...
-    boundThresh,cscan,t,minProm,noiseThresh,maxWidth)
+    cropThresh,cscan,t,minProm,noiseThresh,maxWidth)
 %FINDBOUND Find damage bounding box.
 %    boundI = FINDBOUND(baseTOF,searchI,searchJ,searchOrien,boundThresh,...
 %    cscan,t,minProm,noiseThresh,maxWidth) searches through rows or cols to
@@ -11,17 +11,19 @@ function boundI = findbound(baseTOF,searchI,searchJ,searchOrien, ...
 %    SEARCHI    : Indices to search through in direction 1
 %    SEARCHJ    : Indices to search through in direction 2
 %    SEARCHORIEN: Direction to search along, 'row' or 'col'
-%    BOUNDTHRESH: If abs(tof(i)-baseTOF)>= thresh, boundary index is found
+%    CROPTHRESH : If difference between baseline TOF and TOF at a point is 
+%                 greater than cropThresh, then the point is damaged
 %    CSCAN:       C-scan data, in 3D matrix form: [row x col x pts]
 %    T:           Time, in vector form: [0:dt:tend], in microseconds
 %    MINPROM    : Min prominence in findpeaks for a peak to be identified
-%    NOISETHRESH: If average signal is lower, then point is not processed
-%    MAXWIDTH   : Max width in findpeaks for a peak to be marked as wide
+%    NOISETHRESH: If the average signal at a point is lower than 
+%                 noiseThresh, then the point is ignored
+%    MAXWIDTH   : If a peak's width is greater, then it is noted as wide
 
 % Initialize variables
 boundCandidates = NaN(1,length(searchJ));
-ptTOF = NaN(1,length(searchJ));
-tof = NaN(length(searchI),length(searchJ));
+ptTOF           = NaN(1,length(searchJ));
+tof             = NaN(length(searchI),length(searchJ));
 
 % Loop through designated search indices in row and col directions
 for j = 1:length(searchJ)
@@ -38,7 +40,7 @@ for j = 1:length(searchJ)
         
         % If TOF varies from baseline TOF more than threshold, save as a
         % boundary candidate and move on to the next row/col
-        if abs(baseTOF - tof(i,j)) >= boundThresh
+        if abs(baseTOF - tof(i,j)) >= cropThresh
             boundCandidates(j) = i;
             ptTOF(j) = tof(i,j);
             break

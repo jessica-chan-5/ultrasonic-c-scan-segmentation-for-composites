@@ -50,7 +50,7 @@ damLayers(mask==0) = NaN;
 % Plot and save damage layers
 fig = figure('visible','off');
 implot(fig,damLayers,jet,rowC,colC,fileName,false);
-imsave(figFolder,fig,"damLayers",fileName,true,res);
+imsave(fileName,figFolder,fig,"damLayers",true,res);
 
 vecDam = reshape(damLayers,rowC*colC,1);
 vecDam(1,1) = max(vecDam);
@@ -63,7 +63,7 @@ fig = figure('Visible','off');
 scatter3(xVec,yVec,vecDam,20,vecDam,'filled');
 colormap(gca,'jet'); title(fileName);
 xlabel('Row #'); ylabel('Col #'); zlabel('Layer #');
-imsave(figFolder,fig,"3Dplot",fileName,false,res);
+imsave(fileName,figFolder,fig,"3Dplot",false,res);
 
 % Save damage layers
 savevar = "damLayers";

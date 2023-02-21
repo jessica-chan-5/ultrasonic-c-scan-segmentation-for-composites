@@ -1,9 +1,9 @@
 function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
-    baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,...
-    test,res)
+    baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
+    calcTone,test,res)
 %PROCESSCSCAN Process C-scans to calculate TOF.
 %   PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
-%   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,test,res)
+%   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcTone,test,res)
 %   Look for damage bounding box within search area defined by bounds and a
 %   search grid with increments defined by incr. Calculate a baseline TOF 
 %   from an gridded area designated by baserow and basecol. If difference
@@ -43,7 +43,7 @@ function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
 %   NOISETHRESH: If the average signal at a point is lower than 
 %                noiseThresh, then the point is ignored
 %   MAXWIDTH   : If a peak's width is greater, then it is noted as wide
-%   CALCT1     : If true, calculates and plots time of first peak 
+%   CALCTONE   : If true, calculates and plots time of first peak 
 %   TEST       : If true, shows figures
 %   RES        : Image resolution setting in dpi for saving image
 
@@ -136,25 +136,25 @@ else
 end
 
 % Calculate t1, time of first peak if requested
-if calcT1 == true
-    calct1(figFolder,outFolder,fileName,cscan,t,minProm1,noiseThresh, ...
+if calcTone == true
+    calct1(fileName,outFolder,figFolder,cscan,t,minProm1,noiseThresh, ...
         maxWidth,'jet',res)
 end
 
 % Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
 cropCoord = [startrow endrow startcol endcol]; 
 damBound = [startr endr startc endc];
-plotbounds(figVis,figFolder,fileName,rawTOF,bounds,damBound,cropCoord, ...
-    l2r,t2b,baseRow,baseCol,res);
+plotbounds(fileName,figFolder,rawTOF,bounds,damBound,cropCoord,l2r,t2b, ...
+    baseRow,baseCol,figVis,res);
 
 % Plot rawTOF as queryable scatter + imshow
-figure('visible',visFig);
-imscatter(fig,figFolder,fileName,'rawTOFquery',rawTOF,'jet');
+fig = figure('visible',visFig);
+imscatter(fileName,figFolder,fig,'rawTOFquery',rawTOF,'jet');
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
 implot(fig,rawTOF,jet,row,col,fileName,true);
-imsave(figFolder,fig,'rawTOF',fileName,true,res);
+imsave(fileName,figFolder,fig,'rawTOF',true,res);
 
 % Save raw TOF and corresponding peaks/location info
 savevar = ["rawTOF";"peak";"locs";"wide";"nPeaks";"cropCoord"];

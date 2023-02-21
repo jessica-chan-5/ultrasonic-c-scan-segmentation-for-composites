@@ -1,5 +1,5 @@
 function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
-    res,test)
+    test,res)
 %PLOTCUSTOM Plot custom figures.
 %    PLOTCUSTOM(filename,infolder,outfolder,figfolder,utwincrop,dy,res,...
 %    test) Plots custom figures comparing UTWin screenshots to unsegmented
@@ -15,8 +15,8 @@ function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
 %    UTWINCROP: Indices to crop UTWin screenshot in format:
 %               [startRow endRow startCol endCol]
 %    DY       : Amount to adjust UTWin screenshots (+) = up, (-) = down
-%    RES      : Image resolution setting in dpi for saving image
 %    TEST     : If test is true, shows figures
+%    RES      : Image resolution setting in dpi for saving image
 
 % Load raw TOF and associated info
 loadVar = ["rawTOF";"tof";"cropCoord"];

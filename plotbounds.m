@@ -1,6 +1,26 @@
-function plotbounds(figVis,figFolder,fileName,rawTOF,bounds,damBound, ...
-    cropCoord,l2r,t2b,baseRow,baseCol,res)
-% PLOTBOUNDS Plots bonds, incr, baseRow, baseCol, pad, start/end row/col
+function plotbounds(fileName,figFolder,rawTOF,bounds,damBound, ...
+    cropCoord,l2r,t2b,baseRow,baseCol,figVis,res)
+%PLOTBOUNDS Plots boundary elements.
+%   PLOTBOUNDS(fileName,figFolder,rawTOF,bounds,damBound,cropCoord,l2r,...
+%   t2b,baseRow,baseCol,figVis,res) Plots boundary elements such as the
+%   search area, damage bounding box, damage bounding box with padding
+%   added, search grid, and grid of points used to calculate baseline TOF.
+%
+%   Inputs:
+%
+%   FILENAME:  Name of .mat file to read
+%   FIGFOLDER: Folder path to .fig and .png files
+%   RAWTOF:    Unprocessed TOF in [row x col] matrix form
+%   BOUNDS:    Indices of search area for damage bounding box in format:
+%              [startX endX startY endY]
+%   DAMBOUND:  Indices of damage bounding box
+%   CROPCOORD: Indices of damage bounding box with padding added
+%   L2R:       Column search indices from left to right 
+%   T2B:       Row search indices from top to bottom
+%   BASEROW:   Row indices across which to calculate baseline TOF
+%   BASECOL:   Column indices across which to calculate baseline TOF
+%   FIGVIS:    If true, shows testing figures
+%   RES:       Image resolution setting in dpi for saving image
 
 % Break up start/end variables
 startx = bounds(1);

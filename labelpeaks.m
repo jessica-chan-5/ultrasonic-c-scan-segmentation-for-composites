@@ -1,10 +1,10 @@
 function [peak2, inflpt] = labelpeaks(dir,row,col,locs,peak,nPeaks, ...
     wide,peakThresh)
-%LABELPEAKS Use 2nd peak magnitude to find inflection points
-%    [peak2, inflpt] = LABELPEAKS(dir,row,col,locs,peak, ...
-%    nPeaks,wide,peakThresh) searches along row or col depending on given 
-%    dir to search for inflection points using unique peak labels. Returns 
-%    inflection points and magnitude of 2nd peak.
+%LABELPEAKS Use unique peak labels to find inflection points
+%    [peak2, inflpt] = LABELPEAKS(dir,row,col,locs,peak,nPeaks,wide,...
+%    peakThresh) searches along row or col depending on given dir to search
+%    for inflection points using unique peak labels. Returns inflection 
+%    points and magnitude of 2nd peak.
 %
 %    Inputs:
 %
@@ -15,8 +15,9 @@ function [peak2, inflpt] = labelpeaks(dir,row,col,locs,peak,nPeaks, ...
 %    PEAK:       Magnitude of all peaks at each A-scan point
 %    NPEAKS:     Number of peaks at each A-scan point
 %    WIDE:       Is true if 1st peak is labeled as 'wide' at A-scan point
-%    PEAKTHRESH: If previous dt between previous peak and current peak is
-%                greater than peakThresh, then considered new peak to label
+%    PEAKTHRESH: If the difference between the time a peak appears in the
+%                first point and the time the same peak appears in the
+%                next point is greater than peakThresh, label as new peak
 
 % Initialize variables depending on if searching along row or col
 if strcmp(dir,'row')
@@ -27,14 +28,14 @@ elseif strcmp(dir,'col')
     dir2 = row;
     locs = locs';
     peak = peak';
-    nPeaks = nPeaks';
     wide = wide';
+    nPeaks = nPeaks';
 end
 
 peakLab = cell(dir1,dir2);
-peak2 = zeros(dir1,dir2);
-loc2i = zeros(dir1,dir2);
-locs2i = zeros(dir1,dir2);
+peak2   = zeros(dir1,dir2);
+loc2i   = zeros(dir1,dir2);
+locs2i  = zeros(dir1,dir2);
 
 for i = 1:dir1    
     labList = 1:1e3; % Initialize list of labels
