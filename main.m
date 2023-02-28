@@ -54,6 +54,7 @@ maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
 calcT1     = false;    % If true, calculates and plots time of first peak 
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
+fontSize   = 16;
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; % If the difference between the time a peak appears in 
                    % the first point and the time the same peak appears in 
@@ -137,7 +138,7 @@ tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
 for i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
-        modeThresh(i),seEl(i,:),testSeg,res);
+        modeThresh(i),seEl(i,:),testSeg,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

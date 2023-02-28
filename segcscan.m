@@ -1,5 +1,5 @@
 function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
-    modeThresh,seEl,test,res)
+    modeThresh,seEl,test,fontSize,res)
 %SEGCSCAN Segment C-scan.
 %   SEGCSCAN(filename,outfolder,figfolder,minprom2,peakthresh, ...
 %   modethresh,seEl,test,res) Finds inflection points by combining two
@@ -62,8 +62,15 @@ rawTOF = rawTOF(startRow:endRow,startCol:endCol);
 % Calculate cropped size of raw TOF
 rowC = size(rawTOF,1); colC = size(rawTOF,2);
 
+% If testing, set testing figures to be visible
+if test == true
+    visFig = 'on';
+else
+    visFig = 'off';
+end
+
 % Plot rawTOF as queryable scatter + imshow
-fig = figure('visible','on');
+fig = figure('visible',visFig);
 imscatter(fileName,figFolder,fig,' ',rawTOF,'jet'); colorbar;
 
 % Find locations of 2nd peak and peak changes using label technique
@@ -79,23 +86,17 @@ inflptMagC = magpeaks('col',rowC,colC,peak2,minProm2);
 % Combine all methods used to find inflection points
 inflpt = inflptLabR | inflptLabC | inflptMagR | inflptMagC;
 
-% If testing, set testing figures to be visible
-if test == true
-    visFig = 'on';
-else
-    visFig = 'off';
-end
-
 % Plot and save figure of all methods used to find inflection points
 fig = figure('visible',visFig);
-subplot(2,3,1); implot([],inflptLabR,gray,rowC,colC,'Label Row',false);
-subplot(2,3,2); implot([],inflptLabC,gray,rowC,colC,'Label Col',false);
-subplot(2,3,4); implot([],inflptMagR,gray,rowC,colC,'Magnitude Row',false);
-subplot(2,3,5); implot([],inflptMagC,gray,rowC,colC,'Magnitude Col',false);
-subplot(2,3,3); implot([],inflpt,gray,rowC,colC,'Inflection Points',false);
-subplot(2,3,6); implot([],rawTOF,jet,rowC,colC,'Raw TOF',false);
-sgtitle(fileName);
-imsave(fileName,figFolder,fig,'comboInflpt',true,res);
+tl = tiledlayout(2,3,'TileSpacing','tight','Padding','tight');
+nexttile; implot([],inflptLabR,gray,rowC,colC,'Label Row',false,fontSize);
+nexttile; implot([],inflptLabC,gray,rowC,colC,'Label Col',false,fontSize);
+nexttile; implot([],inflpt,gray,rowC,colC,'Inflection Points',false,fontSize);
+nexttile; implot([],inflptMagR,gray,rowC,colC,'Magnitude Row',false,fontSize);
+nexttile; implot([],inflptMagC,gray,rowC,colC,'Magnitude Col',false,fontSize);
+nexttile; implot([],rawTOF,jet,rowC,colC,'Raw TOF',false,fontSize); colorbar;
+title(tl,fileName,'FontSize',fontSize);
+imsave(fileName,figFolder,fig,'comboInflpt',1,res);
 
 % Set 1 pixel border equal to zero to prevent morphological operations from
 % connecting stray pixels to border
@@ -116,12 +117,11 @@ end
 
 % Plot inflection points
 fig = figure('visible','off');
-implot([],inflpt,gray,rowC,colC,fileName,false);
-imsave(fileName,figFolder,fig,"inflpt",true,res);
+implot([],inflpt,gray,rowC,colC,fileName,false,fontSize);
+imsave(fileName,figFolder,fig,"inflpt",1,res);
 
 % Create concave hull of damage area
 maskInflpt = inflpt;
-maskInflpt = bwmorph(maskInflpt,'clean'); % Remove isolated pixels
 % Take care of edge cases where outer contour is not fully closed
 if strcmp(fileName,'RPR-H-20J-2') == true
     se90 = strel('line',4,90);
@@ -133,6 +133,7 @@ elseif strcmp(fileName,'RPR-S-15J-2-back') == true
     maskInflpt = imclose(maskInflpt,se0);
 end
 maskInflpt = bwmorph(maskInflpt,'spur',inf); % Remove spurs
+maskInflpt = bwmorph(maskInflpt,'clean'); % Remove isolated pixels
 
 % Trace exterior boundary, ignore interior holes
 [concBoundC,~] = bwboundaries(maskInflpt,'noholes');
@@ -145,18 +146,17 @@ for i = 1:length(concBoundC)
 end
 % Flood-fill boundary
 mask = imfill(concBound,4);
-mask = bwmorph(mask,'clean',inf); % Remove isolated pixels
 
 % Find perimeter using 8 pixel connectivity
 bound = bwperim(mask,8);
 
 % Plot figure of modified inflection points, mask, boundary
-fig = figure('visible','off');
-subplot(1,3,1); implot([],maskInflpt,gray,rowC,colC,"Infl Pts",false);
-subplot(1,3,2); implot([],mask,gray,rowC,colC,"Mask",false);
-subplot(1,3,3); implot([],bound,gray,rowC,colC,"Boundary",false);
-sgtitle(fileName);
-imsave(fileName,figFolder,fig,'masks',true,res);
+fig = figure('visible',visFig);
+tiledlayout(1,3,'TileSpacing','tight','Padding','tight');
+nexttile; implot([],maskInflpt,gray,rowC,colC,"Infl Pts",false,fontSize);
+nexttile; implot([],mask,gray,rowC,colC,"Mask",false,fontSize);
+nexttile; implot([],bound,gray,rowC,colC,"Boundary",false,fontSize);
+imsave(fileName,figFolder,fig,'masks',1,res);
 
 % Apply mask to inflection points map before morphological operations
 J = inflpt & mask;
@@ -222,25 +222,26 @@ tof(nPeaks < 2) = 0;
 
 % Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
 fig = figure('visible',visFig);
-tl = tiledlayout(1,4,'TileSpacing','tight','Padding','tight');
-nexttile; implot([],inflpt,gray,rowC,colC,"Original",false);
-nexttile; implot([],J,gray,rowC,colC,"Processed",false);
-nexttile; implot([],L,colorcube,rowC,colC,"Labeled",false);
-t = nexttile; implot(t,tof,jet,rowC,colC,"Mode",true); colorbar;
-title(tl,fileName);
-imsave(fileName,figFolder,fig,'process',true,res);
+tl = tiledlayout(2,2,'TileSpacing','tight','Padding','tight');
+nexttile; implot([],inflpt,gray,rowC,colC,"Original",false,fontSize);
+nexttile; implot([],J,gray,rowC,colC,"Processed",false,fontSize);
+nexttile; implot([],L,colorcube,rowC,colC,"Labeled",false,fontSize);
+t1 = nexttile; implot(t1,tof,jet,rowC,colC,"Mode",true,fontSize); colorbar;
+title(tl,fileName,'FontSize',fontSize);
+imsave(fileName,figFolder,fig,'process',0.5,res);
 
 % Plot and save figure of raw and processed TOF
 fig = figure('visible',visFig);
-subp = subplot(1,2,1); implot(subp,rawTOF,jet,rowC,colC,"Unprocessed",true);
-subp = subplot(1,2,2); implot(subp,tof,jet,rowC,colC,"Processed",true);
-sgtitle(fileName);
-imsave(fileName,figFolder,fig,'compare',true,res);
+tl = tiledlayout(1,2,'TileSpacing','tight','Padding','tight');
+t1 = nexttile; implot(t1,rawTOF,jet,rowC,colC,"Unprocessed",true,fontSize);
+t1 = nexttile; implot(t1,tof,jet,rowC,colC,"Processed",true,fontSize);
+title(tl,fileName,'FontSize',fontSize);
+imsave(fileName,figFolder,fig,'compare',1,res);
 
 % Plot and save figure of processed TOF
 fig = figure('visible','off');
-implot(fig,tof,jet,rowC,colC,fileName,true);
-imsave(fileName,figFolder,fig,'tof',true,res);
+implot(fig,tof,jet,rowC,colC,fileName,true,fontSize);
+imsave(fileName,figFolder,fig,'tof',1,res);
 
 % Save TOF, inflection points, and masks to .mat file
 savevar = ["tof","inflpt","mask","bound","peak2"];

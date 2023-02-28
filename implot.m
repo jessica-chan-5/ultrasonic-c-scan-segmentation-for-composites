@@ -1,4 +1,4 @@
-function implot(fig,data,map,row,col,figTitle,norm)
+function implot(fig,data,map,row,col,figTitle,norm,fontSize)
 %IMPLOT Plot figure using imshow.
 %   IMPLOT(fig,data,map,row,col,figTitle,norm) Plots figure using imshow.
 %   Scales x and y direction using provided row and col coordinates. Flips
@@ -26,6 +26,8 @@ else
 end
 
 title(figTitle);
+ax = gca;
+ax.FontSize = fontSize;
 
 end
 
