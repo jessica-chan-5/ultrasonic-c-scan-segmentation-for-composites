@@ -21,13 +21,13 @@ runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
 runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
-runSeg     = true;    filesSeg     = 1:numFiles;     testSeg     = true;
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
 runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
@@ -79,8 +79,8 @@ seEl       = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
               0 3 0 0; 0 0 0 4; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
               0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0];% 21-26
 %% D. plottest inputs -----------------------------------------------------
-rowRange = 171; % y
-colRange = 115:121; % x
+rowRange = 171:172; % y
+colRange = 115:116; % x
 dir = 'row';
 num = 171;
 %% E. plotfig inputs ------------------------------------------------------
@@ -115,7 +115,7 @@ dyPlotCustom = [26; 12; -5; 70; 73;      %  1- 5
 %% 1. Convert C-scan from .csv to .mat file
 if runRead == true
 tic; fprintf("READCSCAN Convert C-scan from .csv to .mat file for:\n");
-for i = filesRead
+parfor i = filesRead
     disp(strcat(num2str(i),'.',fileNames(i)));
     readcscan(fileNames(i),inFolder,outFolder,delim,dRow,dCol);
 end
@@ -124,7 +124,7 @@ end
 %% 2. Process C-scans to calculate TOF
 if runProcess == true
 tic; fprintf("\nPROCESSCSCAN Process C-scans to calculate TOF for:\n");
-for i = filesProcess
+parfor i = filesProcess
     disp(strcat(num2str(i),'.',fileNames(i)));
     processcscan(fileNames(i),outFolder,figFolder,dt,bounds,incr, ...
         baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
@@ -135,7 +135,7 @@ end
 %% 3. Segment C-Scan
 if runSeg == true
 tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
-for i = filesSeg
+parfor i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),seEl(i,:),testSeg,fontSize,res);
@@ -158,14 +158,14 @@ if runFig == true
 tic; fprintf("\nPLOTFIG Plot figures for:\n");
 parfor i = filesFig
     disp(strcat(num2str(i),'.',fileNames(i)));
-    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,res);
+    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
 %% 6. Merge C-scans
 if runMerge == true
 tic; fprintf("\nMERGECSCAN Merge C-scans for:\n");
-for i = filesMerge
+parfor i = filesMerge
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
         dyMergeCscan(i-di),testMerge,res);

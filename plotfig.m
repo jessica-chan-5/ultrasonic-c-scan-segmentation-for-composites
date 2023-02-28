@@ -1,4 +1,4 @@
-function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,res)
+function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,fontSize,res)
 %PLOTFIG Plot figures
 %   PLOTFIG(fileName,outFolder,figFolder,plateThick,nLayers,res) Groups TOF
 %   into twice as many damage layer groups as number of layers. Plots and 
@@ -49,7 +49,7 @@ damLayers(mask==0) = NaN;
 
 % Plot and save damage layers
 fig = figure('visible','off');
-implot(fig,damLayers,jet,rowC,colC,fileName,false);
+implot(fig,damLayers,jet,rowC,colC,fileName,0,fontSize);
 imsave(fileName,figFolder,fig,"damLayers",true,res);
 
 vecDam = reshape(damLayers,rowC*colC,1);
@@ -62,7 +62,8 @@ yVec = repelem(1:colC,rowC)';
 fig = figure('Visible','off');
 scatter3(xVec,yVec,vecDam,20,vecDam,'filled');
 colormap(gca,'jet'); title(fileName);
-xlabel('Row #'); ylabel('Col #'); zlabel('Layer #');
+xlabel('Row #'); ylabel('Col #'); zlabel('Group #');
+ax = gca; ax.FontSize = fontSize;
 imsave(fileName,figFolder,fig,"3Dplot",false,res);
 
 % Save damage layers

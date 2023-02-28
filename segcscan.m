@@ -152,11 +152,13 @@ bound = bwperim(mask,8);
 
 % Plot figure of modified inflection points, mask, boundary
 fig = figure('visible',visFig);
-tiledlayout(1,3,'TileSpacing','tight','Padding','tight');
-nexttile; implot([],maskInflpt,gray,rowC,colC,"Infl Pts",false,fontSize);
+tl = tiledlayout(2,2,'TileSpacing','tight','Padding','tight');
+nexttile; implot([],inflpt,gray,rowC,colC,"Infl Pts",false,fontSize);
 nexttile; implot([],mask,gray,rowC,colC,"Mask",false,fontSize);
+nexttile; implot([],maskInflpt,gray,rowC,colC,"Cleaned Infl Pts",false,fontSize);
 nexttile; implot([],bound,gray,rowC,colC,"Boundary",false,fontSize);
-imsave(fileName,figFolder,fig,'masks',1,res);
+title(tl,fileName,'FontSize',fontSize);
+imsave(fileName,figFolder,fig,'masks',0.5,res);
 
 % Apply mask to inflection points map before morphological operations
 J = inflpt & mask;
@@ -235,12 +237,12 @@ fig = figure('visible',visFig);
 tl = tiledlayout(1,2,'TileSpacing','tight','Padding','tight');
 t1 = nexttile; implot(t1,rawTOF,jet,rowC,colC,"Unprocessed",true,fontSize);
 t1 = nexttile; implot(t1,tof,jet,rowC,colC,"Processed",true,fontSize);
-title(tl,fileName,'FontSize',fontSize);
+title(tl,fileName,'FontSize',fontSize); colorbar;
 imsave(fileName,figFolder,fig,'compare',1,res);
 
 % Plot and save figure of processed TOF
 fig = figure('visible','off');
-implot(fig,tof,jet,rowC,colC,fileName,true,fontSize);
+implot(fig,tof,jet,rowC,colC,fileName,true,fontSize); colorbar;
 imsave(fileName,figFolder,fig,'tof',1,res);
 
 % Save TOF, inflection points, and masks to .mat file

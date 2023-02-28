@@ -109,8 +109,8 @@ im.CDataMapping = "scaled"; axis on; title('Final Check');
 imsave(fileName,figFolder,fig,"mergeCheck",true,res);
 
 % Remove points if outside boundary
-damLayersC{1}(maskC{1}==0) = NaN;
-damLayersC{2}(maskC{2}==0) = NaN;
+% damLayersC{1}(maskC{1}==0) = NaN;
+% damLayersC{2}(maskC{2}==0) = NaN;
 
 % Save seg TOF inside of max boundary
 damLayersC{1} = damLayersC{1}(startRowF:endRowF,startColF:endColF);
@@ -125,6 +125,10 @@ damLayersVec{1} = reshape(damLayersC{1},rowF*colF,1);
 damLayersVec{2} = reshape(damLayersC{2},rowF*colF,1);
 xVec = repmat((1:rowF)',colF,1);
 yVec = repelem(1:colF,rowF)';
+
+% Remove zero and max value layers
+damLayersVec{1}(damLayersVec{1}==0) = NaN;
+damLayersVec{2}(damLayersVec{2}==0) = NaN;
 
 % Flip layers top to bottom for back TOF
 damLayersVec{2} = abs(damLayersVec{2}-max(damLayersVec{2})-1);
