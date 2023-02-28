@@ -62,6 +62,10 @@ rawTOF = rawTOF(startRow:endRow,startCol:endCol);
 % Calculate cropped size of raw TOF
 rowC = size(rawTOF,1); colC = size(rawTOF,2);
 
+% Plot rawTOF as queryable scatter + imshow
+fig = figure('visible','on');
+imscatter(fileName,figFolder,fig,' ',rawTOF,'jet'); colorbar;
+
 % Find locations of 2nd peak and peak changes using label technique
 [peak2,inflptLabR] = labelpeaks('row',rowC,colC,locs,peak,nPeaks,wide,...
     peakThresh);
@@ -89,10 +93,8 @@ subplot(2,3,2); implot([],inflptLabC,gray,rowC,colC,'Label Col',false);
 subplot(2,3,4); implot([],inflptMagR,gray,rowC,colC,'Magnitude Row',false);
 subplot(2,3,5); implot([],inflptMagC,gray,rowC,colC,'Magnitude Col',false);
 subplot(2,3,3); implot([],inflpt,gray,rowC,colC,'Inflection Points',false);
-plotInflpt = inflptLabR+inflptLabC.*2+inflptMagR.*2+inflptMagC.*3;
-subp = subplot(2,3,6); 
-implot([],plotInflpt,gray,rowC,colC,'Inflection Points',false);
-colormap(subp,[[0 0 0];hsv(8)]); sgtitle(fileName);
+subplot(2,3,6); implot([],rawTOF,jet,rowC,colC,'Raw TOF',false);
+sgtitle(fileName);
 imsave(fileName,figFolder,fig,'comboInflpt',true,res);
 
 % Set 1 pixel border equal to zero to prevent morphological operations from
@@ -119,7 +121,7 @@ imsave(fileName,figFolder,fig,"inflpt",true,res);
 
 % Create concave hull of damage area
 maskInflpt = inflpt;
-maskInflpt = bwmorph(maskInflpt,'clean',inf); % Remove isolated pixels
+maskInflpt = bwmorph(maskInflpt,'clean'); % Remove isolated pixels
 % Take care of edge cases where outer contour is not fully closed
 if strcmp(fileName,'RPR-H-20J-2') == true
     se90 = strel('line',4,90);
@@ -150,7 +152,7 @@ bound = bwperim(mask,8);
 
 % Plot figure of modified inflection points, mask, boundary
 fig = figure('visible','off');
-subplot(1,3,1); implot([],inflpt,gray,rowC,colC,"Infl Pts",false);
+subplot(1,3,1); implot([],maskInflpt,gray,rowC,colC,"Infl Pts",false);
 subplot(1,3,2); implot([],mask,gray,rowC,colC,"Mask",false);
 subplot(1,3,3); implot([],bound,gray,rowC,colC,"Boundary",false);
 sgtitle(fileName);
@@ -220,11 +222,12 @@ tof(nPeaks < 2) = 0;
 
 % Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
 fig = figure('visible',visFig);
-subplot(1,4,1); implot([],inflpt,gray,rowC,colC,"Original",false);
-subplot(1,4,2); implot([],J,gray,rowC,colC,"Processed",false);
-subplot(1,4,3); implot([],L,colorcube,rowC,colC,"Labeled",false);
-subp = subplot(1,4,4); implot(subp,tof,jet,rowC,colC,"Mode",true);
-sgtitle(fileName);
+tl = tiledlayout(1,4,'TileSpacing','tight','Padding','tight');
+nexttile; implot([],inflpt,gray,rowC,colC,"Original",false);
+nexttile; implot([],J,gray,rowC,colC,"Processed",false);
+nexttile; implot([],L,colorcube,rowC,colC,"Labeled",false);
+t = nexttile; implot(t,tof,jet,rowC,colC,"Mode",true); colorbar;
+title(tl,fileName);
 imsave(fileName,figFolder,fig,'process',true,res);
 
 % Plot and save figure of raw and processed TOF

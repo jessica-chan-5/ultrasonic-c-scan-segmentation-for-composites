@@ -32,12 +32,15 @@ peak2 = tempPeak2;
 % Set endx to row or col depending on dir
 if strcmp(dir,'row') == true
     endx = col;
+    xlab = 'Col';
 elseif strcmp(dir,'col') == true
     endx = row;
+    xlab = 'Row';
 end
 
 titleStr = strings(length(num),1); % Initialize legend string array
 figure('WindowState','maximized'); hold on; % Full screen figure
+set(gca,'DefaultLineLineWidth',1);
 
 % Plot all 2nd peak magnitude across row(s) or col(s) requested
 for i = 1:length(num)
@@ -64,9 +67,9 @@ end
 
 grid minor;
 title(strcat(dir," ",num2str(num)));
-xlim([1 endx]);
-xlabel(dir);
-ylabel('2nd Peak Magnitude')
-legend(titleStr);
+xlim([cropCoord(3) cropCoord(4)]);
+xlabel(xlab);
+ylabel('-(2nd Peak Magnitude)')
+ax = gca; ax.FontSize = 12;
 
 end

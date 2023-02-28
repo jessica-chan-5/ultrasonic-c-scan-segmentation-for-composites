@@ -28,6 +28,7 @@ dataTab = table(x,y,dataVec);
 scatter(dataTab,'x','y','filled','ColorVariable','dataVec');
 colormap(gca,map);
 title(fileName);
+axis on;
 
 % Save figure
 if strcmp(name,' ') == false

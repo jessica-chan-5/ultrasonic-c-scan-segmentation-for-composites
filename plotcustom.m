@@ -71,6 +71,6 @@ subplot(1,3,3); imshow(utwin); title("UTWin");
 if test == true
     axis on;
 end
-imsave(figfolder,fig,'utwin',filename,true,res);
+imsave(filename,figfolder,fig,'utwin',true,res);
 
 end

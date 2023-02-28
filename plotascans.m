@@ -34,13 +34,13 @@ t = 0:dt:tend;
 nCol = length(colRange); nRow = length(rowRange);
 
 % Full screen figure
-figure('WindowState','maximized'); hold on;
+figure('WindowState','maximized');
 n = 0; % subplot counter
 
 for j = 1:nCol
     for i = 1:nRow
         n = n + 1;
-        subplot(nRow,nCol,n);
+        subplot(nRow,nCol,n); hold on;
         point = squeeze(cscan(rowRange(i),colRange(j),:))';
         [p, l] = findpeaks(point,t);
 
@@ -65,8 +65,8 @@ for j = 1:nCol
 
         % Display peak info
         peakInfo = table(peak,loc,width,prom);
-        figTitle = strcat("Row ",num2str(rowRange(j)), ...
-            ", Col ",num2str(colRange(i)),", #",num2str(n));
+        figTitle = strcat("Row ",num2str(rowRange(i)), ...
+            ", Col ",num2str(colRange(j)),", #",num2str(n));
         disp(figTitle)
         disp(peakInfo)
 

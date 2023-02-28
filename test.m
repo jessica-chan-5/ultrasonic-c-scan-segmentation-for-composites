@@ -17,13 +17,13 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = false;    filesRead    = 1:numFiles;
+runRead    = true;    filesRead    = 1:numFiles;
 % processcscan
 runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
-runSeg     = true;    filesSeg     = 1:numFiles;     testSeg     = true;
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
-runTest    = false;    filesTest    = 1;
+runTest    = false;    filesTest    = 1:numFiles;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
@@ -78,8 +78,8 @@ seEl       = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
               0 3 0 0; 0 0 0 4; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
               0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0];% 21-26
 %% D. plottest inputs -----------------------------------------------------
-rowRange = 171; % y
-colRange = 115:121; % x
+rowRange = 171:172; % y
+colRange = 129:130; % x
 dir = 'row';
 num = 171;
 %% E. plotfig inputs ------------------------------------------------------
@@ -134,7 +134,7 @@ end
 %% 3. Segment C-Scan
 if runSeg == true
 tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
-for i = filesSeg
+parfor i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),seEl(i,:),testSeg,res);

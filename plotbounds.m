@@ -96,11 +96,10 @@ plot([startcol endcol],[endrow endrow],padLS,'LineWidth',padLW);
 
 % Add legend and title
 legend([p1 p2 p3 p4 p5], ...
-    {'bounds','incr','baseRow/baseCol','Damage bound box','pad'}, ...
+    {'bounds','incr','baseRow/baseCol','pad','Damage bound box'}, ...
     'Location','bestoutside'); axis on;
 title(fileName);
 
 % Save figure
-imsave(figFolder,fig,'damBoundBox',fileName,true,res);
-
+imsave(fileName,figFolder,fig,'damBoundBox',true,res);
 end

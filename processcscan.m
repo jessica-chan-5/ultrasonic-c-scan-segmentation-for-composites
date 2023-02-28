@@ -148,12 +148,12 @@ plotbounds(fileName,figFolder,rawTOF,bounds,damBound,cropCoord,l2r,t2b, ...
     baseRow,baseCol,figVis,res);
 
 % Plot rawTOF as queryable scatter + imshow
-fig = figure('visible',visFig);
-imscatter(fileName,figFolder,fig,'rawTOFquery',rawTOF,'jet');
+fig = figure('visible',figVis);
+imscatter(fileName,figFolder,fig,'rawTOFquery',rawTOF,'jet'); colorbar;
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
-implot(fig,rawTOF,jet,row,col,fileName,true);
+implot(fig,rawTOF,jet,row,col,fileName,true); colorbar;
 imsave(fileName,figFolder,fig,'rawTOF',true,res);
 
 % Save raw TOF and corresponding peaks/location info

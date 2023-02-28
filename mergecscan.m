@@ -50,6 +50,7 @@ startColC = [cropCoordC{1}(3) cropCoordC{2}(3)];
 endColC = [cropCoordC{1}(4) cropCoordC{2}(4)];
 
 % Save boundaries and mask in full size row/col dimensions
+tempBoundF= zeros(rowF,colF);
 tempBoundF(startRowC(1):endRowC(1),startColC(1):endColC(1)) = boundC{1};
 boundC{1} = tempBoundF;
 
