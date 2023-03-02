@@ -27,9 +27,9 @@ runTest    = false;    filesTest    = 1;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
-runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
+runCustom  = true;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
 inFolder   = "Input";  % Folder location for input files
 outFolder  = "Output"; % Folder location for output files
@@ -158,7 +158,7 @@ if runFig == true
 tic; fprintf("\nPLOTFIG Plot figures for:\n");
 parfor i = filesFig
     disp(strcat(num2str(i),'.',fileNames(i)));
-    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,fontSize,res);
+    plotfig(fileNames(i),outFolder,figFolder,plateThick,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
@@ -168,7 +168,7 @@ tic; fprintf("\nMERGECSCAN Merge C-scans for:\n");
 parfor i = filesMerge
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
-        dyMergeCscan(i-di),testMerge,res);
+        dyMergeCscan(i-di),testMerge,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
@@ -178,7 +178,8 @@ tic; fprintf("\nPLOTCUSTOM Plot custom figures for:\n");
 parfor i = filesCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
-        dyPlotCustom(i),testCustom,res);
+        dyPlotCustom(i),plateThick ...
+        ,testCustom,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

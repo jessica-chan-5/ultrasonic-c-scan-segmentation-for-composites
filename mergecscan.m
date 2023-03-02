@@ -1,4 +1,4 @@
-function mergecscan(fileName,outFolder,figFolder,dx,dy,test,res)
+function mergecscan(fileName,outFolder,figFolder,dx,dy,test,fontSize,res)
 %MERGECSCAN Merge C-scans.
 %   MERGECSCAN(fileName,outFolder,figFolder,dx,dy,test,res) user can adjust
 %   dx and dy of front side C-scan relative to back side C-scan using the
@@ -40,6 +40,8 @@ for i = 1:length(loadVar)
     eval(strcat(name,"C{2} = ",name,"C{2}.",name,";"));
 end
 
+damLayersC{2} = fliplr(damLayersC{2});
+
 % Save full size of segmented TOF
 rowF = size(damLayersC{1},1); colF = size(damLayersC{1},2);
 
@@ -76,8 +78,10 @@ endColF = max([cropCoordC{1}(4) cropCoordC{2}(4)]);
 fig = figure('Visible',figVis);
 boundF = boundC{1}+boundC{2}.*2;
 boundF = boundF(startRowF:endRowF,startColF:endColF);
-subplot(1,2,1); im = imshow(boundF,gray);
+tl = tiledlayout(2,3,'TileSpacing','tight','Padding','tight');
+nexttile; im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Initial Check');
+ax = gca; ax.FontSize = fontSize;
 
 % Adjust x and y offset for front TOF
 if dx > 0     % right
@@ -104,8 +108,9 @@ end
 % Replot to check if correct
 boundF = boundC{1}+boundC{2}.*2;
 boundF = boundF(startRowF:endRowF,startColF:endColF);
-subplot(1,2,2); im = imshow(boundF,gray);
+nexttile; im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
+ax = gca; ax.FontSize = fontSize;
 imsave(fileName,figFolder,fig,"mergeCheck",true,res);
 
 % Remove points if outside boundary
@@ -142,27 +147,25 @@ fig = figure('Visible','off'); hold on;
 scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
     20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3);
+view(3); title(fileName); ax = gca; ax.FontSize = fontSize;
 imsave(fileName,figFolder,fig,"hybridCscan",false,res);
 
 % Plot front, back, hybrid C-scan
 fig = figure('Visible','off'); hold on;
-subplot(1,3,1);
-scatter3(xVec,yVec,damLayersVec{1}, ...
+tl = tiledlayout(1,3,'TileSpacing','tight','Padding','tight');
+nexttile; scatter3(xVec,yVec,damLayersVec{1}, ...
     20,damLayersVec{1},'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title('Front');
-subplot(1,3,2);
-scatter3(xVec,yVec,damLayersVec{2}, ...
+view(3); title('Front'); ax = gca; ax.FontSize = fontSize;
+nexttile; scatter3(xVec,yVec,damLayersVec{2}, ...
     20,damLayersVec{2},'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title('Back');
-subplot(1,3,3);
-scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
+view(3); title('Back'); ax = gca; ax.FontSize = fontSize;
+nexttile; scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
     20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title('Hybrid')
-sgtitle(fileName);
+view(3); title('Hybrid'); ax = gca; ax.FontSize = fontSize;
+title(tl,fileName); ax = gca; ax.FontSize = fontSize;
 imsave(fileName,figFolder,fig,"frontBackHybrid",true,res);
 
 % Save merged damage layers

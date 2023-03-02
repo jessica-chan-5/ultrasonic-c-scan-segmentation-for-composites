@@ -1,5 +1,5 @@
-function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
-    test,res)
+function plotcustom(fileName,inFolder,outFolder,figFolder,utwincrop,dy, ...
+    plateThick,test,fontSize,res)
 %PLOTCUSTOM Plot custom figures.
 %    PLOTCUSTOM(filename,infolder,outfolder,figfolder,utwincrop,dy,res,...
 %    test) Plots custom figures comparing UTWin screenshots to unsegmented
@@ -21,7 +21,7 @@ function plotcustom(filename,infolder,outfolder,figfolder,utwincrop,dy, ...
 % Load raw TOF and associated info
 loadVar = ["rawTOF";"tof";"cropCoord"];
 for i = 1:length(loadVar)
-    inFile = strcat(outfolder,"\",loadVar(i),"\",filename,'-',...
+    inFile = strcat(outFolder,"\",loadVar(i),"\",fileName,'-',...
         loadVar(i),'.mat');
     load(inFile,loadVar(i))
 end
@@ -49,7 +49,7 @@ startRow = floor(startRow*ratiorow); endRow = floor(endRow*ratiorow);
 startCol = floor(startCol*ratiocol); endCol = floor(endCol*ratiocol);
 
 % Read in UTWin image
-inFile = strcat(infolder,"\utwin\",filename,'.bmp');
+inFile = strcat(inFolder,"\utwin\",fileName,'.bmp');
 utwin = imread(inFile);
 
 % Crop UTWin image
@@ -63,14 +63,29 @@ else
     figVis = 'off';
 end
 
+% Convert TOF to thickness
+baseTOF = mode((nonzeros(tof)),'all'); % Calculate baseline TOF
+matVel = plateThick/baseTOF;         % Calculate material velocity
+
+% Flip left to right if is back scan
+if strcmp('back',extractAfter(fileName,strlength(fileName)-4)) == true
+    rawTOF = fliplr(rawTOF);
+    tof = fliplr(tof);
+    utwin = fliplr(utwin);
+end
+
 % Plot and save raw TOF, TOF, and UTWin images side-by-side
 fig = figure('visible',figVis);
-subp = subplot(1,3,1); implot(subp,rawTOF,jet,rowC,colC,"Raw TOF",true);
-subp = subplot(1,3,2); implot(subp,tof,jet,rowC,colC,"TOF",true);
-subplot(1,3,3); imshow(utwin); title("UTWin");
+tiledlayout(1,3,'TileSpacing','tight');
+t1 = nexttile; implot(t1,rawTOF*matVel,jet,rowC,colC, ...
+    "Raw Damage Depth (mm)",true,fontSize); colorbar;
+t1 = nexttile; implot(t1,tof*matVel,jet,rowC,colC, ...
+    "Processed Damage Depth (mm)",true,fontSize); colorbar;
+nexttile; imshow(utwin); 
+title("UTWin Damage Depth (mm)"); ax = gca; ax.FontSize = fontSize;
 if test == true
     axis on;
 end
-imsave(filename,figfolder,fig,'utwin',true,res);
+imsave(fileName,figFolder,fig,'utwin',1,res);
 
 end
