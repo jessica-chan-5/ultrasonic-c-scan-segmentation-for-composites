@@ -29,7 +29,7 @@ runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
 runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
-runCustom  = true;    filesCustom  = 1:numFiles;     testCustom  = false;
+runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
 inFolder   = "Input";  % Folder location for input files
 outFolder  = "Output"; % Folder location for output files
