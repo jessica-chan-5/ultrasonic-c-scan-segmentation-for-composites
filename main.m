@@ -25,9 +25,9 @@ runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
-runFig     = false;    filesFig     = 1:numFiles;
+runFig     = true;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
 runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
@@ -158,7 +158,7 @@ if runFig == true
 tic; fprintf("\nPLOTFIG Plot figures for:\n");
 parfor i = filesFig
     disp(strcat(num2str(i),'.',fileNames(i)));
-    plotfig(fileNames(i),outFolder,figFolder,plateThick,fontSize,res);
+    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

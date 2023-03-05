@@ -111,7 +111,7 @@ boundF = boundF(startRowF:endRowF,startColF:endColF);
 nexttile; im = imshow(boundF,gray);
 im.CDataMapping = "scaled"; axis on; title('Final Check');
 ax = gca; ax.FontSize = fontSize;
-imsave(fileName,figFolder,fig,"mergeCheck",true,res);
+imsave(fileName,figFolder,fig,"mergeCheck",1,res);
 
 % Remove points if outside boundary
 % damLayersC{1}(maskC{1}==0) = NaN;
@@ -142,31 +142,31 @@ hybridCscan = sortrows([[xVec; xVec],[yVec; yVec], ...
     [damLayersVec{1};damLayersVec{2}]]);
 hybridCscan(isnan(hybridCscan(:,3)),:) = [];
 
-% Plot hybrid C-scan
-fig = figure('Visible','off'); hold on;
-scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
-    20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
-xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title(fileName); ax = gca; ax.FontSize = fontSize;
-imsave(fileName,figFolder,fig,"hybridCscan",false,res);
+frontCscan = sortrows([xVec,yVec,damLayersVec{1}]);
+frontCscan(isnan(frontCscan(:,3)),:) = [];
+backCscan = sortrows([xVec,yVec,damLayersVec{2}]);
+backCscan(isnan(backCscan(:,3)),:) = [];
 
 % Plot front, back, hybrid C-scan
 fig = figure('Visible','off'); hold on;
 tl = tiledlayout(1,3,'TileSpacing','tight','Padding','tight');
-nexttile; scatter3(xVec,yVec,damLayersVec{1}, ...
-    20,damLayersVec{1},'filled'); colormap(gca,'jet');
+nexttile; plotlayers(frontCscan,tl,' ',fileName,figFolder,fontSize,res);
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title('Front'); ax = gca; ax.FontSize = fontSize;
-nexttile; scatter3(xVec,yVec,damLayersVec{2}, ...
-    20,damLayersVec{2},'filled'); colormap(gca,'jet');
+title('Front'); ax = gca; ax.FontSize = fontSize;
+
+nexttile; plotlayers(backCscan,tl,' ',fileName,figFolder,fontSize,res);
 xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title('Back'); ax = gca; ax.FontSize = fontSize;
-nexttile; scatter3(hybridCscan(:,1),hybridCscan(:,2),hybridCscan(:,3), ...
-    20,hybridCscan(:,3),'filled'); colormap(gca,'jet');
-xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
-view(3); title('Hybrid'); ax = gca; ax.FontSize = fontSize;
+title('Back'); ax = gca; ax.FontSize = fontSize;
+
+nexttile; plotlayers(hybridCscan,tl,' ',fileName,figFolder,fontSize,res);
+title('Hybrid'); ax = gca; ax.FontSize = fontSize;
+
 title(tl,fileName); ax = gca; ax.FontSize = fontSize;
-imsave(fileName,figFolder,fig,"frontBackHybrid",true,res);
+imsave(fileName,figFolder,fig,"frontBackHybrid",1,res);
+
+% Plot merged C-scans
+fig = figure('Visible','off'); 
+plotlayers(hybridCscan,fig,'hybridCscan',fileName,figFolder,fontSize,res);
 
 % Save merged damage layers
 name = "hybridCscan";

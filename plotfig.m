@@ -36,7 +36,7 @@ rowC = size(tof,1); colC = size(tof,2);
 baseTOF = mode((nonzeros(tof)),'all'); % Calculate baseline TOF
 matVel = 2*plateThick/baseTOF;         % Calculate material velocity
 plyt = plateThick/nLayers;             % Calculate ply thickness
-dtTOF = plyt/matVel;                   % Calculate TOF for each layer
+dtTOF = plyt/matVel*2;                   % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers and group into 
 % (nLayers+1) damage layers
@@ -55,16 +55,13 @@ imsave(fileName,figFolder,fig,"damLayers",true,res);
 vecDam = reshape(damLayers,rowC*colC,1);
 vecDam(1,1) = max(vecDam);
 vecDam(vecDam==max(vecDam)) = NaN;
-
 xVec = repmat((1:rowC)',colC,1);
 yVec = repelem(1:colC,rowC)';
+vecCscan = [xVec, yVec, vecDam];
+vecCscan(isnan(vecCscan(:,3)),:) = [];
 
 fig = figure('Visible','off');
-scatter3(xVec,yVec,vecDam,20,vecDam,'filled');
-colormap(gca,'jet'); title(fileName);
-xlabel('Row #'); ylabel('Col #'); zlabel('Group #');
-ax = gca; ax.FontSize = fontSize;
-imsave(fileName,figFolder,fig,"3Dplot",false,res);
+plotlayers(vecCscan,fig,'3Dplot',fileName,figFolder,fontSize,res);
 
 % Save damage layers
 savevar = "damLayers";
