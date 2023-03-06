@@ -1,6 +1,6 @@
 function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
     baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
-    calcTone,test,res)
+    calcTone,test,fontSize,res)
 %PROCESSCSCAN Process C-scans to calculate TOF.
 %   PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
 %   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcTone,test,res)
@@ -153,7 +153,7 @@ imscatter(fileName,figFolder,fig,'rawTOFquery',rawTOF,'jet'); colorbar;
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');
-implot(fig,rawTOF,jet,row,col,fileName,true); colorbar;
+implot(fig,rawTOF,jet,row,col,fileName,true,fontSize); colorbar;
 imsave(fileName,figFolder,fig,'rawTOF',true,res);
 
 % Save raw TOF and corresponding peaks/location info

@@ -128,7 +128,7 @@ for i = filesProcess
     disp(strcat(num2str(i),'.',fileNames(i)));
     processcscan(fileNames(i),outFolder,figFolder,dt,bounds,incr, ...
         baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
-        calcT1,testProcess,res);
+        calcT1,testProcess,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

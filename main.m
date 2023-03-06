@@ -124,18 +124,18 @@ end
 %% 2. Process C-scans to calculate TOF
 if runProcess == true
 tic; fprintf("\nPROCESSCSCAN Process C-scans to calculate TOF for:\n");
-parfor i = filesProcess
+for i = filesProcess
     disp(strcat(num2str(i),'.',fileNames(i)));
     processcscan(fileNames(i),outFolder,figFolder,dt,bounds,incr, ...
         baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth, ...
-        calcT1,testProcess,res);
+        calcT1,testProcess,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
 %% 3. Segment C-Scan
 if runSeg == true
 tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
-parfor i = filesSeg
+for i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),seEl(i,:),testSeg,fontSize,res);
@@ -165,7 +165,7 @@ end
 %% 6. Merge C-scans
 if runMerge == true
 tic; fprintf("\nMERGECSCAN Merge C-scans for:\n");
-parfor i = filesMerge
+for i = filesMerge
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
         dyMergeCscan(i-di),testMerge,fontSize,res);
@@ -175,7 +175,7 @@ end
 %% 7. Make custom plots
 if runCustom == true
 tic; fprintf("\nPLOTCUSTOM Plot custom figures for:\n");
-parfor i = filesCustom
+for i = filesCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
         dyPlotCustom(i),plateThick ...
