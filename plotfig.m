@@ -36,7 +36,7 @@ rowC = size(tof,1); colC = size(tof,2);
 baseTOF = mode((nonzeros(tof)),'all'); % Calculate baseline TOF
 matVel = 2*plateThick/baseTOF;         % Calculate material velocity
 plyt = plateThick/nLayers;             % Calculate ply thickness
-dtTOF = plyt/matVel*2;                   % Calculate TOF for each layer
+dtTOF = plyt/matVel;                   % Calculate TOF for each layer
 
 % Calculate bins centered at interface between layers and group into 
 % (nLayers+1) damage layers
@@ -49,7 +49,7 @@ damLayers(mask==0) = NaN;
 
 % Plot and save damage layers
 fig = figure('visible','off');
-implot(fig,damLayers,jet,rowC,colC,fileName,0,fontSize);
+implot(fig,damLayers,jet,rowC,colC,' ',0,fontSize); colorbar;
 imsave(fileName,figFolder,fig,"damLayers",true,res);
 
 vecDam = reshape(damLayers,rowC*colC,1);

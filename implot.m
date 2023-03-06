@@ -25,7 +25,10 @@ else
     im.CDataMapping = "scaled";
 end
 
-title(figTitle);
+if strcat(figTitle,' ') == false
+    title(figTitle);
+end
+
 ax = gca;
 ax.FontSize = fontSize;
 

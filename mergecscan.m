@@ -151,17 +151,15 @@ backCscan(isnan(backCscan(:,3)),:) = [];
 fig = figure('Visible','off'); hold on;
 tl = tiledlayout(1,3,'TileSpacing','tight','Padding','tight');
 nexttile; plotlayers(frontCscan,tl,' ',fileName,figFolder,fontSize,res);
-xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
 title('Front'); ax = gca; ax.FontSize = fontSize;
 
 nexttile; plotlayers(backCscan,tl,' ',fileName,figFolder,fontSize,res);
-xlabel('Row #'); ylabel('Col #'); zlabel('Z depth'); grid on;
 title('Back'); ax = gca; ax.FontSize = fontSize;
 
 nexttile; plotlayers(hybridCscan,tl,' ',fileName,figFolder,fontSize,res);
 title('Hybrid'); ax = gca; ax.FontSize = fontSize;
 
-title(tl,fileName); ax = gca; ax.FontSize = fontSize;
+title(tl,fileName,'FontSize',fontSize);
 imsave(fileName,figFolder,fig,"frontBackHybrid",1,res);
 
 % Plot merged C-scans

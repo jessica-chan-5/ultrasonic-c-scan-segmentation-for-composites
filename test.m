@@ -17,13 +17,13 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = true;    filesRead    = 1:numFiles;
+runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
 runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
-runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
 % plottest
-runTest    = false;    filesTest    = 1:numFiles;
+runTest    = false;    filesTest    = 1;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
@@ -54,6 +54,7 @@ maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
 calcT1     = false;    % If true, calculates and plots time of first peak 
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
+fontSize   = 16;
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; % If the difference between the time a peak appears in 
                    % the first point and the time the same peak appears in 
@@ -79,7 +80,7 @@ seEl       = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
               0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0];% 21-26
 %% D. plottest inputs -----------------------------------------------------
 rowRange = 171:172; % y
-colRange = 129:130; % x
+colRange = 115:116; % x
 dir = 'row';
 num = 171;
 %% E. plotfig inputs ------------------------------------------------------
@@ -114,7 +115,7 @@ dyPlotCustom = [26; 12; -5; 70; 73;      %  1- 5
 %% 1. Convert C-scan from .csv to .mat file
 if runRead == true
 tic; fprintf("READCSCAN Convert C-scan from .csv to .mat file for:\n");
-for i = filesRead
+parfor i = filesRead
     disp(strcat(num2str(i),'.',fileNames(i)));
     readcscan(fileNames(i),inFolder,outFolder,delim,dRow,dCol);
 end
@@ -134,10 +135,10 @@ end
 %% 3. Segment C-Scan
 if runSeg == true
 tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
-parfor i = filesSeg
+for i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
-        modeThresh(i),seEl(i,:),testSeg,res);
+        modeThresh(i),seEl(i,:),testSeg,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
@@ -157,7 +158,7 @@ if runFig == true
 tic; fprintf("\nPLOTFIG Plot figures for:\n");
 parfor i = filesFig
     disp(strcat(num2str(i),'.',fileNames(i)));
-    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,res);
+    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
@@ -167,17 +168,18 @@ tic; fprintf("\nMERGECSCAN Merge C-scans for:\n");
 for i = filesMerge
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
-        dyMergeCscan(i-di),testMerge,res);
+        dyMergeCscan(i-di),testMerge,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end
 %% 7. Make custom plots
 if runCustom == true
 tic; fprintf("\nPLOTCUSTOM Plot custom figures for:\n");
-parfor i = filesCustom
+for i = filesCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
-        dyPlotCustom(i),testCustom,res);
+        dyPlotCustom(i),plateThick ...
+        ,testCustom,fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

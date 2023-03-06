@@ -25,9 +25,9 @@ runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
-runFig     = true;    filesFig     = 1:numFiles;
+runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
 runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs

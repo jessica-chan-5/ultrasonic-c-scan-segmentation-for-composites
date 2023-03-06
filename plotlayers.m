@@ -43,7 +43,7 @@ function plotlayers(hybridCscan,fig,name,fileName,figFolder,fontSize,res)
     view(3);
     ax = gca; ax.FontSize = fontSize;
     set(ax,'Ydir','reverse','Zdir','reverse')
-    xlabel('Row'); ylabel('Column'); zlabel('Damage group');
+    xlabel('Row'); ylabel('Col'); zlabel('Damage group');
 
     if strcmp(name,' ') == false
         title(fileName); ax = gca; ax.FontSize = fontSize;
