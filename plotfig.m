@@ -49,7 +49,8 @@ damLayers(mask==0) = NaN;
 
 % Plot and save damage layers
 fig = figure('visible','off');
-implot(fig,damLayers,jet,rowC,colC,' ',0,fontSize); colorbar;
+implot(fig,damLayers,jet,rowC,colC,' ',false,fontSize); colorbar;
+title(strcat('Damage layer #:',fileName),'FontSize',fontSize)
 imsave(fileName,figFolder,fig,"damLayers",true,res);
 
 vecDam = reshape(damLayers,rowC*colC,1);

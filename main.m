@@ -19,7 +19,7 @@ numFiles = length(fileNames);
 % readcscan
 runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
+runProcess = true;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
 runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
 % plottest
