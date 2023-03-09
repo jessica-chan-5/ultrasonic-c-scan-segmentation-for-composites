@@ -19,9 +19,9 @@ numFiles = length(fileNames);
 % readcscan
 runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = true;    filesProcess = 1:numFiles;     testProcess = false;
+runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
-runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
@@ -135,7 +135,7 @@ end
 %% 3. Segment C-Scan
 if runSeg == true
 tic; fprintf("\nSEGCSCAN Segment C-scan for:\n");
-for i = filesSeg
+parfor i = filesSeg
     disp(strcat(num2str(i),'.',fileNames(i)));
     segcscan(fileNames(i),outFolder,figFolder,minProm2,peakThresh, ...
         modeThresh(i),seEl(i,:),testSeg,fontSize,res);
@@ -165,7 +165,7 @@ end
 %% 6. Merge C-scans
 if runMerge == true
 tic; fprintf("\nMERGECSCAN Merge C-scans for:\n");
-for i = filesMerge
+parfor i = filesMerge
     disp(strcat(num2str(i),'.',fileNames(i)));
     mergecscan(fileNames(i),outFolder,figFolder,dx(i-di),...
         dyMergeCscan(i-di),testMerge,fontSize,res);
@@ -175,7 +175,7 @@ end
 %% 7. Make custom plots
 if runCustom == true
 tic; fprintf("\nPLOTCUSTOM Plot custom figures for:\n");
-for i = filesCustom
+parfor i = filesCustom
     disp(strcat(num2str(i),'.',fileNames(i)));
     plotcustom(fileNames(i),inFolder,outFolder,figFolder,utwinCrop, ...
         dyPlotCustom(i),plateThick ...

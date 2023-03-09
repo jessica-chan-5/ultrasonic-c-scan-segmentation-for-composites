@@ -144,7 +144,6 @@ end
 cropCoord = [startrow endrow startcol endcol]; 
 damBound = [startr endr startc endc];
 
-if test == true
 % Plot bonds, incr, baseRow, baseCol, pad, start/end row/col
 plotbounds(fileName,figFolder,rawTOF,bounds,damBound,cropCoord,l2r,t2b, ...
     baseRow,baseCol,figVis,res);
@@ -152,7 +151,6 @@ plotbounds(fileName,figFolder,rawTOF,bounds,damBound,cropCoord,l2r,t2b, ...
 % Plot rawTOF as queryable scatter + imshow
 fig = figure('visible',figVis);
 imscatter(fileName,figFolder,fig,'rawTOFquery',rawTOF,'jet'); colorbar;
-end
 
 % Save png and figure of raw TOF
 fig = figure('visible','off');

@@ -70,8 +70,10 @@ else
 end
 
 % Plot rawTOF as queryable scatter + imshow
-fig = figure('visible',visFig);
-imscatter(fileName,figFolder,fig,' ',rawTOF,'jet'); colorbar;
+if test == true
+    fig = figure('visible','on');
+    imscatter(fileName,figFolder,fig,' ',rawTOF,'jet'); colorbar;
+end
 
 % Find locations of 2nd peak and peak changes using label technique
 [peak2,inflptLabR] = labelpeaks('row',rowC,colC,locs,peak,nPeaks,wide,...
@@ -89,12 +91,12 @@ inflpt = inflptLabR | inflptLabC | inflptMagR | inflptMagC;
 % Plot and save figure of all methods used to find inflection points
 fig = figure('visible',visFig);
 tl = tiledlayout(2,3,'TileSpacing','tight','Padding','tight');
-nexttile; implot([],inflptLabR,gray,rowC,colC,'Label Row',false,fontSize);
-nexttile; implot([],inflptLabC,gray,rowC,colC,'Label Col',false,fontSize);
-nexttile; implot([],inflpt,gray,rowC,colC,'Inflection Points',false,fontSize);
-nexttile; implot([],inflptMagR,gray,rowC,colC,'Magnitude Row',false,fontSize);
-nexttile; implot([],inflptMagC,gray,rowC,colC,'Magnitude Col',false,fontSize);
-nexttile; implot([],rawTOF,jet,rowC,colC,'Raw TOF',false,fontSize); colorbar;
+t1 = nexttile; implot(t1,inflptLabR,gray,rowC,colC,'Label Row',false,fontSize);
+t1 = nexttile; implot(t1,inflptLabC,gray,rowC,colC,'Label Col',false,fontSize);
+t1 = nexttile; implot(t1,inflpt,gray,rowC,colC,'Inflection Points',false,fontSize);
+t1 = nexttile; implot(t1,inflptMagR,gray,rowC,colC,'Magnitude Row',false,fontSize);
+t1 = nexttile; implot(t1,inflptMagC,gray,rowC,colC,'Magnitude Col',false,fontSize);
+t1 = nexttile; implot(t1,rawTOF,jet,rowC,colC,'Raw TOF',false,fontSize); colorbar;
 title(tl,fileName,'FontSize',fontSize);
 imsave(fileName,figFolder,fig,'comboInflpt',1,res);
 
@@ -117,7 +119,7 @@ end
 
 % Plot inflection points
 fig = figure('visible','off');
-implot([],inflpt,gray,rowC,colC,fileName,false,fontSize);
+implot(fig,inflpt,gray,rowC,colC,fileName,false,fontSize);
 imsave(fileName,figFolder,fig,"inflpt",1,res);
 
 % Create concave hull of damage area
@@ -153,10 +155,10 @@ bound = bwperim(mask,8);
 % Plot figure of modified inflection points, mask, boundary
 fig = figure('visible',visFig);
 tl = tiledlayout(2,2,'TileSpacing','tight','Padding','tight');
-nexttile; implot([],inflpt,gray,rowC,colC,"Infl Pts",false,fontSize);
-nexttile; implot([],mask,gray,rowC,colC,"Mask",false,fontSize);
-nexttile; implot([],maskInflpt,gray,rowC,colC,"Cleaned Infl Pts",false,fontSize);
-nexttile; implot([],bound,gray,rowC,colC,"Boundary",false,fontSize);
+t1 = nexttile; implot(t1,inflpt,gray,rowC,colC,"Infl Pts",false,fontSize);
+t1 = nexttile; implot(t1,mask,gray,rowC,colC,"Mask",false,fontSize);
+t1 = nexttile; implot(t1,maskInflpt,gray,rowC,colC,"Cleaned Infl Pts",false,fontSize);
+t1 = nexttile; implot(t1,bound,gray,rowC,colC,"Boundary",false,fontSize);
 title(tl,fileName,'FontSize',fontSize);
 imsave(fileName,figFolder,fig,'masks',0.5,res);
 
@@ -225,9 +227,9 @@ tof(nPeaks < 2) = 0;
 % Plot and save figure of inflpts, processed inflpts, labeled regions, TOF
 fig = figure('visible',visFig);
 tl = tiledlayout(2,2,'TileSpacing','tight','Padding','tight');
-nexttile; implot([],inflpt,gray,rowC,colC,"Original",false,fontSize);
-nexttile; implot([],J,gray,rowC,colC,"Processed",false,fontSize);
-nexttile; implot([],L,colorcube,rowC,colC,"Labeled",false,fontSize);
+t1 = nexttile; implot(t1,inflpt,gray,rowC,colC,"Original",false,fontSize);
+t1 = nexttile; implot(t1,J,gray,rowC,colC,"Processed",false,fontSize);
+t1 = nexttile; implot(t1,L,colorcube,rowC,colC,"Labeled",false,fontSize);
 t1 = nexttile; implot(t1,tof,jet,rowC,colC,"Mode",true,fontSize); colorbar;
 title(tl,fileName,'FontSize',fontSize);
 imsave(fileName,figFolder,fig,'process',0.5,res);
