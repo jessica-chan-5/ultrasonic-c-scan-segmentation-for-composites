@@ -7,13 +7,14 @@ This code was developed as part of Jessica Chan’s master’s thesis in Dr Hyon
 ## Background
 Despite a high strength to weight ratio, aerospace composites are susceptible to impact damage which can be barely visible while still adversely affecting their strength, therefore detecting and characterizing damage is important. Non-destructive evaluation, specifically single-sided pulse-echo ultrasonic C-scans, can be used to detect damage. The main characteristic of barely visible impact damage is that it occurs from impacts that leave little to no visual indication on the front side that damage has occurred, when in fact there is internal damage, namely planar delaminations between the lamina, and there can be visual indication of damage on the back side of the component. Examples of barely visible impact damage include damage to a component impacted by runway debris, hail, or accidentally dropped maintenance tools [^1].
 
-<!-- ![](/assets/images/bvid-xray-ct.png) -->
+![](/assets/bvid-xray-ct.png)
+
 (A) Example through-thickness X-ray CT scan slice showing barely visible impact damage labeled with impact direction and front/back side with respect to impact direction. Reprinted with permission [^2]. (B) Processed UT C-scan of the same sample as in (A) showing front side damage and representative location for section cut shown in (A).
 
 Pulse-echo UT C-scans are made of a 2D array of A-scans taken at points in a uniform grid across a sample. Each A-scan is the measurement of the reflection(s) from the initial ultrasonic signal emitted by the transducer. The first reflected peak is from the top layer of the sample and the second reflected peak is the topmost damaged interface within the sample. An example of the A-scan signal and time-of-flight (TOF) calculation for an undamaged and damaged A-scan point is shown in below. A map of the depth of damaged areas can be created by calculating the difference between the first peak and the second peak, the TOF, which then can be converted to damage depth by using the material’s through-thickness wave velocity.
 
-<!-- ![](/assets/images/cscan-explanation-b.png) -->
-<!-- ![](/assets/images/cscan-explanation-b.png) -->
+![](/assets/cscan-explanation.png)
+
 (A) Photo of a sample with manually mapped damage region outline, (B) UT C-scan time-of-flight map, (C) C-scan process and calculating TOF for undamaged scan point (right) and damaged scan point (left) using the A-scan signal at each scan point.
 
 [^1]: Federal Aviation Administration, "Advisory Circular: Composite Aircraft Structure," *U.S. Department of Transportation*, 2009.
