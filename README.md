@@ -62,20 +62,24 @@ The overall structure of the code is shown below as a summary:
 - Parallel Computing Toolbox
 - Signal Processing Toolbox
 
+1. When running the code for the first time, it is suggested to test one sample first before attempting to process all samples in order to adjust parameters. Pick a sample you would like to use.
+2. We will be using `test.m` to adjust parameters, which is an exact copy of `main.m` but with parallel for loops removed to allow for helper figures to appear. Parallel for loops do not allow for figures to appear. Parameters can be copied over after finishing adjusting.
 ### readcscan
 1. Format your raw UT C-scan data in a supported character delimited file type (.csv, .txt, .dat) following the format below (header information is okay and will be trimmed automatically):
 ![](/assets/csv_format.png)
 
-2. Run foldersetup.m in the same directory as the code to create the required folder structure for inputs, outputs, and figures.
+2. Run `foldersetup.m` in the same directory as the code to create the required folder structure for inputs, outputs, and figures.
 3. Move all formatted raw UT C-scan data into the Input folder
-4. Open main.m and edit Section ii to be a string array list of your file names.
+4. Open test.m and edit Section ii to be a string array list of your file names, when adjusting parameters, you will only have one file name, but in general it will look like this:
 
-   For example: `fileNames = ["sample-1";"sample-2",”sample-3”];`
+   ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
 
-5. Update `delim` and `fileExt` to the character delimiter and file extension (including '.', i.e. '.csv')
+5. Update `delim` and `fileExt` to the character delimiter and file extension (including ‘.’)
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
-7. In main.m, Section iii, edit all read function values to be false except for readcscan
+7. In `test.m`, Section iii, edit all read function values to be false except for readcscan
 8. Run main.m and go to Output\cscan to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
+
+### processcscan
 
 ## Input/Output Files & Figures Summary
 
