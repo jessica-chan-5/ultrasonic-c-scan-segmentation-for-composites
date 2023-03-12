@@ -64,6 +64,7 @@ The overall structure of the code is shown below as a summary:
 
 1. When running the code for the first time, it is suggested to test one sample first before attempting to process all samples in order to adjust parameters. Pick a sample you would like to use.
 2. We will be using `test.m` to adjust parameters, which is an exact copy of `main.m` but with parallel for loops removed to allow for helper figures to appear. Parallel for loops do not allow for figures to appear. Parameters can be copied over after finishing adjusting.
+
 ### readcscan
 1. Format your raw UT C-scan data in a supported character delimited file type (.csv, .txt, .dat) following the format below (header information is okay and will be trimmed automatically):
 ![](/assets/csv_format.png)
@@ -74,12 +75,17 @@ The overall structure of the code is shown below as a summary:
 
    ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
 
-5. Update `delim` and `fileExt` to the character delimiter and file extension (including ‘.’)
+5. In Section A, update `delim` and `fileExt` to the character delimiter and file extension (including ‘.’)
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
 7. In `test.m`, Section iii, edit all read function values to be false except for readcscan
 8. Run main.m and go to Output\cscan to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
 
 ### processcscan
+0. In Section B, enter the sampling period, `dt`, in microseconds used to collect the A-scan signals
+1. First we will set the parameters for finding a rectangular box bounding the damaged region. The relevant parameters are illustrated below:
+![](/assets/dam-bound-box.png)
+
+2. The purpose of `bounds`, in red, is to define a search area that excludes artifacts that may be erroneously detected as damage such as the foam tape plate orientation indicator and standoffs the sample may be resting on. You can make an initial guess for an appropriate search area using the sampling resolution to convert to matrix indices. It should be in [startRow endRow startCol endCol] format in Section B.
 
 ## Input/Output Files & Figures Summary
 
