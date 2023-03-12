@@ -87,6 +87,10 @@ The overall structure of the code is shown below as a summary:
 
 2. The purpose of `bounds`, in red, is to define a search area that excludes artifacts that may be erroneously detected as damage such as the foam tape plate orientation indicator and standoffs the sample may be resting on. You can make an initial guess for an appropriate search area using the sampling resolution to convert to matrix indices. It should be in [startRow endRow startCol endCol] format in Section B.
 
+3. Choose a reasonable value for `incr`, this is in matrix indices and will define the coarse grid size, in yellow, used to search for the start of damage. The search method is shown below:
+![](/assets/dam-box-search.png)
+Damage bounding box search process. (A) Search along columns, (B) picking start row and end row indices, (C) search along rows, (D) picking start and end column indices.
+
 ## Input/Output Files & Figures Summary
 
 ### readcscan
