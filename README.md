@@ -53,7 +53,27 @@ Thank you to:
 
 ## Quick Start Guide
 
-To be updated.
+The overall structure of the code is shown below as a summary:
+![](/assets/code_diag.png)
+
+0. Install the following MATLAB toolboxes if you don’t have them already:
+-  Curve Fitting Toolbox
+- Image Processing Toolbox
+- Parallel Computing Toolbox
+- Signal Processing Toolbox
+
+### readcscan
+1. Format your raw UT C-scan data in a supported character delimited file type (.csv, .txt, .dat) following the format below (header information is okay and will be trimmed automatically):
+![](/assets/csv_format.png)
+
+2. Run foldersetup.m in the same directory as the code to create the required folder structure for inputs, outputs, and figures.
+3. Move all formatted raw UT C-scan data into the Input folder
+4. Open main.m and edit Section ii to be a string array list of your file names.
+
+   For example: `fileNames = ["sample-1";"sample-2",”sample-3”];`
+
+5. In main.m, Section iii, edit all read function values to be false except for readcscan
+6. Run main.m and go to Output\cscan to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
 
 ## Input/Output Files & Figures Summary
 
