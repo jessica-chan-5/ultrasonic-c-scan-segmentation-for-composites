@@ -3,7 +3,8 @@ function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
     calcTone,test,fontSize,res)
 %PROCESSCSCAN Process C-scans to calculate TOF.
 %   PROCESSCSCAN(fileName,outFolder,figFolder,dt,bounds,incr,baseRow, ...
-%   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcTone,test,res)
+%   baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcTone,test,...
+%   fontSize,res)
 %   Look for damage bounding box within search area defined by bounds and a
 %   search grid with increments defined by incr. Calculate a baseline TOF 
 %   from an gridded area designated by baseRow and baseCol. If difference
@@ -45,6 +46,7 @@ function processcscan(fileName,outFolder,figFolder,dt,bounds,incr, ...
 %   MAXWIDTH   : If a peak's width is greater, then it is noted as wide
 %   CALCTONE   : If true, calculates and plots time of first peak 
 %   TEST       : If true, shows figures
+%   FONTSIZE   : Font size for text in figures
 %   RES        : Image resolution setting in dpi for saving image
 
 % Load C-scan

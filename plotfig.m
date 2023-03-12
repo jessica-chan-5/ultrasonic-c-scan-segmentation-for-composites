@@ -1,8 +1,9 @@
-function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,fontSize,res)
+function plotfig(fileName,outFolder,figFolder,plateThick,nLayers, ...
+    fontSize,res)
 %PLOTFIG Plot figures
-%   PLOTFIG(fileName,outFolder,figFolder,plateThick,nLayers,res) Groups TOF
-%   into twice as many damage layer groups as number of layers. Plots and 
-%   saves 2D and 3D layer damage plots. Saves damage layer groups.
+%   PLOTFIG(fileName,outFolder,figFolder,plateThick,nLayers,fontSize,res)
+%   Groups TOF into twice as many damage layer groups as number of layers. 
+%   Plots and saves 2D and 3D layer damage plots. Saves damage layer groups
 %
 %   Inputs:
 %
@@ -11,6 +12,7 @@ function plotfig(fileName,outFolder,figFolder,plateThick,nLayers,fontSize,res)
 %   FIGFOLDER : Folder path to .fig and .png files
 %   PLATETHICK: Thickness of scanned plate in millimeters
 %   NLAYERS   : Number of layers in scanned plate
+%   FONTSIZE   : Font size for text in figures
 %   RES       : Image resolution setting in dpi for saving image
 
 % Load raw TOF and associated info

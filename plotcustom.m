@@ -1,10 +1,11 @@
 function plotcustom(fileName,inFolder,outFolder,figFolder,utwincrop,dy, ...
     plateThick,test,fontSize,res)
 %PLOTCUSTOM Plot custom figures.
-%    PLOTCUSTOM(filename,infolder,outfolder,figfolder,utwincrop,dy,res,...
-%    test) Plots custom figures comparing UTWin screenshots to unsegmented
-%    and segmented TOF plots from this code. Allows for adjustments in the
-%    y direction to align UTWin screenshots with figures from this code.
+%    PLOTCUSTOM(fileName,inFolder,outFolder,figFolder,utwincrop,dy, ...
+%    plateThick,test,fontSize,res) Plots custom figures comparing UTWin 
+%    screenshots to unsegmented and segmented TOF plots from this code. 
+%    Allows for adjustments in the y direction to align UTWin screenshots 
+%    with figures from this code.
 % 
 %    Inputs:
 % 

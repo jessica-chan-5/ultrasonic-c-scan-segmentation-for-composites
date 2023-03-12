@@ -1,7 +1,6 @@
 % Sets up Figure, Input, and Output folders including subfolders
 
 mkdir Figures
-mkdir Input
 mkdir Output
 
 figFolders = ["3Dplot","combingInflpt","compare","cscan","damBoundBox",...

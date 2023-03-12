@@ -17,19 +17,19 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = false;    filesRead    = 1:numFiles;
+runRead    = true;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
+runProcess = true;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
-runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
+runSeg     = true;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
-runFig     = false;    filesFig     = 1:numFiles;
+runFig     = true;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
-runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
+runCustom  = true;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
 inFolder   = "Input";  % Folder location for input files
 outFolder  = "Output"; % Folder location for output files
@@ -54,7 +54,7 @@ maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
 calcT1     = false;    % If true, calculates and plots time of first peak 
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
-fontSize   = 16;
+fontSize   = 16;   % Font size for text in figures
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; % If the difference between the time a peak appears in 
                    % the first point and the time the same peak appears in 
@@ -158,7 +158,8 @@ if runFig == true
 tic; fprintf("\nPLOTFIG Plot figures for:\n");
 parfor i = filesFig
     disp(strcat(num2str(i),'.',fileNames(i)));
-    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers,fontSize,res);
+    plotfig(fileNames(i),outFolder,figFolder,plateThick,nLayers, ...
+        fontSize,res);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

@@ -2,8 +2,8 @@ function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
     modeThresh,seEl,test,fontSize,res)
 %SEGCSCAN Segment C-scan.
 %   SEGCSCAN(filename,outfolder,figfolder,minprom2,peakthresh, ...
-%   modethresh,seEl,test,res) Finds inflection points by combining two
-%   techniques: (1) changes in peak labels for first and second peak at
+%   modethresh,seEl,test,fontSiz,res) Finds inflection points by combining
+%   two techniques: (1) changes in peak labels for first and second peak at
 %   each point along a row or column and (2) peaks in the graph of the 
 %   magnitude of the second peak along a row or column. Using the 
 %   inflection points found, finds the outline of the damage area. Then
@@ -41,6 +41,7 @@ function segcscan(fileName,outFolder,figFolder,minProm2,peakThresh, ...
 %               indicating length of structuring element for morphological
 %               closing of gaps if needed
 %   TEST      : If true, shows figures
+%   FONTSIZE  : Font size for text in figures
 %   RES       : Image resolution setting in dpi for saving image
 
 % Load raw TOF and associated info

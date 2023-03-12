@@ -1,9 +1,10 @@
 function mergecscan(fileName,outFolder,figFolder,dx,dy,test,fontSize,res)
 %MERGECSCAN Merge C-scans.
-%   MERGECSCAN(fileName,outFolder,figFolder,dx,dy,test,res) user can adjust
-%   dx and dy of front side C-scan relative to back side C-scan using the
-%   outline of damage. Removes points outside of the outline. Merges front 
-%   and back side C-scans, then plots and saves as matrix, png, and fig.
+%   MERGECSCAN(fileName,outFolder,figFolder,dx,dy,test,fontSize,res) user 
+%   can adjust dx and dy of front side C-scan relative to back side C-scan 
+%   using the outline of damage. Removes points outside of the outline. 
+%   Merges front and back side C-scans, then plots and saves as matrix, 
+%   png, and fig.
 %
 %   Inputs:
 %
@@ -15,6 +16,7 @@ function mergecscan(fileName,outFolder,figFolder,dx,dy,test,fontSize,res)
 %   DY       : Amount to move front side scan relative to back vertically
 %              (+) = up, (-) = down
 %   TEST     : If test is true, shows figures
+%   FONTSIZE   : Font size for text in figures
 %   RES      : Image resolution setting in dpi for saving image
 
 %#ok<*NASGU>
