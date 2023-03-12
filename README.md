@@ -72,8 +72,10 @@ The overall structure of the code is shown below as a summary:
 
    For example: `fileNames = ["sample-1";"sample-2",”sample-3”];`
 
-5. In main.m, Section iii, edit all read function values to be false except for readcscan
-6. Run main.m and go to Output\cscan to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
+5. Update `delim` and `fileExt` to the character delimiter and file extension (including ‘.’)
+6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
+7. In main.m, Section iii, edit all read function values to be false except for readcscan
+8. Run main.m and go to Output\cscan to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
 
 ## Input/Output Files & Figures Summary
 
