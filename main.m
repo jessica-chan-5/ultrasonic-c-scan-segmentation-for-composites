@@ -17,7 +17,7 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = true;    filesRead    = 1;%:numFiles;
+runRead    = true;    filesRead    = 1:numFiles;
 % processcscan
 runProcess = true;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan

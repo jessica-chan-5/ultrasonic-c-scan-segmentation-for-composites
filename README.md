@@ -70,6 +70,7 @@ The overall structure of the code is shown below as a summary:
 - Signal Processing Toolbox
 
 1. When running the code for the first time, it is suggested to test one sample first before attempting to process all samples in order to adjust parameters. Pick a sample you would like to use.
+
 2. We will be using `test.m` to adjust parameters, which is an exact copy of `main.m` but with parallel for loops removed to allow for helper figures to appear. Parallel for loops do not allow for figures to appear. Parameters can be copied over after finishing adjusting.
 
 ### readcscan
@@ -80,18 +81,24 @@ The overall structure of the code is shown below as a summary:
 </p>
 
 2. Run `foldersetup.m` in the same directory as the code to create the required folder structure for inputs, outputs, and figures.
+
 3. Move all formatted raw UT C-scan data into the Input folder
+
 4. Open test.m and edit Section ii to be a string array list of your file names, when adjusting parameters, you will only have one file name, but in general it will look like this:
 
    ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
 
-5. In Section A, update `delim` and `fileExt` to the character delimiter and file extension (including ‘.’)
+5. In Section A, update `delim` and `fileExt` to the character delimiter and file extension (including '.', i.e. '.csv')
+
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
-7. In `test.m`, Section iii, edit all read function values to be false except for readcscan
-8. Run main.m and go to Output\cscan to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
+
+7. In `test.m`, Section iii, edit all read function values to be false except for `runRead`
+
+8. Run `test.m` and go to `Output\cscan` to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
 
 ### processcscan
 0. In Section B, enter the sampling period, `dt`, in microseconds used to collect the A-scan signals
+
 1. First we will set the parameters for finding a rectangular box bounding the damaged region. The relevant parameters are illustrated below:
 
 <p align="center">
@@ -108,18 +115,39 @@ The overall structure of the code is shown below as a summary:
 
 Damage bounding box search process. (A) Search along columns, (B) picking start row and end row indices, (C) search along rows, (D) picking start and end column indices.
 
+4. Pick a grid of points using `baseRow` and `baseCol` that represent a grid of points in an undamaged region of the sample, shown as green dots. A baseline TOF will be calculated using the mode of these points
+
+5. Leave `pad`, `cropThresh`, `minProm1`, `noiseThresh`, `maxWidth` at the orginal value, this will be adjusted later.
+
+6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed.
+
+7. Set `res` to the desired resolution for all saved figures in dpi (dots per inch).
+
+8. In test.m, Section iii, edit all read function values to be false except for `runProcess` and `testProcess`
+
+9. Use the damage bounding box figure to adjust `bounds`, `incr`, `baseRow`, `baseCol`, and `pad` accordingly. An example of the figure is shown below:
+
+<p align="center">
+   <img src=assets/dam-bound-box-ex.png  width="50%">
+</p>
+
 ## Input/Output Files & Figures Summary
 
 ### readcscan
 ```
 readcscan(fileName,inFolder,outFolder,delim,dRow,dCol)
+   
    Requirement: Down sample to equal resolution along row and col
+
    Input: \inFolder\fileName.csv
    Output: \outFolder\fileName-
                                cscan.mat 3D matrix - [row x col x # data pts/A-scan]
+```
 
-processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow,baseCol,...
-cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,test,fontSize,res)
+### processcscan
+```
+processcscan(fileName,outFolder,figFolder,dt,bounds,incr,baseRow,baseCol,cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,test,fontSize,res)
+
    Input: \outFolder\fileName-cscan.mat
    Output: \outFolder\fileName-
                                rawTOF   .mat 2D matrix – [row x col]
@@ -146,8 +174,7 @@ cropThresh,pad,minProm1,noiseThresh,maxWidth,calcT1,test,fontSize,res)
 
 ### segcsan
 ```
-segcscan(fileName,outFolder,figFolder,minProm2,peakThresh,modeThresh,seEl,test,...
-fontSize,res)
+segcscan(fileName,outFolder,figFolder,minProm2,peakThresh,modeThresh,seEl,test,fontSize,res)
    Input: \outFolder\fileName-
                                rawTOF   .mat 2D matrix – [row x col]
                                peak     .mat 2D matrix – [row x col]
@@ -196,7 +223,9 @@ plotfig (fileName,outFolder,figFolder,plateThick,nLayers,fontSize,res)
 ### mergecscan
 ```
 mergecscan (fileName,outFolder,figFolder,dx,dy,test,fontSize,res)
+   
    Requirement: Same front and back C-scan dimensions [row x col]
+   
    Input: \outFolder\fileName-
                                mask     .mat 2D matrix – [cropRow x cropCol]
                                damLayers.mat 2D matrix – [row x col]
@@ -213,8 +242,7 @@ mergecscan (fileName,outFolder,figFolder,dx,dy,test,fontSize,res)
 
 ### plotcustom
 ```
-plotcustom (fileName,inFolder,outFolder,figFolder,utwincrop,dy, ...
-plateThick,test,fontSize,res)
+plotcustom (fileName,inFolder,outFolder,figFolder,utwincrop,dy,plateThick,test,fontSize,res)
    Input:   \outFolder\fileName-
                                  rawTOF   .mat 2D matrix – [row x col]
                                  tof      .mat 2D matrix – [row x col]
