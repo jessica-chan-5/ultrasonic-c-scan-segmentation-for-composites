@@ -1,4 +1,5 @@
 # Ultrasonic C-scan Segmentation for Composites
+[![View Ultrasonic C-scan Segmentation for Composites on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/125985-ultrasonic-c-scan-segmentation-for-composites)
 
 ## Description
 
