@@ -19,11 +19,11 @@ numFiles = length(fileNames);
 % readcscan
 runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = true;    filesProcess = 1;              testProcess = false;
+runProcess = false;    filesProcess = 1:numFiles;      testProcess = false;
 % segcscan
 runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
-runTest    = false;    filesTest    = 1;
+runTest    = true;    filesTest    = 1;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
@@ -48,7 +48,7 @@ baseCol    = 10:5:20;  % Col indices across which to calculate baseline TOF
 cropThresh = 0.2;      % If diff between baseline TOF and TOF at a point is 
                        % greater than cropThresh, then the point is damaged
 pad        = 1;        % (1+pad)*incr added to all sides of bounding box
-minProm1   = 0;%0.03;     % Min prominence for a peak to be identified
+minProm1   = 0.03;     % Min prominence for a peak to be identified
 noiseThresh= 0.01;     % If the average signal at a point is lower than 
                        % noiseThresh, then the point is ignored
 maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
@@ -80,8 +80,8 @@ seEl       = [0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; 0 0 0 0; % 1-5
               0 3 0 0; 0 0 0 4; 0 6 0 0; 0 0 0 0; 0 0 0 0; % 16-20
               0 0 0 0; 0 0 0 0; 6 0 0 0; 0 0 0 0; 0 0 0 0; 0 3 0 0];% 21-26
 %% D. plottest inputs -----------------------------------------------------
-rowRange = 171:172; % y
-colRange = 115:116; % x
+rowRange = 183; % y
+colRange = 106; % x
 dir = 'row';
 num = 171;
 %% E. plotfig inputs ------------------------------------------------------

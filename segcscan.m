@@ -70,12 +70,6 @@ else
     visFig = 'off';
 end
 
-% Plot rawTOF as queryable scatter + imshow
-if test == true
-    fig = figure('visible','on');
-    imscatter(fileName,figFolder,fig,' ',rawTOF,'jet'); colorbar;
-end
-
 % Find locations of 2nd peak and peak changes using label technique
 [peak2,inflptLabR] = labelpeaks('row',rowC,colC,locs,peak,nPeaks,wide,...
     peakThresh);
@@ -110,13 +104,11 @@ inflpt(:,1) = 0; inflpt(:,end) = 0;
 inflpt(nPeaks < 2) = 1;
 
 % Plot inflection points as queryable scatter + imshow
-if test == true
-    % Save inflpt in full size plate
-    tempinflpt = ones(rowF,colF);
-    tempinflpt(startRow:endRow,startCol:endCol) = inflpt;
-    fig = figure('visible',visFig);
-    imscatter(fileName,figFolder,fig,'inflptsQuery',tempinflpt,'gray');
-end
+% Save inflpt in full size plate
+tempinflpt = ones(rowF,colF);
+tempinflpt(startRow:endRow,startCol:endCol) = inflpt;
+fig = figure('visible',visFig);
+imscatter(fileName,figFolder,fig,'inflptsQuery',tempinflpt,'gray');
 
 % Plot inflection points
 fig = figure('visible','off');

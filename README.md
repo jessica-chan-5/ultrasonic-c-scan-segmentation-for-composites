@@ -67,6 +67,8 @@ The overall structure of the code is shown below as a summary:
 
 2. We will be using `test.m` to adjust parameters, which is an exact copy of `main.m` but with parallel for loops removed to allow for helper figures to appear. Parallel for loops do not allow for figures to appear. Parameters can be copied over after finishing adjusting.
 
+3. Just like MATLAB built in functions, type `help functionName` into the Command Window for documentation
+
 ### readcscan
 1. Format your raw UT C-scan data in a supported character delimited file type (.csv, .txt, .dat) following the format below (header information is okay and will be trimmed automatically):
 
@@ -125,10 +127,42 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
    <img src=assets/dam-bound-box-ex.png  width="50%">
 </p>
 
-If regions of damage are being cropped by the damage bounding box, increase `pad` by the number of `incr` needed to expand the bounding box, in blue, to include the whole damage area. Decrease `pad` if desired to create a tighter bounding box. `pad` is defined as (1 + `pad` x `incr`) added to all sides of the damage bounding box.
+   If regions of damage are being cropped by the damage bounding box, increase `pad` by the number of `incr` needed to expand the bounding box, in blue, to include the whole damage area. Decrease `pad` if desired to create a tighter bounding box. `pad` should be a whole number and is defined as (1 + `pad` x `incr`) added to all sides of the damage bounding box.
 
-10. Use the damage bounding box figure and queryable raw TOF figure to check if `cropThresh` should be increased or decreased by querying TOF values at relevant points.
+10. Use the damage bounding box figure and queryable raw TOF figure to check if `cropThresh` should be increased or decreased by querying TOF values at relevant points. If the difference between the current grid search point and the calculated baseline TOF is greater than `cropThresh`, then the point is detected as damaged.
 
+*Note: The helper figures produced by this code will be flipped about the x-axis (rows) because of MATLAB plotting idiosyncrasies, but the row, column and TOF values are correct.
+
+### plottest
+0. Skip ahead to `plottest`, it will be useful for adjusting `minProm1`, `noiseThresh`, `maxWidth` from `processcscan`
+
+1. Shown below is a raw TOF figure showing the results of setting `minProm1` too low (`minProm1` = 0):
+
+<p align="center">
+   <img src=assets/low-minProm1.png  width="50%">
+</p>
+
+2. Using the queryable raw TOF figure, query the row and column locations of a light blue artifact region. In `test.m`, in Section D, set `rowRange` and `colRange` to the rows and columns of interest.
+
+3. In Section iii, edit all read function values to be false except for `runSeg`
+
+4. An example of the output is shown below with the figure and the Command Window output side-by-side:
+
+<p align="center">
+   <img src=assets/plotascans.png  width="90%">
+</p>
+
+In the above example, the first, third, and fifth peaks are a result of noise and slight changes in the data and do not represent peaks of interest. Prominence is a measure of how much a peak stands out because of its height and location relative to neighboring peaks. Any peaks with a prominence less than `minProm1` is not detected. By looking at the corresponding prominence value printed in the Command Window, a good choice for `minProm1` is 0.03, so that only the second and fourth peak are detected.
+
+5. Steps 2-4 can be repeated, if necessary, for setting `noiseThresh`. If the average of the signal at a point is less than `noiseThresh`, the point is not processed and set to zero. An example is seen in the bottom left corner of the figure showing raw TOF results with a too low `minProm1`
+
+6. Steps 2-4 can be repeated for setting `maxWidth`. If the width of a peak is greater than `maxWidth`, then the peak is marked as "wide". These peaks be be skipped when segmenting the TOF in `segcscan`. An example of a "wide" peak is shown below. These peaks represent damage that is close to the surface, blue, but where more than one peak is detected.
+
+<p align="center">
+   <img src=assets/plotascans-wide.png  width="90%">
+</p>
+
+### segcscan
 
 
 ## Input/Output Files & Figures Summary
