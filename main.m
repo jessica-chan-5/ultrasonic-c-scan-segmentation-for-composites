@@ -21,7 +21,7 @@ runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
 runProcess = false;    filesProcess = 1:numFiles;      testProcess = false;
 % segcscan
-runSeg     = true;    filesSeg     = 1;     testSeg     = false;
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
@@ -57,7 +57,7 @@ fontSize   = 16;       % Font size for text in figures
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
-peakThresh = 0.04; % If the difference between the time a peak appears in 
+peakThresh = 0.02; % If the difference between the time a peak appears in 
                    % the first point and the time the same peak appears in 
                    % the next point is greater than peakThresh, label as
                    % new peak

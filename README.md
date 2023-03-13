@@ -88,6 +88,10 @@ The overall structure of the code is shown below as a summary:
 
    ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
 
+If there is a sample with front and back side C-scans, `fileNames` should be formatted as the following:
+
+   ` fileNames = ["sample-1";"sample-1-back”];  `
+
 5. In Section A, update `delim` and `fileExt` to the character delimiter and file extension (including '.', i.e. '.csv')
 
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
@@ -273,13 +277,47 @@ A compare figure is shown below as an example of where more artifacts are remove
 
 3. Check damage layer figures in 2D and 3D to see if results are as expected. Examples are shown below:
 
-
 <p align="center">
    <img src=assets/plotfig.png  width="90%">
 </p>
 
 ### mergecscan
-1. 
+0. This section is only applicable if there are front and back side C-scans of sample(s).
+
+1. In Section iii, edit `filesMerge` to be 1. When processing more than one sample with front and back C-scans, the file indices included should be front C-scans only. So if `fileName` was:
+
+`fileName = ["sample-1","sample-2","sample-1-back","sample-2-back"]`
+
+Then, `filesMerge` should be:
+
+`filesMerge = 1:2`
+
+Adjust the file index offset, `di`, if there is a mix of front side C-scans only samples and front/back side C-scan samples. For example, if `fileName` was:
+
+`fileName = ["sample-1","sample-2","sample-3","sample-4","sample-3-back","sample-4-back"]`
+
+Then `di` should be equal to 2 (index of first front/back scan - 1).
+
+2. Set `dx` and `dyMergeCscan` for each sample to be equal to zero.
+
+3. In Section iii, edit all read function values to be false except for `runMerge` and `testMerge` then run `test.m`
+
+4. Use the merge check figure to adjust the front side C-scan damage outline vertically and horizontally relative to the back side C-scan.
+
+<p align="center">
+   <img src=assets/merge-check.png  width="90%">
+</p>
+
+Units are in pixels. `dx` left is negative, right is positive. `dyMergeCscan` down is negative, right is positive. The darker grey outline is the front outline and the lighter grey outline is the back outline.
+
+5. When the outlines match up, check the front, back and hybrid 3D reconstruction figure. An example is shown below:
+
+<p align="center">
+   <img src=assets/front-back-hybrid.png  width="90%">
+</p>
+
+### plotcustom
+
 
 ## Input/Output Files & Figures Summary
 
