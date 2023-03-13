@@ -4,6 +4,10 @@
 
 This code was developed as part of Jessica Chan’s master’s thesis in Dr Hyonny Kim’s lab at UC San Diego. The code takes pulse-echo ultrasonic C-scan data in character delimited formats (.csv, .txt, .dat) of aerospace composites with impact damage and creates a 3D reconstruction of the damage state. The code also calculates time-of-flight, creates a mask of the overall damaged region, and merges front and back C-scans of a sample when available. The code was developed in MATLAB 2022b, but works for 2019b or later.
 
+<p align="center">
+   <img src=assets/graphical-summary.png  width="100%">
+</p>
+
 ## Background
 Despite a high strength to weight ratio, aerospace composites are susceptible to impact damage which can be barely visible while still adversely affecting their strength, therefore detecting and characterizing damage is important. Non-destructive evaluation, specifically single-sided pulse-echo ultrasonic C-scans, can be used to detect damage. The main characteristic of barely visible impact damage is that it occurs from impacts that leave little to no visual indication on the front side that damage has occurred, when in fact there is internal damage, namely planar delaminations between the lamina, and there can be visual indication of damage on the back side of the component. Examples of barely visible impact damage include damage to a component impacted by runway debris, hail, or accidentally dropped maintenance tools [^1].
 
@@ -115,7 +119,11 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 5. Leave `pad`, `cropThresh`, `minProm1`, `noiseThresh`, `maxWidth` at the orginal value, this will be adjusted later.
 
-6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed.
+6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed. An example of a first peak TOF figure is shown below:
+
+<p align="center">
+   <img src=assets/t1.png  width="70%">
+</p>
 
 7. Set `res` to the desired resolution for all saved figures in dpi (dots per inch). Set `fontSize` to desired font size for all saved figures in pixels (same font size measurements as in Microsoft Word or Google Docs)
 
@@ -133,7 +141,7 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 *Note: The helper figures produced by this code will be flipped about the x-axis (rows) because of MATLAB plotting idiosyncrasies, but the row, column and TOF values are correct.
 
-### plottest
+### plottest (plotascan)
 0. Skip ahead to `plottest`, it will be useful for adjusting `minProm1`, `noiseThresh`, `maxWidth` from `processcscan`
 
 1. Shown below is a raw TOF figure showing the results of setting `minProm1` too low (`minProm1` = 0):
@@ -162,7 +170,7 @@ In the above example, the first, third, and fifth peaks are a result of noise an
    <img src=assets/plotascans-wide.png  width="90%">
 </p>
 
-### segcscan
+### segcscan (Part 1 of 2)
 
 0. An overview of how `segcscan` works is shown below:
 
@@ -193,6 +201,85 @@ A figure explaining how `peakThresh` is used is shown below:
 </p>
 
 In the peak labeling process, each peak in each A-scan receives a unique numerical label. If a peak location change is greater than `peakThresh`, then the peak is considered a new unique peak and given a different label. Inflection points are marked when the second peak changes labels such as Column 96-97 and Column 98-99 in the example above. As mentioned in the summary of `segcscan`, the peak labeling and inflection point finding process occurs twice, once along rows and once along columns.
+
+It is recommended to adjust `peakThresh` as a multiple of the sampling period, `dt`. In the example above the two different values of `peakThresh` were 1 x `dt` (0.02) and 2 x `dt` (0.04) respectively.
+
+### plottest (plotpeak2)
+
+0. Skip to `plottest` again. It will be used to help adjust `minProm2`. A figure explaining how `minProm2` is shown below:
+
+<p align="center">
+   <img src=assets/magpeak-minprom2.png  width="90%">
+</p>
+
+`minProm2` is used to exclude noisy peaks when looking at the magnitude of the second peak across a row or column. In this example, the layer change occurs at Column 118, where the magnitude of the second peak is at a local mininum.
+
+*Note: in the plot of second peak magnitude, the negative value is taken to turn local mininum into local maximums so that the built-in MATLAB function `findpeaks` can detect them.
+
+1. Pick a direction for `dir` ('row' or 'col') and a row or column number for `num` in Section D. A good starting point is to look at the centerline along the row or column direction.
+
+2. In Section iii, edit all read function values to be false except for `runTest` then run `test.m`
+
+3. Use the second peak magnitude figure and Command Window output to adjust `minProm2`.  An example is shown below:
+
+<p align="center">
+   <img src=assets/plotpeak2-fig.png  width="70%">
+</p>
+
+4. The combination inflection point figure from `segcscan`, shown below, should also be used in tandem to adjust the `minProm2` value. A higher `minProm2` value will create a less noisy inflection points map, but with more gaps and a lower `minProm2` value will create a noisier map, but with less gaps.
+
+<p align="center">
+   <img src=assets/inflection-pts.png  width="70%">
+</p>
+
+### segcsan (2 of 2)
+
+1. Use the process and queryable inflection points figure to adjust `seEl` input. The `seEl` input is in `[45 -45 90 0]` format, where each value designates the length of the structuring element in pixels. The first value is a structuring element in the shape of a one pixel wide line angled at 45 degrees, with the rest in the same form. If there are gaps not filled by the default morphological processing steps in the code, then the user should use the least number and shortest elements necessary to close the gaps.
+
+For example, if there is a 4 pixel gap at 45 degrees, then a 5 pixel, 45 degree structuring element should be used. If values are left as zero, that structuring element is not used. The length should always be one pixel longer than the biggest gap present.
+
+An example of the process figure is shown below, where the top right plot is the morphologically processed inflection points map and the bottom left plot is a plot of the labeled connected regions plotted by color. Each color represents an enclosed damaged region.
+
+<p align="center">
+   <img src=assets/process.png  width="50%">
+</p>
+
+2. Use the process, compare, queryable raw TOF and queryable inflection points figure to adjust the `modeThresh` input. This input can be used for gradually transitioning regions that are not currently detectable by the code or near surface damage that is also currently unable to be detected. Examples of near surface damage requiring lower `modeThresh` input is shown below.
+
+<p align="center">
+   <img src=assets/lo-modethresh1.png  width="50%">
+</p>
+
+`modeThresh` is used to process the TOF map. If the difference between the TOF value of the current point and the mode value of the connected region it belongs to is greater than `modeThresh`, then the TOF value at the point is not changed to the mode value of the connected region. Additionally, the boundaries of the connected regions are not included in any connected regions, so all TOF values located at a boundary are not changed.
+
+<p align="center">
+   <img src=assets/lo-modethresh2.png  width="50%">
+</p>
+
+A lower `modeThresh` value means that the processed TOF map will look more similar to the raw TOF map and that less artifacts will be removed. A higher `modeThresh` value means that the processed TOF map will have more artifacts removed, but gradual changes in TOF value or close to surface damage regions may merge together.
+
+Suggested `modeThresh` values of `hig`, `med`, and `low` are included in the `test.m` file in Section C.
+
+A compare figure is shown below as an example of where more artifacts are removed:
+
+<p align="center">
+   <img src=assets/compare.png  width="70%">
+</p>
+
+### plotfig
+1. Update `plateThick` to the thickness of your sample in mm and `nLayers` to the number of layers in the sample layup.
+
+2. In Section iii, edit all read function values to be false except for `runFig` then run `test.m`
+
+3. Check damage layer figures in 2D and 3D to see if results are as expected. Examples are shown below:
+
+
+<p align="center">
+   <img src=assets/plotfig.png  width="90%">
+</p>
+
+### mergecscan
+1. 
 
 ## Input/Output Files & Figures Summary
 
