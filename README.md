@@ -117,9 +117,9 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed.
 
-7. Set `res` to the desired resolution for all saved figures in dpi (dots per inch).
+7. Set `res` to the desired resolution for all saved figures in dpi (dots per inch). Set `fontSize` to desired font size for all saved figures in pixels (same font size measurements as in Microsoft Word or Google Docs)
 
-8. In test.m, Section iii, edit all read function values to be false except for `runProcess` and `testProcess`
+8. In `test.m`, Section iii, edit all read function values to be false except for `runProcess` and `testProcess` then run `test.m`
 
 9. Use the damage bounding box figure to adjust `bounds`, `incr`, `baseRow`, `baseCol`, and `pad` accordingly. An example of the figure is shown below:
 
@@ -139,12 +139,12 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 1. Shown below is a raw TOF figure showing the results of setting `minProm1` too low (`minProm1` = 0):
 
 <p align="center">
-   <img src=assets/low-minProm1.png  width="50%">
+   <img src=assets/low-minProm1.png  width="30%">
 </p>
 
 2. Using the queryable raw TOF figure, query the row and column locations of a light blue artifact region. In `test.m`, in Section D, set `rowRange` and `colRange` to the rows and columns of interest.
 
-3. In Section iii, edit all read function values to be false except for `runSeg`
+3. In Section iii, edit all read function values to be false except for `runTest` then run `test.m`
 
 4. An example of the output is shown below with the figure and the Command Window output side-by-side:
 
@@ -164,6 +164,17 @@ In the above example, the first, third, and fifth peaks are a result of noise an
 
 ### segcscan
 
+1. In `test.m`, in Section C, leave `minProm2`, `peakThresh` at original value. This will be adjusted later.
+
+2. Set `modeThresh` to `hig` and seEl to `[0 0 0 0]`
+
+3. In Section iii, edit all read function values to be false except for `runSeg` and `testSeg` then run `test.m`
+
+4. Adjust `peakThresh` using the combination inflection point figure. Below is an example of `peakThresh` set too low (`peakThresh` = 0.02) and an adjusted `peakThresh` value.
+
+<p align="center">
+   <img src=assets/peakthresh.png  width="50%">
+</p>
 
 ## Input/Output Files & Figures Summary
 

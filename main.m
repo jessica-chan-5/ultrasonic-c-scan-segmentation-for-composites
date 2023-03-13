@@ -21,9 +21,9 @@ runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
 runProcess = false;    filesProcess = 1:numFiles;      testProcess = false;
 % segcscan
-runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
+runSeg     = true;    filesSeg     = 1;     testSeg     = false;
 % plottest
-runTest    = true;    filesTest    = 1;
+runTest    = false;    filesTest    = 1;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
@@ -53,9 +53,9 @@ noiseThresh= 0.01;     % If the average signal at a point is lower than
                        % noiseThresh, then the point is ignored
 maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
 calcT1     = false;    % If true, calculates and plots time of first peak 
+fontSize   = 16;       % Font size for text in figures
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
-fontSize   = 16;   % Font size for text in figures
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; % If the difference between the time a peak appears in 
                    % the first point and the time the same peak appears in 
