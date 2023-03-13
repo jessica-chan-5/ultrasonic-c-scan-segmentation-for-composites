@@ -182,7 +182,7 @@ In the above example, the first, third, and fifth peaks are a result of noise an
    <img src=assets/segcscan-code-diag.png  width="100%">
 </p>
 
-Inflection points in this code refer to points that outline where the damage changes from one layer to another in the laminate. `labelpeaks` and `magpeaks` process the raw TOF from `processcscan` row-wise and column-wise in order to obtain an inflection point map. All four resulting inflection point maps are combined using an OR operation. Morphological processing is used to clean up, close gaps, and label connected regions in the inflection point map. The TOF value in each labeled connected region is assigned to the mode value of the region it is a part of. For details of the process, see Section 3.6 of [Jessica's MS thesis]().
+Inflection points in this code refer to points that outline where the damage changes from one layer to another in the laminate. `labelpeaks` and `magpeaks` process the raw TOF from `processcscan` row-wise and column-wise in order to obtain an inflection point map. All four resulting inflection point maps are combined using an OR operation. Morphological processing is used to clean up, close gaps, and label connected regions in the inflection point map. The TOF value in each labeled connected region is assigned to the mode value of the region it is a part of. For details of the process, see Section 3.6 of [Jessica's MS thesis]() (Link to be included when published).
 
 [//]: # (Link to be included when published)
 
