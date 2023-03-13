@@ -17,17 +17,17 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = true;    filesRead    = 1:numFiles;
+runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = true;    filesProcess = 1:numFiles;     testProcess = false;
+runProcess = true;    filesProcess = 1;              testProcess = false;
 % segcscan
-runSeg     = true;    filesSeg     = 1:numFiles;     testSeg     = false;
+runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
 runTest    = false;    filesTest    = 1;
 % plotfig
-runFig     = true;    filesFig     = 1:numFiles;
+runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
 runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
@@ -48,7 +48,7 @@ baseCol    = 10:5:20;  % Col indices across which to calculate baseline TOF
 cropThresh = 0.2;      % If diff between baseline TOF and TOF at a point is 
                        % greater than cropThresh, then the point is damaged
 pad        = 1;        % (1+pad)*incr added to all sides of bounding box
-minProm1   = 0.03;     % Min prominence for a peak to be identified
+minProm1   = 0;%0.03;     % Min prominence for a peak to be identified
 noiseThresh= 0.01;     % If the average signal at a point is lower than 
                        % noiseThresh, then the point is ignored
 maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide

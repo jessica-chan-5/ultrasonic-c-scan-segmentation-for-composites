@@ -21,30 +21,24 @@ Pulse-echo UT C-scans are made of a 2D array of A-scans taken at points in a uni
 
 (A) Photo of a sample with manually mapped damage region outline, (B) UT C-scan time-of-flight map, (C) C-scan process and calculating TOF for undamaged scan point (right) and damaged scan point (left) using the A-scan signal at each scan point.
 
+
 [^1]: Federal Aviation Administration, "Advisory Circular: Composite Aircraft Structure," *U.S. Department of Transportation*, 2009.
 [^2]: A. Ellison, "Segmentation of X-ray CT and Ultrasonic Scans of Impacted Composite Structures for Damage State Interpretation and Model Generation," PhD Dissertation, *UC San Diego*, 2020.
 
 ## Relevant Links
-1. UC San Diego Research Data Collection (RDCP): Link to be posted shortly when published
-   - Code development and testing dataset along with processed output/figures are posted here with documentation about how the data was collected and created
+1. [UC San Diego Research Data Collection (RDCP)](https://doi.org/10.6075/J0G16118): Code development and testing dataset along with processed output/figures are posted here with documentation about how the data was collected and created
    
-2. Jessica Chan’s master’s thesis: Link to be posted shortly when published
-   - Chapter 3: Code development is a detailed description of how the code functions
+2. Jessica Chan’s master’s thesis: Link to be posted shortly when published, Chapter 3: Code development is a detailed description of how the code functions
    
-3. Barrett Romasko’s master’s thesis: [Flat Composite Panel Impact Testing and Characterization by Ultrasonic Non-Destructive Evaluation](https://escholarship.org/uc/item/16h2v5xf)
-   - Used 26 of 81 C-scans from this dataset collected by Barrett to develop and test the code (this is part of what is posted in the UC San Diego RDCP collection)
+3. [Barrett Romasko’s master’s thesis](https://escholarship.org/uc/item/16h2v5xf): Used 26 of 81 C-scans from this dataset collected by Barrett to develop and test the code (this is part of what is posted in the UC San Diego RDCP collection)
    
-4. Mac Delany’s master’s thesis: [Low Velocity Impacts of Variable Tip Radius on Carbon/Epoxy Plates](https://escholarship.org/uc/item/6q32d5q5)
-   - Used front and back C-scan from sample LV-162 to validate code in conjunction with Andrew’s work on the same sample
+4. [Mac Delany’s master’s thesis](https://escholarship.org/uc/item/6q32d5q5): Used front and back C-scan from sample LV-162 to validate code in conjunction with Andrew’s work on the same sample
    
-5. Andrew Ellison’s PhD dissertation: [Segmentation of X-ray CT and Ultrasonic Scans of Impacted Composite Structures for Damage State Interpretation and Model Generation](https://escholarship.org/uc/item/3433636k)
-   - Used CT X-ray scan and processed UT C-scan of the front side of LV-162 to validate code
+5. [Andrew Ellison’s PhD dissertation](https://escholarship.org/uc/item/3433636k): Used CT X-ray scan and processed UT C-scan of the front side of LV-162 to validate code
    
-6. Andrew Ellison’s shadow delamination paper: [Segmentation of X-ray CT and Ultrasonic Scans of Impacted Composite Structures for Damage State Interpretation and Model Generation](https://doi.org/10.1177/0021998319865311)
-   - Paper presents a shadow extension algorithm demonstrated using the LV-162 sample for predicting shape of shadowed damaged regions which could be combined with this code in the future to create a more complete 3D reconstruction of the damage state
+6. [Andrew Ellison’s shadow delamination paper](https://doi.org/10.1177/0021998319865311): Paper presents a shadow extension algorithm demonstrated using the LV-162 sample for predicting shape of shadowed damaged regions which could be combined with this code in the future to create a more complete 3D reconstruction of the damage state
    
-7. [MathWorks File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/125985-ultrasonic-c-scan-segmentation-for-composites)
-   - Releases of the code are also published here
+7. [MathWorks File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/125985-ultrasonic-c-scan-segmentation-for-composites): Releases of the code are also published here
 
 ## Acknowledgments
 
@@ -55,7 +49,7 @@ Thank you to:
 - Andrew Ellison for explaining to me how to process C-scans and processing the C-scans and X-ray CT scan of the sample used to validate the code
 - Mac Delany for testing and scanning the composite sample dataset used for validating the code
 
-## Quick Start Guide
+## User Guide
 
 The overall structure of the code is shown below as a summary:
 
@@ -84,7 +78,7 @@ The overall structure of the code is shown below as a summary:
 
 3. Move all formatted raw UT C-scan data into the Input folder
 
-4. Open test.m and edit Section ii to be a string array list of your file names, when adjusting parameters, you will only have one file name, but in general it will look like this:
+4. Open `test.m` and edit Section ii to be a string array list of your file names, when adjusting parameters, you will only have one file name, but in general it will look like this:
 
    ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
 
@@ -94,10 +88,10 @@ The overall structure of the code is shown below as a summary:
 
 7. In `test.m`, Section iii, edit all read function values to be false except for `runRead`
 
-8. Run `test.m` and go to `Output\cscan` to check if the saved .mat files are the expected size. They should be [row x column x data points per A-scan].
+8. Run `test.m` and go to `Output\cscan` to check if the saved .mat files are the expected size. They should be size `[row x column x data points per A-scan]`.
 
 ### processcscan
-0. In Section B, enter the sampling period, `dt`, in microseconds used to collect the A-scan signals
+0. In `test.m`, Section B, enter the sampling period, `dt`, in microseconds used to collect the A-scan signals
 
 1. First we will set the parameters for finding a rectangular box bounding the damaged region. The relevant parameters are illustrated below:
 
@@ -105,7 +99,7 @@ The overall structure of the code is shown below as a summary:
    <img src=assets/dam-bound-box.png  width="90%">
 </p>
 
-2. The purpose of `bounds`, in red, is to define a search area that excludes artifacts that may be erroneously detected as damage such as the foam tape plate orientation indicator and standoffs the sample may be resting on. You can make an initial guess for an appropriate search area using the sampling resolution to convert to matrix indices. It should be in [startRow endRow startCol endCol] format in Section B.
+2. The purpose of `bounds`, in red, is to define a search area that excludes artifacts that may be erroneously detected as damage such as the foam tape plate orientation indicator and standoffs the sample may be resting on. You can make an initial guess for an appropriate search area using the sampling resolution to convert to matrix indices. It should be in `[startRow endRow startCol endCol]` format in Section B.
 
 3. Choose a reasonable value for `incr`, this is in matrix indices and will define the coarse grid size, in yellow, used to search for the start of damage. The search method is shown below:
 
@@ -130,6 +124,12 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 <p align="center">
    <img src=assets/dam-bound-box-ex.png  width="50%">
 </p>
+
+If regions of damage are being cropped by the damage bounding box, increase `pad` by the number of `incr` needed to expand the bounding box, in blue, to include the whole damage area. Decrease `pad` if desired to create a tighter bounding box. `pad` is defined as (1 + `pad` x `incr`) added to all sides of the damage bounding box.
+
+10. Use the damage bounding box figure and queryable raw TOF figure to check if `cropThresh` should be increased or decreased by querying TOF values at relevant points.
+
+
 
 ## Input/Output Files & Figures Summary
 
