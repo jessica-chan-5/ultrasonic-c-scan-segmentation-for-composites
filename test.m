@@ -1,5 +1,5 @@
 %% i. Clear workspace
-close all; clearvars; format compact;
+clearvars; format compact;
 %% ii. File names
 panel = ["BL","CONT","RPR"];    m = length(panel);
 impact = ["10","15","20"];      n = length(impact);
@@ -17,9 +17,9 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = false;    filesRead    = 1:numFiles;
+runRead    = true;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = false;    filesProcess = 1:numFiles;     testProcess = false;
+runProcess = false;    filesProcess = 1:numFiles;     testProcess = true;
 % segcscan
 runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = true;
 % plottest
@@ -27,9 +27,9 @@ runTest    = false;    filesTest    = 1;
 % plotfig
 runFig     = false;    filesFig     = 1:numFiles;
 % mergecscan
-runMerge   = false;    filesMerge   = 9:17;           testMerge   = false;
+runMerge   = false;    filesMerge   = 9:17;           testMerge   = true;
 % plotcustom
-runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
+runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = true;
 %% A. readcscan inputs
 inFolder   = "Input";  % Folder location for input files
 outFolder  = "Output"; % Folder location for output files
@@ -52,9 +52,9 @@ noiseThresh= 0.01;     % If the average signal at a point is lower than
                        % noiseThresh, then the point is ignored
 maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
 calcT1     = false;    % If true, calculates and plots time of first peak 
+fontSize   = 16;       % Font size for all figures
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
-fontSize   = 16;
 minProm2   = 0.013;%Min prominence in findpeaks for a peak to be identified
 peakThresh = 0.04; % If the difference between the time a peak appears in 
                    % the first point and the time the same peak appears in 
