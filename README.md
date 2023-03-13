@@ -164,17 +164,35 @@ In the above example, the first, third, and fifth peaks are a result of noise an
 
 ### segcscan
 
+0. An overview of how `segcscan` works is shown below:
+
+<p align="center">
+   <img src=assets/segcscan-code-diag.png  width="100%">
+</p>
+
+Inflection points in this code refer to points that outline where the damage changes from one layer to another in the laminate. `labelpeaks` and `magpeaks` process the raw TOF from `processcscan` row-wise and column-wise in order to obtain an inflection point map. All four resulting inflection point maps are combined using an OR operation. Morphological processing is used to clean up, close gaps, and label connected regions in the inflection point map. The TOF value in each labeled connected region is assigned to the mode value of the region it is a part of. For details of the process, see Section 3.6 of [Jessica's MS thesis]().
+
+[//]: # (Link to be included when published)
+
 1. In `test.m`, in Section C, leave `minProm2`, `peakThresh` at original value. This will be adjusted later.
 
 2. Set `modeThresh` to `hig` and seEl to `[0 0 0 0]`
 
 3. In Section iii, edit all read function values to be false except for `runSeg` and `testSeg` then run `test.m`
 
-4. Adjust `peakThresh` using the combination inflection point figure. Below is an example of `peakThresh` set too low (`peakThresh` = 0.02) and an adjusted `peakThresh` value.
+4. Adjust `peakThresh` using the combination inflection point figure. Below is an example of `peakThresh` set too low (`peakThresh` = 0.02) and an adjusted optimal `peakThresh` value (`peakThresh` = 0.04):
 
 <p align="center">
    <img src=assets/peakthresh.png  width="50%">
 </p>
+
+A figure explaining how `peakThresh` is used is shown below:
+
+<p align="center">
+   <img src=assets/labpeak-peakthresh.png  width="80%">
+</p>
+
+In the peak labeling process, each peak in each A-scan receives a unique numerical label. If a peak location change is greater than `peakThresh`, then the peak is considered a new unique peak and given a different label. Inflection points are marked when the second peak changes labels such as Column 96-97 and Column 98-99 in the example above. As mentioned in the summary of `segcscan`, the peak labeling and inflection point finding process occurs twice, once along rows and once along columns.
 
 ## Input/Output Files & Figures Summary
 
