@@ -278,7 +278,7 @@ A compare figure is shown below as an example of where more artifacts are remove
 3. Check damage layer figures in 2D and 3D to see if results are as expected. Examples are shown below:
 
 <p align="center">
-   <img src=assets/plotfig.png  width="90%">
+   <img src=assets/plotfig.png  width="70%">
 </p>
 
 ### mergecscan
@@ -317,7 +317,23 @@ Units are in pixels. `dx` left is negative, right is positive. `dyMergeCscan` do
 </p>
 
 ### plotcustom
+0. This section may not be of interest to everyone, but can be adapted to plot other figures. The original purpose was to plot the unprocessed damage layer map, the processed damage layer map, and the Mistras/UTWin damage layer map side by side for comparison.
 
+This function was kept in the code in case others want to plot comparisons with commercial C-scan processing sofware
+
+1. Set `startRowUT`, `endRowUT`, `startColUT`, `endColUT` to pixel row/col values to crop the UTWin screenshots to only include the damage layer map. GIMP or similar software can be used to find the appropriate crop values.
+
+2. In Section iii, edit all read function values to be false except for `runCustom` and `testCustom` then run `test.m`
+
+3. Similar to `mergecscan`, update `dyPlotCustom` to adjust the UTWin image vertically where up is positive and down is negative.
+
+4. Check the UTWin comparison figure to see if all damage maps are vertically aligned. An example is shown below:
+
+<p align="center">
+   <img src=assets/utwin.png  width="100%">
+</p>
+
+As shown in the figure, the code is able to define lobes of damage near the surface that appear as dark blue and black in the UTWin image, which the sofware is unable to resolve. The processed damage map removes donut artifcats while retaining detail in the lobes near the top surface of the sample.
 
 ## Input/Output Files & Figures Summary
 
