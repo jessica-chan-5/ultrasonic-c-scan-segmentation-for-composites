@@ -17,7 +17,7 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = true;    filesRead    = 1:numFiles;
+runRead    = true;    filesRead    = 1;%:numFiles;
 % processcscan
 runProcess = true;    filesProcess = 1:numFiles;     testProcess = false;
 % segcscan
@@ -29,13 +29,14 @@ runFig     = true;    filesFig     = 1:numFiles;
 % mergecscan
 runMerge   = true;    filesMerge   = 9:17;           testMerge   = false;
 % plotcustom
-runCustom  = true;    filesCustom  = 1:numFiles;     testCustom  = false;
+runCustom  = false;    filesCustom  = 1:numFiles;     testCustom  = false;
 %% A. readcscan inputs
 inFolder   = "Input";  % Folder location for input files
 outFolder  = "Output"; % Folder location for output files
 delim      = "   ";    % Field delimiter character
 dRow       = 1;        % # rows to down sample
 dCol       = 5;        % # col  to down sample
+fileExt    = '.csv';   % File extension including '.'
 %% B. processcscan inputs -------------------------------------------------
 figFolder  = "Figures";% Folder path to .fig and .png files
 dt         = 1/50;     % Sampling period in microseconds
@@ -117,7 +118,7 @@ if runRead == true
 tic; fprintf("READCSCAN Convert C-scan from .csv to .mat file for:\n");
 parfor i = filesRead
     disp(strcat(num2str(i),'.',fileNames(i)));
-    readcscan(fileNames(i),inFolder,outFolder,delim,dRow,dCol);
+    readcscan(fileNames(i),inFolder,outFolder,delim,dRow,dCol,fileExt);
 end
 fprintf("\nFinished! Elapsed time is:"); sec = toc; disp(duration(0,0,sec))
 end

@@ -1,4 +1,4 @@
-function readcscan(fileName,inFolder,outFolder,delim,dRow,dCol)
+function readcscan(fileName,inFolder,outFolder,delim,dRow,dCol,fileExt)
 %READCSCAN Convert C-scan from .csv to .mat file. 
 %    READCSCAN(fileName,inFolder,outFolder,delim,dRow,dCol) Reads in C-scan
 %    from .csv file located in inFolder using readmatrix with designated 
@@ -16,9 +16,10 @@ function readcscan(fileName,inFolder,outFolder,delim,dRow,dCol)
 %    DELIM:     Field delimiter characters (i.e. "," or " ")
 %    DROW:      # rows to down sample (i.e. 5 means every 5th row is saved)
 %    DCOL:      # col to down sample  (and 1 means no down sampling)
+%    FILEEXT:   File extension including '.'
 
 % Read C-scan .csv file
-inPath = strcat(inFolder,'\',fileName,'.csv');
+inPath = strcat(inFolder,'\',fileName,fileExt);
 rawcscan = readmatrix(inPath,'Delimiter',delim,'TrimNonNumeric',true);
 
 % Calculate # A-scans along row & col scan directions, add 1 to adjust 
