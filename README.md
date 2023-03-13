@@ -7,13 +7,17 @@ This code was developed as part of Jessica Chan’s master’s thesis in Dr Hyon
 ## Background
 Despite a high strength to weight ratio, aerospace composites are susceptible to impact damage which can be barely visible while still adversely affecting their strength, therefore detecting and characterizing damage is important. Non-destructive evaluation, specifically single-sided pulse-echo ultrasonic C-scans, can be used to detect damage. The main characteristic of barely visible impact damage is that it occurs from impacts that leave little to no visual indication on the front side that damage has occurred, when in fact there is internal damage, namely planar delaminations between the lamina, and there can be visual indication of damage on the back side of the component. Examples of barely visible impact damage include damage to a component impacted by runway debris, hail, or accidentally dropped maintenance tools [^1].
 
-![](/assets/bvid-xray-ct.png)
+<p align="center">
+   <img src=assets/bvid-xray-ct.png  width="60%">
+</p>
 
 (A) Example through-thickness X-ray CT scan slice showing barely visible impact damage labeled with impact direction and front/back side with respect to impact direction. Reprinted with permission [^2]. (B) Processed UT C-scan of the same sample as in (A) showing front side damage and representative location for section cut shown in (A).
 
 Pulse-echo UT C-scans are made of a 2D array of A-scans taken at points in a uniform grid across a sample. Each A-scan is the measurement of the reflection(s) from the initial ultrasonic signal emitted by the transducer. The first reflected peak is from the top layer of the sample and the second reflected peak is the topmost damaged interface within the sample. An example of the A-scan signal and time-of-flight (TOF) calculation for an undamaged and damaged A-scan point is shown in below. A map of the depth of damaged areas can be created by calculating the difference between the first peak and the second peak, the TOF, which then can be converted to damage depth by using the material’s through-thickness wave velocity.
 
-![](/assets/cscan-explanation.png)
+<p align="center">
+   <img src=assets/cscan-explanation.png  width="60%">
+</p>
 
 (A) Photo of a sample with manually mapped damage region outline, (B) UT C-scan time-of-flight map, (C) C-scan process and calculating TOF for undamaged scan point (right) and damaged scan point (left) using the A-scan signal at each scan point.
 
@@ -54,7 +58,10 @@ Thank you to:
 ## Quick Start Guide
 
 The overall structure of the code is shown below as a summary:
-![](/assets/code_diag.png)
+
+<p align="center">
+   <img src=assets/code_diag.png  width="90%">
+</p>
 
 0. Install the following MATLAB toolboxes if you don’t have them already:
 -  Curve Fitting Toolbox
@@ -67,7 +74,10 @@ The overall structure of the code is shown below as a summary:
 
 ### readcscan
 1. Format your raw UT C-scan data in a supported character delimited file type (.csv, .txt, .dat) following the format below (header information is okay and will be trimmed automatically):
-![](/assets/csv_format.png)
+
+<p align="center">
+   <img src=assets/csv_format.png  width="70%">
+</p>
 
 2. Run `foldersetup.m` in the same directory as the code to create the required folder structure for inputs, outputs, and figures.
 3. Move all formatted raw UT C-scan data into the Input folder
@@ -83,12 +93,19 @@ The overall structure of the code is shown below as a summary:
 ### processcscan
 0. In Section B, enter the sampling period, `dt`, in microseconds used to collect the A-scan signals
 1. First we will set the parameters for finding a rectangular box bounding the damaged region. The relevant parameters are illustrated below:
-![](/assets/dam-bound-box.png)
+
+<p align="center">
+   <img src=assets/dam-bound-box.png  width="90%">
+</p>
 
 2. The purpose of `bounds`, in red, is to define a search area that excludes artifacts that may be erroneously detected as damage such as the foam tape plate orientation indicator and standoffs the sample may be resting on. You can make an initial guess for an appropriate search area using the sampling resolution to convert to matrix indices. It should be in [startRow endRow startCol endCol] format in Section B.
 
 3. Choose a reasonable value for `incr`, this is in matrix indices and will define the coarse grid size, in yellow, used to search for the start of damage. The search method is shown below:
-![](/assets/dam-box-search.png)
+
+<p align="center">
+   <img src=assets/dam-box-search.png  width="60%">
+</p>
+
 Damage bounding box search process. (A) Search along columns, (B) picking start row and end row indices, (C) search along rows, (D) picking start and end column indices.
 
 ## Input/Output Files & Figures Summary
