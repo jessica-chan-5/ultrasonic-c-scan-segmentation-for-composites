@@ -85,13 +85,13 @@ The overall structure of the code is shown below as a summary:
 
 3. Move all formatted raw UT C-scan data into the Input folder
 
-4. Open `test.m` and edit Section ii to be a string array list of your file names, when adjusting parameters, you will only have one file name, but in general it will look like this:
+4. Open `test.m` and edit Section ii to be a string array list of your file names. When adjusting parameters, you will only have one file name, but in general it will look like this:
 
-   ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
+   ` fileNames = ["sample-1";"sample-2","sample-3"];  `
 
 If there is a sample with front and back side C-scans, `fileNames` should be formatted as the following:
 
-   ` fileNames = ["sample-1";"sample-1-back”];  `
+   ` fileNames = ["sample-1";"sample-1-back"];  `
 
 5. In Section A, update `delim` and `fileExt` to the character delimiter and file extension (including '.', i.e. '.csv')
 
