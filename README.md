@@ -93,7 +93,7 @@ If there is a sample with front and back side C-scans, `fileNames` should be for
 
    ` fileNames = ["sample-1";"sample-1-back"];  `
 
-5. In Section A, update `delim` and `fileExt` to the character delimiter (i.e. `' '`, `','`) and file extension (including '.', i.e. '.csv')
+5. In Section A, update `delim` and `fileExt` to the character delimiter (i.e. ' ', ',') and file extension (including '.', i.e. '.csv')
 
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
 
@@ -124,7 +124,7 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 5. Leave `pad`, `cropThresh`, `minProm1`, `noiseThresh`, `maxWidth` at the orginal value, this will be adjusted later.
 
-6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed. An example of a first peak TOF figure is shown below:
+6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed. An example of a first peak TOF figure is shown below to the left with the raw TOF on the right for reference:
 
 <p align="center">
    <img src=assets/t1.png  width="70%">
