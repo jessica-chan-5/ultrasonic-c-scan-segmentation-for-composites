@@ -334,7 +334,7 @@ This function was kept in the code in case others want to plot comparisons with 
    <img src=assets/utwin.png  width="100%">
 </p>
 
-As shown in the figure, the code is able to define lobes of damage near the surface that appear as dark blue and black in the UTWin image, which the sofware is unable to resolve. The processed damage map removes donut artifcats while retaining detail in the lobes near the top surface of the sample.
+As shown in the figure, the code is able to define lobes of damage near the surface that appear as dark blue and black in the UTWin image, which the sofware is unable to resolve. The processed damage map removes donut artifacts while retaining detail in the lobes near the top surface of the sample.
 
 ## Input/Output Files & Figures Summary
 
