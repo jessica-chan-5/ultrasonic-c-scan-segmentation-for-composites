@@ -93,7 +93,7 @@ If there is a sample with front and back side C-scans, `fileNames` should be for
 
    ` fileNames = ["sample-1";"sample-1-back"];  `
 
-5. In Section A, update `delim` and `fileExt` to the character delimiter (i.e. ' ', ',') and file extension (including '.', i.e. '.csv')
+5. In Section A, update `delim` and `fileExt` to the character delimiter (i.e. `' '`, `','`) and file extension (including '.', i.e. '.csv')
 
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
 
