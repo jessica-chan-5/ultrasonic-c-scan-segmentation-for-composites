@@ -169,7 +169,7 @@ In the above example, the first, third, and fifth peaks are a result of noise an
 
 5. Steps 2-4 can be repeated, if necessary, for setting `noiseThresh`. If the average of the signal at a point is less than `noiseThresh`, the point is not processed and set to zero.
 
-6. Steps 2-4 can be repeated for setting `maxWidth`. If the width of a peak is greater than `maxWidth`, then the peak is marked as "wide". These peaks be be skipped when segmenting the TOF in `segcscan`. An example of a "wide" peak is shown below. These peaks represent damage that is close to the surface, blue, but where more than one peak is detected.
+6. Steps 2-4 can be repeated for setting `maxWidth`. If the width of a peak is greater than `maxWidth`, then the peak is marked as "wide". These points are skipped when segmenting the TOF in `segcscan`. An example of a "wide" peak is shown below. These peaks represent damage that is close to the surface, blue, but where more than one peak is detected.
 
 <p align="center">
    <img src=assets/plotascans-wide.png  width="90%">
