@@ -239,7 +239,7 @@ It is recommended to adjust `peakThresh` as a multiple of the sampling period, `
 
 ### segcsan (2 of 2)
 
-1. Use the process and queryable inflection points figure to adjust `seEl` input. The `seEl` input is in `[45 -45 90 0]` format, where each value designates the length of the structuring element in pixels. The first value is a structuring element in the shape of a one pixel wide line angled at 45 degrees, with the rest in the same form. If there are gaps not filled by the default morphological processing steps in the code, then the user should use the least number and shortest elements necessary to close the gaps.
+1. Use the process and queryable inflection points figure to adjust `seEl` input. The `seEl` input is in `[length45 length-45 length90 length0]` format, where each value designates the length of the structuring element in pixels. The first value is a structuring element in the shape of a one pixel wide line angled at 45 degrees, with the rest in the same form. If there are gaps not filled by the default morphological processing steps in the code, then the user should use the least number and shortest elements necessary to close the gaps.
 
 For example, if there is a 4 pixel gap at 45 degrees, then a 5 pixel, 45 degree structuring element should be used. If values are left as zero, that structuring element is not used. The length should always be one pixel longer than the biggest gap present.
 
