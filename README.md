@@ -167,7 +167,7 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 In the above example, the first, third, and fifth peaks are a result of noise and slight changes in the data and do not represent peaks of interest. Prominence is a measure of how much a peak stands out because of its height and location relative to neighboring peaks. Any peaks with a prominence less than `minProm1` is not detected. By looking at the corresponding prominence value printed in the Command Window, a good choice for `minProm1` is 0.03, so that only the second and fourth peak are detected.
 
-5. Steps 2-4 can be repeated, if necessary, for setting `noiseThresh`. If the average of the signal at a point is less than `noiseThresh`, the point is not processed and set to zero. An example is seen in the bottom left corner of the figure showing raw TOF results with a too low `minProm1`
+5. Steps 2-4 can be repeated, if necessary, for setting `noiseThresh`. If the average of the signal at a point is less than `noiseThresh`, the point is not processed and set to zero.
 
 6. Steps 2-4 can be repeated for setting `maxWidth`. If the width of a peak is greater than `maxWidth`, then the peak is marked as "wide". These peaks be be skipped when segmenting the TOF in `segcscan`. An example of a "wide" peak is shown below. These peaks represent damage that is close to the surface, blue, but where more than one peak is detected.
 
