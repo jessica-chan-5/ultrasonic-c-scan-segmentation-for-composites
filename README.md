@@ -1,4 +1,5 @@
 # Ultrasonic C-scan Segmentation for Composites
+[![View Ultrasonic C-scan Segmentation for Composites on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/125985-ultrasonic-c-scan-segmentation-for-composites)
 
 ## Description
 
@@ -84,15 +85,15 @@ The overall structure of the code is shown below as a summary:
 
 3. Move all formatted raw UT C-scan data into the Input folder
 
-4. Open `test.m` and edit Section ii to be a string array list of your file names, when adjusting parameters, you will only have one file name, but in general it will look like this:
+4. Open `test.m` and edit Section ii to be a string array list of your file names. When adjusting parameters, you will only have one file name, but in general it will look like this:
 
-   ` fileNames = ["sample-1";"sample-2",”sample-3”];  `
+   ` fileNames = ["sample-1";"sample-2","sample-3"];  `
 
 If there is a sample with front and back side C-scans, `fileNames` should be formatted as the following:
 
-   ` fileNames = ["sample-1";"sample-1-back”];  `
+   ` fileNames = ["sample-1";"sample-1-back"];  `
 
-5. In Section A, update `delim` and `fileExt` to the character delimiter and file extension (including '.', i.e. '.csv')
+5. In Section A, update `delim` and `fileExt` to the character delimiter (i.e. ' ', ',') and file extension (including '.', i.e. '.csv')
 
 6. If your data does not have equal resolution along both dimensions, calculate the appropriate down sampling required to have equal resolution. Update `dRow` and `dCol` accordingly. For example, if the data has equal resolution, leave both to 1. If you would like to sample every point along the row direction, set `dRow` to 1, but you would like to sample every 5th point along the column direction, set `dCol` to 5.
 
@@ -123,7 +124,7 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 5. Leave `pad`, `cropThresh`, `minProm1`, `noiseThresh`, `maxWidth` at the orginal value, this will be adjusted later.
 
-6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed. An example of a first peak TOF figure is shown below:
+6. If intersted in creating a dent depth map, set `t1` equal to true. This will increase run time significantly as it requires the whole sample to be processed. An example of a first peak TOF figure is shown below to the left with the raw TOF on the right for reference:
 
 <p align="center">
    <img src=assets/t1.png  width="70%">
@@ -166,9 +167,9 @@ Damage bounding box search process. (A) Search along columns, (B) picking start 
 
 In the above example, the first, third, and fifth peaks are a result of noise and slight changes in the data and do not represent peaks of interest. Prominence is a measure of how much a peak stands out because of its height and location relative to neighboring peaks. Any peaks with a prominence less than `minProm1` is not detected. By looking at the corresponding prominence value printed in the Command Window, a good choice for `minProm1` is 0.03, so that only the second and fourth peak are detected.
 
-5. Steps 2-4 can be repeated, if necessary, for setting `noiseThresh`. If the average of the signal at a point is less than `noiseThresh`, the point is not processed and set to zero. An example is seen in the bottom left corner of the figure showing raw TOF results with a too low `minProm1`
+5. Steps 2-4 can be repeated, if necessary, for setting `noiseThresh`. If the average of the signal at a point is less than `noiseThresh`, the point is not processed and set to zero.
 
-6. Steps 2-4 can be repeated for setting `maxWidth`. If the width of a peak is greater than `maxWidth`, then the peak is marked as "wide". These peaks be be skipped when segmenting the TOF in `segcscan`. An example of a "wide" peak is shown below. These peaks represent damage that is close to the surface, blue, but where more than one peak is detected.
+6. Steps 2-4 can be repeated for setting `maxWidth`. If the width of a peak is greater than `maxWidth`, then the peak is marked as "wide". These points are skipped when segmenting the TOF in `segcscan`. An example of a "wide" peak is shown below. These peaks represent damage that is close to the surface, blue, but where more than one peak is detected.
 
 <p align="center">
    <img src=assets/plotascans-wide.png  width="90%">
@@ -238,7 +239,7 @@ It is recommended to adjust `peakThresh` as a multiple of the sampling period, `
 
 ### segcsan (2 of 2)
 
-1. Use the process and queryable inflection points figure to adjust `seEl` input. The `seEl` input is in `[45 -45 90 0]` format, where each value designates the length of the structuring element in pixels. The first value is a structuring element in the shape of a one pixel wide line angled at 45 degrees, with the rest in the same form. If there are gaps not filled by the default morphological processing steps in the code, then the user should use the least number and shortest elements necessary to close the gaps.
+1. Use the process and queryable inflection points figure to adjust `seEl` input. The `seEl` input is in `[length45 length-45 length90 length0]` format, where each value designates the length of the structuring element in pixels. The first value is a structuring element in the shape of a one pixel wide line angled at 45 degrees, with the rest in the same form. If there are gaps not filled by the default morphological processing steps in the code, then the user should use the least number of elements and the shortest elements necessary to close the gaps. The structuring elements are used to morphologically close the gaps. However, morphological closing can also connected undesired regions together.
 
 For example, if there is a 4 pixel gap at 45 degrees, then a 5 pixel, 45 degree structuring element should be used. If values are left as zero, that structuring element is not used. The length should always be one pixel longer than the biggest gap present.
 
@@ -333,7 +334,7 @@ This function was kept in the code in case others want to plot comparisons with 
    <img src=assets/utwin.png  width="100%">
 </p>
 
-As shown in the figure, the code is able to define lobes of damage near the surface that appear as dark blue and black in the UTWin image, which the sofware is unable to resolve. The processed damage map removes donut artifcats while retaining detail in the lobes near the top surface of the sample.
+As shown in the figure, the code is able to define lobes of damage near the surface that appear as dark blue and black in the UTWin image, which the sofware is unable to resolve. The processed damage map removes donut artifacts while retaining detail in the lobes near the top surface of the sample.
 
 ## Input/Output Files & Figures Summary
 
