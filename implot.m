@@ -21,7 +21,8 @@ if norm == true
     colormap(fig,map);
     im.CDataMapping = "scaled";
 else
-    im = imshow(data,[],'XData',[0 col],'YData',[row 0]);
+    im = imshow(data,[min(data,[],'all') max(data,[],'all')], ...
+        'XData',[0 col],'YData',[row 0]);
     colormap(fig,map);
     im.CDataMapping = "scaled";
 end

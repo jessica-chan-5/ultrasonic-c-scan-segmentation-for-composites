@@ -140,7 +140,7 @@ end
 % Calculate t1, time of first peak if requested
 if calcTone == true
     calct1(fileName,outFolder,figFolder,cscan,t,minProm1,noiseThresh, ...
-        maxWidth,'jet',res)
+        maxWidth,'jet',fontSize,res)
 end
 
 cropCoord = [startrow endrow startcol endcol]; 

@@ -1,5 +1,5 @@
 function calct1(fileName,outFolder,figFolder,cscan,t,minProm1, ...
-    noiseThresh,maxWidth,map,res)
+    noiseThresh,maxWidth,map,fontSize,res)
 %CALCT1 Calculate time of first peak.
 %   CALCT1(figFolder,outFolder,fileName,cscan,t,minProm1,noiseThresh,...
 %   maxWidth,map,res) Calculates time of first peak and TOF of full plate,
@@ -39,16 +39,15 @@ for i = 1:row
 end
 
 sub1 = subplot(1,2,1);
-implot(sub1,t1,map,row,col,'t1 (microseconds)',false);
+implot(sub1,t1,map,row,col,'t1 (microseconds)',false,fontSize);
 colorbar;
-
 % Plot TOF
 sub2 = subplot(1,2,2);
-implot(sub2,fullTOF,map,row,col,'Raw TOF (microseconds)',true);
+implot(sub2,fullTOF,map,row,col,'Raw TOF (microseconds)',true,fontSize);
 colorbar;
 
 sgtitle(fileName);
-imsave(figFolder,fig,'t1',fileName,true,res);
+imsave(fileName,figFolder,fig,'t1',true,res);
 
 % Save time of first peak
 savevar = 't1';

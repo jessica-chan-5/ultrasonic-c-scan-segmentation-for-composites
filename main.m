@@ -17,9 +17,9 @@ numFiles = length(fileNames);
 %% iii. Function options
 %   Run function?   |  Indices of files to read?   |  Shows figures if true
 % readcscan
-runRead    = true;    filesRead    = 1:numFiles;
+runRead    = false;    filesRead    = 1:numFiles;
 % processcscan
-runProcess = false;    filesProcess = 1:numFiles;      testProcess = false;
+runProcess = true;    filesProcess = 1;      testProcess = false;
 % segcscan
 runSeg     = false;    filesSeg     = 1:numFiles;     testSeg     = false;
 % plottest
@@ -52,7 +52,7 @@ minProm1   = 0.03;     % Min prominence for a peak to be identified
 noiseThresh= 0.01;     % If the average signal at a point is lower than 
                        % noiseThresh, then the point is ignored
 maxWidth   = 0.75;     % If a peak's width is greater, then noted as wide
-calcT1     = false;    % If true, calculates and plots time of first peak 
+calcT1     = true;    % If true, calculates and plots time of first peak 
 fontSize   = 16;       % Font size for text in figures
 res        = 300;      % Image resolution setting in dpi for saving image
 %% C. segcscan inputs -----------------------------------------------------
