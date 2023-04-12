@@ -33,7 +33,7 @@ Pulse-echo UT C-scans are made of a 2D array of A-scans taken at points in a uni
 ## Relevant Links
 1. [UC San Diego Research Data Collection (RDCP)](https://doi.org/10.6075/J0G16118): Code development and testing dataset along with processed output/figures are posted here with documentation about how the data was collected and created
    
-2. Jessica Chan’s master’s thesis: Link to be posted shortly when published, Chapter 3: Code development is a detailed description of how the code functions
+2. [Jessica Chan’s master’s thesis, Chapter 3](https://escholarship.org/uc/item/1wp2k035): Code development is a detailed description of how the code functions
    
 3. [Barrett Romasko’s master’s thesis](https://escholarship.org/uc/item/16h2v5xf): Used 26 of 81 C-scans from this dataset collected by Barrett to develop and test the code (this is part of what is posted in the UC San Diego RDCP collection)
    
