@@ -43,7 +43,7 @@ Pulse-echo UT C-scans are made of a 2D array of A-scans taken at points in a uni
    
 6. [Andrew Ellison’s shadow delamination paper](https://doi.org/10.1177/0021998319865311): Paper presents a shadow extension algorithm demonstrated using the LV-162 sample for predicting shape of shadowed damaged regions which could be combined with this code in the future to create a more complete 3D reconstruction of the damage state
    
-7. [MathWorks File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/125985-ultrasonic-c-scan-segmentation-for-composites): Releases of the code are also published here
+7. [MathWorks File Exchange](https://www.mathworks.com/matlabcentral/fileexchange/125985-ultrasonic-c-scan-segmentation-for-composites): Releases of the code are also published here, however, most updated version of code will always live on GitHub.
 
 ## Acknowledgments
 
